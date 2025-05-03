@@ -45,7 +45,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }
   };
 
   const mainMenuItems = [
-    { name: 'Dashboard', path: '/dashboard/v0.2', icon: LayoutDashboard },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Projects', path: '/projects', icon: FolderKanban },
     { name: 'Teams', path: '/teams', icon: Users },
     { name: 'Schedule', path: '/schedule', icon: Calendar },
