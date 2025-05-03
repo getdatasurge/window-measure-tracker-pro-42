@@ -60,7 +60,7 @@ const ActivityFeed: React.FC = () => {
             action={activity.action}
             target={activity.target}
             timestamp={activity.timestamp}
-            icon={activity.icon}
+            icon={activity.icon as "measurement" | "complete" | "team" | "issue"}
           />
         ))}
       </div>
