@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { MoreHorizontal } from 'lucide-react';
+import { MoreHorizontal, Check, Edit } from 'lucide-react';
 
 export type ProjectColor = "blue" | "purple" | "orange" | "red" | "green" | "cyan" | "pink" | "teal";
 
