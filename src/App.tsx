@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import Dashboard from "./pages/Dashboard";
+import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import Teams from "./pages/Teams";
 import Schedule from "./pages/Schedule";
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="reports" element={<Reports />} />
             <Route path="settings" element={<Settings />} />
           </Route>
+          <Route path="/dashboard/v0.2" element={<DashboardV2 />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
