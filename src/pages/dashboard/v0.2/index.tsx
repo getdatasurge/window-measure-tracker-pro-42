@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Plus, Search, Bell, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Plus, Search, Bell, ChevronDown, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
@@ -8,9 +8,18 @@ import RecentProjectsTable from '@/components/dashboard/RecentProjectsTable';
 import RecentMeasurements from '@/components/dashboard/RecentMeasurements';
 import TeamActivityFeed from '@/components/dashboard/TeamActivityFeed';
 import DashboardSidebar from '@/components/dashboard/v0.2/DashboardSidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const DashboardV2: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const isMobile = useIsMobile();
+  
+  // Set sidebar collapsed by default on mobile
+  useEffect(() => {
+    if (isMobile) {
+      setSidebarCollapsed(true);
+    }
+  }, [isMobile]);
   
   const toggleSidebar = () => {
     setSidebarCollapsed(prev => !prev);
@@ -46,7 +55,17 @@ const DashboardV2: React.FC = () => {
           className="sticky top-0 z-10 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-zinc-800/70 px-6 py-4"
         >
           <div className="flex justify-between items-center">
-            <div>
+            <div className="flex items-center gap-4">
+              {isMobile && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="md:hidden text-zinc-400 hover:text-white" 
+                  onClick={toggleSidebar}
+                >
+                  <Menu size={20} />
+                </Button>
+              )}
               <h1 className="text-2xl font-semibold">Dashboard <span className="bg-green-900/30 text-green-400 text-xs px-2 py-0.5 rounded ml-2 border border-green-700/30">Beta</span></h1>
             </div>
             <div className="flex gap-4 items-center">

@@ -1,12 +1,16 @@
 
 import React from 'react';
 import { Search } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarSearchProps {
   collapsed: boolean;
 }
 
 const SidebarSearch: React.FC<SidebarSearchProps> = ({ collapsed }) => {
+  const isMobile = useIsMobile();
+  
+  // Hide search on collapsed sidebar or mobile
   if (collapsed) {
     return null;
   }

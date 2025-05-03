@@ -13,13 +13,16 @@ import {
   Settings,
   HelpCircle,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Menu
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WinTrackLogo from '../../logo/WinTrackLogo';
 import SidebarMenuSection from './SidebarMenuSection';
 import SidebarSearch from './SidebarSearch';
 import SidebarUserProfile from './SidebarUserProfile';
+import SidebarMenuItem from './SidebarMenuItem';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -28,6 +31,14 @@ interface SidebarProps {
 
 const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }) => {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  
+  // Auto-collapse sidebar on mobile
+  React.useEffect(() => {
+    if (isMobile && !collapsed) {
+      toggleCollapsed();
+    }
+  }, [isMobile, collapsed, toggleCollapsed]);
   
   const isActive = (path: string) => {
     return location.pathname === path;
