@@ -1,6 +1,6 @@
 
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   FolderKanban, 
@@ -13,11 +13,13 @@ import {
   Settings,
   HelpCircle,
   ChevronLeft,
-  ChevronRight,
-  Search
+  ChevronRight
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import WinTrackLogo from '../../logo/WinTrackLogo';
+import SidebarMenuSection from './SidebarMenuSection';
+import SidebarSearch from './SidebarSearch';
+import SidebarUserProfile from './SidebarUserProfile';
 
 interface SidebarProps {
   collapsed: boolean;
@@ -26,29 +28,28 @@ interface SidebarProps {
 
 const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }) => {
   const location = useLocation();
-  const currentPath = location.pathname;
-
+  
   const isActive = (path: string) => {
-    return currentPath === path;
+    return location.pathname === path;
   };
 
   const mainMenuItems = [
-    { name: 'Dashboard', path: '/dashboard/v0.2', icon: <LayoutDashboard size={18} /> },
-    { name: 'Projects', path: '/projects', icon: <FolderKanban size={18} /> },
-    { name: 'Teams', path: '/teams', icon: <Users size={18} /> },
-    { name: 'Schedule', path: '/schedule', icon: <Calendar size={18} /> },
-    { name: 'Reports', path: '/reports', icon: <FileText size={18} /> },
+    { name: 'Dashboard', path: '/dashboard/v0.2', icon: LayoutDashboard },
+    { name: 'Projects', path: '/projects', icon: FolderKanban },
+    { name: 'Teams', path: '/teams', icon: Users },
+    { name: 'Schedule', path: '/schedule', icon: Calendar },
+    { name: 'Reports', path: '/reports', icon: FileText },
   ];
 
   const toolsMenuItems = [
-    { name: 'Measurements', path: '/measurements', icon: <Ruler size={18} /> },
-    { name: 'Inventory', path: '/inventory', icon: <PackageOpen size={18} /> },
-    { name: 'Suppliers', path: '/suppliers', icon: <Truck size={18} /> },
+    { name: 'Measurements', path: '/measurements', icon: Ruler },
+    { name: 'Inventory', path: '/inventory', icon: PackageOpen },
+    { name: 'Suppliers', path: '/suppliers', icon: Truck },
   ];
 
   const settingsMenuItems = [
-    { name: 'Settings', path: '/settings', icon: <Settings size={18} /> },
-    { name: 'Help & Support', path: '/help', icon: <HelpCircle size={18} /> },
+    { name: 'Settings', path: '/settings', icon: Settings },
+    { name: 'Help & Support', path: '/help', icon: HelpCircle },
   ];
 
   return (
@@ -69,20 +70,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }
         </button>
       </div>
       
-      {!collapsed && (
-        <div className="mt-2 px-4">
-          <div className="relative">
-            <input 
-              type="text" 
-              placeholder="Search..." 
-              className="w-full h-9 bg-zinc-800/50 border-none text-zinc-300 text-sm rounded-md pl-9 pr-3 focus:outline-none focus:ring-1 focus:ring-zinc-700"
-            />
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
-              <Search size={14} className="text-zinc-500" />
-            </div>
-          </div>
-        </div>
-      )}
+      <SidebarSearch collapsed={collapsed} />
       
       <div className="flex-1 overflow-auto pt-4 scrollbar-none">
         <div>
@@ -90,119 +78,41 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }
             {!collapsed ? 'Main Menu' : '•••'}
           </div>
           {mainMenuItems.map((item) => (
-            <Link 
-              key={item.path} 
-              to={item.path} 
-              className={`flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
-                isActive(item.path) 
-                  ? 'bg-green-900/20 text-green-400' 
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              <div className={`${isActive(item.path) ? 'text-green-400' : 'text-zinc-400'}`}>
-                {item.icon}
-              </div>
-              {!collapsed && (
-                <span className="ml-3 text-sm">{item.name}</span>
-              )}
-              {isActive(item.path) && !collapsed && (
-                <motion.div
-                  layoutId="active-nav-pill"
-                  className="absolute left-0 w-1 h-5 bg-green-400 rounded-full"
-                />
-              )}
-            </Link>
+            <SidebarMenuItem
+              key={item.path}
+              name={item.name}
+              path={item.path}
+              icon={item.icon}
+              isActive={isActive(item.path)}
+              collapsed={collapsed}
+              layoutId="active-nav-pill"
+            />
           ))}
         </div>
         
-        <div className="mt-6">
-          <div className={`px-4 py-1.5 text-xs uppercase tracking-wider text-zinc-500 ${collapsed ? 'text-center' : ''}`}>
-            {!collapsed ? 'Tools' : '•••'}
-          </div>
-          {toolsMenuItems.map((item) => (
-            <Link 
-              key={item.path} 
-              to={item.path} 
-              className={`flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
-                isActive(item.path) 
-                  ? 'bg-green-900/20 text-green-400' 
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              <div className={`${isActive(item.path) ? 'text-green-400' : 'text-zinc-400'}`}>
-                {item.icon}
-              </div>
-              {!collapsed && (
-                <span className="ml-3 text-sm">{item.name}</span>
-              )}
-              {isActive(item.path) && !collapsed && (
-                <motion.div
-                  layoutId="active-nav-tool"
-                  className="absolute left-0 w-1 h-5 bg-green-400 rounded-full"
-                />
-              )}
-            </Link>
-          ))}
-        </div>
+        <SidebarMenuSection 
+          title="Tools" 
+          items={toolsMenuItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+          layoutId="active-nav-tool"
+        />
         
-        <div className="mt-6">
-          <div className={`px-4 py-1.5 text-xs uppercase tracking-wider text-zinc-500 ${collapsed ? 'text-center' : ''}`}>
-            {!collapsed ? 'Settings' : '•••'}
-          </div>
-          {settingsMenuItems.map((item) => (
-            <Link 
-              key={item.path} 
-              to={item.path} 
-              className={`flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
-                isActive(item.path) 
-                  ? 'bg-green-900/20 text-green-400' 
-                  : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
-              } ${collapsed ? 'justify-center' : ''}`}
-            >
-              <div className={`${isActive(item.path) ? 'text-green-400' : 'text-zinc-400'}`}>
-                {item.icon}
-              </div>
-              {!collapsed && (
-                <span className="ml-3 text-sm">{item.name}</span>
-              )}
-              {isActive(item.path) && !collapsed && (
-                <motion.div
-                  layoutId="active-nav-settings"
-                  className="absolute left-0 w-1 h-5 bg-green-400 rounded-full"
-                />
-              )}
-            </Link>
-          ))}
-        </div>
+        <SidebarMenuSection 
+          title="Settings" 
+          items={settingsMenuItems} 
+          collapsed={collapsed} 
+          isActive={isActive} 
+          layoutId="active-nav-settings"
+        />
       </div>
       
-      {!collapsed && (
-        <div className="p-4 border-t border-zinc-800/70 flex items-center">
-          <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
-            <img 
-              src="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" 
-              alt="Alex Morgan" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-          <div className="ml-3">
-            <div className="text-sm font-medium text-white">Alex Morgan</div>
-            <div className="text-xs text-zinc-400">Project Manager</div>
-          </div>
-        </div>
-      )}
-      
-      {collapsed && (
-        <div className="p-4 border-t border-zinc-800/70 flex justify-center">
-          <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
-            <img 
-              src="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" 
-              alt="Alex Morgan" 
-              className="w-full h-full object-cover"
-            />
-          </div>
-        </div>
-      )}
+      <SidebarUserProfile 
+        collapsed={collapsed}
+        avatarUrl="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png"
+        name="Alex Morgan"
+        role="Project Manager"
+      />
     </motion.div>
   );
 };
