@@ -11,8 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { motion } from 'framer-motion';
 
-type ProjectStatus = 'In Progress' | 'Completed' | 'Planning' | 'Delayed';
+type ProjectStatus = 'In Progress' | 'Completed' | 'Planning' | 'Delayed' | 'On Track';
 
 interface Project {
   name: string;
@@ -28,16 +29,26 @@ interface Project {
 const getStatusStyles = (status: ProjectStatus) => {
   switch(status) {
     case 'In Progress':
-      return 'bg-amber-700/80 text-amber-200';
+      return 'bg-amber-900/30 text-amber-400 border border-amber-700/30';
     case 'Completed':
-      return 'bg-green-700/80 text-green-200';
+      return 'bg-green-900/30 text-green-400 border border-green-700/30';
     case 'Planning':
-      return 'bg-blue-700/80 text-blue-200';
+      return 'bg-blue-900/30 text-blue-400 border border-blue-700/30';
     case 'Delayed':
-      return 'bg-red-700/80 text-red-200';
+      return 'bg-red-900/30 text-red-400 border border-red-700/30';
+    case 'On Track':
+      return 'bg-green-900/30 text-green-400 border border-green-700/30';
     default:
-      return 'bg-gray-700 text-gray-200';
+      return 'bg-zinc-800 text-zinc-300 border border-zinc-700/30';
   }
+};
+
+const getProgressColor = (progress: number) => {
+  if (progress >= 100) return 'bg-green-500';
+  if (progress >= 75) return 'bg-emerald-500';
+  if (progress >= 50) return 'bg-blue-500';
+  if (progress >= 25) return 'bg-amber-500';
+  return 'bg-orange-500';
 };
 
 const RecentProjectsTable: React.FC = () => {
@@ -72,24 +83,49 @@ const RecentProjectsTable: React.FC = () => {
     }
   ];
 
+  const tableContainer = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.05,
+        when: "beforeChildren"
+      }
+    }
+  };
+
+  const tableRow = {
+    hidden: { opacity: 0, x: -10 },
+    show: { opacity: 1, x: 0, transition: { duration: 0.4 } }
+  };
+
   return (
-    <div className="bg-zinc-800 rounded-xl shadow-lg overflow-hidden">
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={tableContainer}
+      className="bg-[#1a1a1a] rounded-xl shadow-lg overflow-hidden border border-zinc-800/70"
+    >
       <Table>
         <TableHeader>
-          <TableRow className="border-zinc-700 bg-zinc-800/70">
-            <TableHead className="text-zinc-400 font-medium">PROJECT NAME</TableHead>
-            <TableHead className="text-zinc-400 font-medium">CLIENT</TableHead>
-            <TableHead className="text-zinc-400 font-medium">STATUS</TableHead>
-            <TableHead className="text-zinc-400 font-medium">MEASUREMENTS</TableHead>
-            <TableHead className="text-zinc-400 font-medium">DEADLINE</TableHead>
-            <TableHead className="text-zinc-400 font-medium text-right">ACTIONS</TableHead>
+          <TableRow className="border-zinc-700/50 bg-zinc-800/50">
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Project Name</TableHead>
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Client</TableHead>
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Status</TableHead>
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Measurements</TableHead>
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium">Deadline</TableHead>
+            <TableHead className="text-xs uppercase tracking-wide text-zinc-400 font-medium text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {projects.map((project, i) => (
-            <TableRow key={i} className="border-zinc-700/50 hover:bg-zinc-700/20">
-              <TableCell className="font-medium text-zinc-100">{project.name}</TableCell>
-              <TableCell>{project.client}</TableCell>
+            <motion.tr 
+              key={i} 
+              variants={tableRow}
+              className="border-zinc-700/30 hover:bg-zinc-800/40 transition-colors"
+            >
+              <TableCell className="font-medium text-white">{project.name}</TableCell>
+              <TableCell className="text-zinc-300">{project.client}</TableCell>
               <TableCell>
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusStyles(project.status)}`}>
                   {project.status}
@@ -98,33 +134,37 @@ const RecentProjectsTable: React.FC = () => {
               <TableCell>
                 <div className="flex flex-col gap-1.5">
                   <div className="flex justify-between text-xs">
-                    <span>{project.measurements.completed}/{project.measurements.total}</span>
+                    <span className="text-zinc-400">{project.measurements.completed}/{project.measurements.total}</span>
+                    <span className="text-zinc-400">
+                      {Math.round((project.measurements.completed / project.measurements.total) * 100)}%
+                    </span>
                   </div>
                   <Progress 
                     value={(project.measurements.completed / project.measurements.total) * 100} 
                     className="h-1.5 bg-zinc-700"
+                    indicatorClassName={getProgressColor((project.measurements.completed / project.measurements.total) * 100)}
                   />
                 </div>
               </TableCell>
-              <TableCell>{project.deadline}</TableCell>
+              <TableCell className="text-zinc-300">{project.deadline}</TableCell>
               <TableCell className="text-right">
-                <div className="flex justify-end gap-2">
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100">
+                <div className="flex justify-end gap-1">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
                     <Eye size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
                     <Pencil size={16} />
                   </Button>
-                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-zinc-100">
+                  <Button variant="ghost" size="icon" className="h-8 w-8 text-zinc-400 hover:text-white hover:bg-zinc-700">
                     <Share size={16} />
                   </Button>
                 </div>
               </TableCell>
-            </TableRow>
+            </motion.tr>
           ))}
         </TableBody>
       </Table>
-    </div>
+    </motion.div>
   );
 };
 

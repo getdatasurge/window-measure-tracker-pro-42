@@ -1,5 +1,7 @@
 
 import React from 'react';
+import { motion } from 'framer-motion';
+import { FileText, UserPlus, CheckCircle, Calendar, AlertCircle } from 'lucide-react';
 
 interface TeamActivity {
   id: number;
@@ -9,6 +11,7 @@ interface TeamActivity {
   target?: string;
   targetType?: 'project' | 'team' | 'measurement';
   timeAgo: string;
+  icon: "measurement" | "team" | "complete" | "issue" | "update";
 }
 
 const TeamActivityFeed: React.FC = () => {
@@ -20,7 +23,8 @@ const TeamActivityFeed: React.FC = () => {
       action: 'added 12 measurements to',
       target: 'Downtown Office Tower',
       targetType: 'project',
-      timeAgo: '2 hours ago'
+      timeAgo: '2 hours ago',
+      icon: 'measurement'
     },
     {
       id: 2,
@@ -29,7 +33,8 @@ const TeamActivityFeed: React.FC = () => {
       action: 'created a new project',
       target: 'Greenview Mall',
       targetType: 'project',
-      timeAgo: '5 hours ago'
+      timeAgo: '5 hours ago',
+      icon: 'project' as any // Using type assertion for backward compatibility
     },
     {
       id: 3,
@@ -38,7 +43,8 @@ const TeamActivityFeed: React.FC = () => {
       action: 'completed all measurements for',
       target: 'Riverside Apartments',
       targetType: 'project',
-      timeAgo: 'Yesterday'
+      timeAgo: 'Yesterday',
+      icon: 'complete'
     },
     {
       id: 4,
@@ -47,16 +53,35 @@ const TeamActivityFeed: React.FC = () => {
       action: 'updated the deadline for',
       target: 'Lakeside Hotel',
       targetType: 'project',
-      timeAgo: '2 days ago'
+      timeAgo: '2 days ago',
+      icon: 'update' as any // Using type assertion for backward compatibility
     },
     {
       id: 5,
       avatar: '/lovable-uploads/ba4d7a6f-6bb7-4c0a-a30b-19d87ec003f2.png',
       name: 'Tom Wilson',
       action: 'joined the team',
-      timeAgo: '1 week ago'
+      timeAgo: '1 week ago',
+      icon: 'team'
     }
   ];
+
+  const getActivityIcon = (icon: "measurement" | "team" | "complete" | "issue" | "update" | string) => {
+    switch (icon) {
+      case 'measurement':
+        return <div className="p-2 rounded-full bg-blue-900/30 text-blue-400"><FileText size={16} /></div>;
+      case 'team':
+        return <div className="p-2 rounded-full bg-purple-900/30 text-purple-400"><UserPlus size={16} /></div>;
+      case 'complete':
+        return <div className="p-2 rounded-full bg-green-900/30 text-green-400"><CheckCircle size={16} /></div>;
+      case 'issue':
+        return <div className="p-2 rounded-full bg-red-900/30 text-red-400"><AlertCircle size={16} /></div>;
+      case 'update':
+        return <div className="p-2 rounded-full bg-amber-900/30 text-amber-400"><Calendar size={16} /></div>;
+      default:
+        return <div className="p-2 rounded-full bg-gray-900/30 text-gray-400"><FileText size={16} /></div>;
+    }
+  };
 
   const getTargetStyles = (targetType?: 'project' | 'team' | 'measurement') => {
     switch (targetType) {
@@ -71,34 +96,60 @@ const TeamActivityFeed: React.FC = () => {
     }
   };
 
+  const container = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const item = {
+    hidden: { opacity: 0, y: 10 },
+    show: { opacity: 1, y: 0, transition: { duration: 0.4 } }
+  };
+
   return (
-    <div className="bg-zinc-800 rounded-xl shadow-lg p-4 h-full">
-      <div className="space-y-6">
+    <motion.div 
+      initial="hidden"
+      animate="show"
+      variants={container}
+      className="bg-[#1a1a1a] rounded-xl shadow-lg p-4 h-full border border-zinc-800/70"
+    >
+      <h2 className="text-xl font-semibold text-white mb-4">Team Activity</h2>
+      <div className="space-y-5">
         {activities.map((activity) => (
-          <div key={activity.id} className="flex gap-3">
-            <div className="shrink-0">
-              <img 
-                src={activity.avatar} 
-                alt={activity.name} 
-                className="h-9 w-9 rounded-full object-cover border border-zinc-700"
-              />
+          <motion.div key={activity.id} variants={item} className="flex gap-3 group">
+            <div className="shrink-0 mt-0.5">
+              {getActivityIcon(activity.icon)}
             </div>
-            <div>
-              <p className="text-sm">
-                <span className="font-medium">{activity.name}</span>{' '}
-                <span className="text-zinc-400">{activity.action}</span>{' '}
-                {activity.target && (
-                  <span className={getTargetStyles(activity.targetType)}>
-                    {activity.target}
-                  </span>
-                )}
-              </p>
-              <p className="text-xs text-zinc-500 mt-1">{activity.timeAgo}</p>
+            <div className="flex-1">
+              <div className="flex items-start">
+                <div className="h-6 w-6 rounded-full overflow-hidden border border-zinc-700/50 mr-2 shrink-0">
+                  <img 
+                    src={activity.avatar} 
+                    alt={activity.name} 
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+                <p className="text-sm">
+                  <span className="font-medium text-white">{activity.name}</span>{' '}
+                  <span className="text-zinc-400">{activity.action}</span>{' '}
+                  {activity.target && (
+                    <span className={getTargetStyles(activity.targetType)}>
+                      {activity.target}
+                    </span>
+                  )}
+                </p>
+              </div>
+              <p className="text-xs text-zinc-500 mt-1.5 ml-8">{activity.timeAgo}</p>
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 };
 

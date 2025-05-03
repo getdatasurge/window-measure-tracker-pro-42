@@ -1,6 +1,25 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
+import { motion, useMotionValue, useSpring, animate } from 'framer-motion';
 import { ClipboardList, Ruler, Users, CheckCircle } from 'lucide-react';
+
+interface CounterProps {
+  from: number;
+  to: number;
+  duration?: number;
+}
+
+const Counter: React.FC<CounterProps> = ({ from, to, duration = 1 }) => {
+  const count = useMotionValue(from);
+  const rounded = useSpring(count, { stiffness: 100, damping: 30 });
+  
+  useEffect(() => {
+    const controls = animate(count, to, { duration });
+    return controls.stop;
+  }, [count, to, duration]);
+  
+  return <motion.span>{rounded}</motion.span>;
+};
 
 type MetricCardProps = {
   title: string;
@@ -15,13 +34,17 @@ type MetricCardProps = {
 
 const MetricCard: React.FC<MetricCardProps> = ({ title, value, subtext, icon, change }) => {
   return (
-    <div className="bg-zinc-800 rounded-xl p-6 shadow-lg">
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      whileHover={{ scale: 1.02, boxShadow: "0 8px 16px rgba(0, 0, 0, 0.2)" }}
+      className="bg-[#1a1a1a] rounded-xl p-6 shadow-lg border border-zinc-800/70 hover:border-zinc-700/70 transition-all"
+    >
       <div className="flex items-start justify-between mb-2">
-        <div className="p-2 bg-zinc-700/50 rounded-lg">
-          {icon}
-        </div>
+        <div className="p-2 bg-zinc-800/70 rounded-lg">{icon}</div>
         <div className={`flex items-center ${change.positive ? 'text-green-500' : 'text-red-500'}`}>
-          <span>{change.value}</span>
+          <span className="text-sm font-medium">{change.value}</span>
           <svg 
             className="w-4 h-4 ml-1" 
             fill="none" 
@@ -39,11 +62,13 @@ const MetricCard: React.FC<MetricCardProps> = ({ title, value, subtext, icon, ch
         </div>
       </div>
       <div className="mt-4">
-        <h3 className="text-zinc-400 text-sm">{title}</h3>
-        <p className="text-4xl font-bold mt-1">{value}</p>
+        <h3 className="text-zinc-400 text-xs uppercase tracking-wider">{title}</h3>
+        <p className="text-4xl font-bold mt-1 text-white">
+          <Counter from={0} to={value} />
+        </p>
         <p className="text-zinc-400 text-xs mt-2">{subtext}</p>
       </div>
-    </div>
+    </motion.div>
   );
 };
 
@@ -82,7 +107,10 @@ const DashboardMetrics: React.FC = () => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
       {metrics.map((metric, index) => (
-        <MetricCard key={index} {...metric} />
+        <MetricCard 
+          key={index} 
+          {...metric} 
+        />
       ))}
     </div>
   );
