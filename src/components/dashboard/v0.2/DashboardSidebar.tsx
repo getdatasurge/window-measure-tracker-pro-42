@@ -59,7 +59,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }
       className="bg-[#0f0f0f] h-screen flex flex-col fixed left-0 top-0 border-r border-zinc-800/70 z-20"
     >
       <div className="p-4 flex items-center justify-between">
-        {!collapsed && <WinTrackLogo className="h-8" />}
+        {!collapsed && <WinTrackLogo />}
         {collapsed && <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center text-white font-bold">W</div>}
         <button 
           onClick={toggleCollapsed}

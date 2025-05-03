@@ -12,6 +12,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { motion } from 'framer-motion';
+import { cn } from '@/lib/utils';
 
 type ProjectStatus = 'In Progress' | 'Completed' | 'Planning' | 'Delayed' | 'On Track';
 
@@ -142,7 +143,10 @@ const RecentProjectsTable: React.FC = () => {
                   <Progress 
                     value={(project.measurements.completed / project.measurements.total) * 100} 
                     className="h-1.5 bg-zinc-700"
-                    indicatorClassName={getProgressColor((project.measurements.completed / project.measurements.total) * 100)}
+                    // Modified this line - using the cn utility to combine classes instead of indicatorClassName
+                    style={{ 
+                      '--progress-indicator-color': getProgressColor((project.measurements.completed / project.measurements.total) * 100) 
+                    } as React.CSSProperties}
                   />
                 </div>
               </TableCell>
