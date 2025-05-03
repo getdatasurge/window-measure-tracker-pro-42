@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Plus, Search, Bell, ChevronDown, Menu } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -9,72 +8,51 @@ import RecentMeasurements from '@/components/dashboard/RecentMeasurements';
 import TeamActivityFeed from '@/components/dashboard/TeamActivityFeed';
 import DashboardSidebar from '@/components/dashboard/v0.2/DashboardSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const DashboardV2: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
-  
+
   // Set sidebar collapsed by default on mobile
   useEffect(() => {
     if (isMobile) {
       setSidebarCollapsed(true);
     }
   }, [isMobile]);
-  
   const toggleSidebar = () => {
     setSidebarCollapsed(prev => !prev);
   };
-
   const fadeIn = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { 
-      opacity: 1, 
-      y: 0, 
+    hidden: {
+      opacity: 0,
+      y: 10
+    },
+    visible: {
+      opacity: 1,
+      y: 0,
       transition: {
         duration: 0.5
       }
     }
   };
-
-  return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white">
+  return <div className="min-h-screen bg-[#0f0f0f] text-white">
       <DashboardSidebar collapsed={sidebarCollapsed} toggleCollapsed={toggleSidebar} />
       
-      <div 
-        className="transition-all duration-200"
-        style={{ 
-          marginLeft: sidebarCollapsed ? '64px' : '240px',
-          width: `calc(100% - ${sidebarCollapsed ? '64px' : '240px'})`
-        }}
-      >
+      <div className="transition-all duration-200" style={{
+      marginLeft: sidebarCollapsed ? '64px' : '240px',
+      width: `calc(100% - ${sidebarCollapsed ? '64px' : '240px'})`
+    }}>
         {/* Header */}
-        <motion.div 
-          initial="hidden"
-          animate="visible"
-          variants={fadeIn}
-          className="sticky top-0 z-10 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-zinc-800/70 px-6 py-4"
-        >
+        <motion.div initial="hidden" animate="visible" variants={fadeIn} className="sticky top-0 z-10 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-zinc-800/70 px-6 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center gap-4">
-              {isMobile && (
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  className="md:hidden text-zinc-400 hover:text-white" 
-                  onClick={toggleSidebar}
-                >
+              {isMobile && <Button variant="ghost" size="icon" className="md:hidden text-zinc-400 hover:text-white" onClick={toggleSidebar}>
                   <Menu size={20} />
-                </Button>
-              )}
+                </Button>}
               <h1 className="text-2xl font-semibold">Dashboard <span className="bg-green-900/30 text-green-400 text-xs px-2 py-0.5 rounded ml-2 border border-green-700/30">Beta</span></h1>
             </div>
             <div className="flex gap-4 items-center">
               <div className="relative hidden md:block">
-                <input 
-                  type="text" 
-                  placeholder="Search..." 
-                  className="bg-zinc-800/70 border-zinc-700/50 text-zinc-200 rounded-lg py-2 pl-10 pr-4 w-[240px] focus:outline-none focus:ring-1 focus:ring-zinc-700"
-                />
+                <input type="text" placeholder="Search..." className="bg-zinc-800/70 border-zinc-700/50 text-zinc-200 rounded-lg py-2 pl-10 pr-4 w-[240px] focus:outline-none focus:ring-1 focus:ring-zinc-700" />
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Search size={16} className="text-zinc-500" />
                 </div>
@@ -85,19 +63,7 @@ const DashboardV2: React.FC = () => {
                   <Bell size={18} />
                 </Button>
                 
-                <div className="flex items-center ml-2 gap-2">
-                  <div className="h-8 w-8 rounded-full overflow-hidden bg-zinc-800 border border-zinc-700">
-                    <img
-                      src="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png"
-                      alt="User"
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="hidden md:flex items-center gap-1 cursor-pointer">
-                    <span className="text-sm font-medium">Alex Morgan</span>
-                    <ChevronDown size={14} className="text-zinc-400" />
-                  </div>
-                </div>
+                
               </div>
               
               <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white">
@@ -112,21 +78,26 @@ const DashboardV2: React.FC = () => {
         
         <div className="p-6 space-y-8">
           {/* Metrics */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.1
+        }}>
             <DashboardMetrics />
           </motion.div>
           
           {/* Recent Projects */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-4"
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.2
+        }} className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Recent Projects</h2>
               <Button variant="link" className="text-green-400 hover:text-green-300 p-0">View All</Button>
@@ -135,12 +106,14 @@ const DashboardV2: React.FC = () => {
           </motion.div>
           
           {/* Two-column layout for measurements and activity */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.3
+        }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Recent Measurements</h2>
@@ -154,8 +127,6 @@ const DashboardV2: React.FC = () => {
           </motion.div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default DashboardV2;
