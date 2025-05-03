@@ -1,11 +1,13 @@
 
 import React from 'react';
-import { Check, Edit } from 'lucide-react';
+import { MoreHorizontal } from 'lucide-react';
 
-interface Project {
+export type ProjectColor = "blue" | "purple" | "orange" | "red" | "green" | "cyan" | "pink" | "teal";
+
+export interface Project {
   id: number;
   name: string;
-  color: 'blue' | 'purple' | 'orange' | 'red' | 'green';
+  color: ProjectColor;
   client: string;
   location: string;
   windows: number;
