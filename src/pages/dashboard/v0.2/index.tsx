@@ -121,7 +121,7 @@ const DashboardV2: React.FC = () => {
               </div>
               <RecentMeasurements />
             </div>
-            <div className="space-y-4 grid xs:grid-cols-4 3xl:grid-cols-6">
+            <div className="lg:col-span-2 space-y-4">
               <h2 className="text-xl font-semibold lg:col-span-2 space-y-4 pb-[.65rem]">Team Activity</h2>
               <TeamActivityFeed className="flex justify-between items-center" />
             </div>
