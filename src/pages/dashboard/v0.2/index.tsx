@@ -98,7 +98,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 
         <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 ">
           
-          <div className="col-span-12 lg:col-span-3">
+          <div className="col-span-1 lg:col-span-1">
             <ActivityFeed />
           </div>
         </div>
