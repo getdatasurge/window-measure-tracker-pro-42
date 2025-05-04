@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useLocation } from 'react-router-dom';
 import { LayoutDashboard, FolderKanban, Users, Calendar, FileText, Ruler, PackageOpen, Truck, Settings, HelpCircle, ChevronLeft, ChevronRight, Menu } from 'lucide-react';
@@ -8,10 +9,12 @@ import SidebarSearch from './SidebarSearch';
 import SidebarUserProfile from './SidebarUserProfile';
 import SidebarMenuItem from './SidebarMenuItem';
 import { useIsMobile } from '@/hooks/use-mobile';
+
 interface SidebarProps {
   collapsed: boolean;
   toggleCollapsed: () => void;
 }
+
 const DashboardSidebar: React.FC<SidebarProps> = ({
   collapsed,
   toggleCollapsed
@@ -25,9 +28,11 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
       toggleCollapsed();
     }
   }, [isMobile, collapsed, toggleCollapsed]);
+
   const isActive = (path: string) => {
     return location.pathname === path;
   };
+
   const mainMenuItems = [{
     name: 'Dashboard',
     path: '/dashboard',
@@ -49,6 +54,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
     path: '/reports',
     icon: FileText
   }];
+
   const toolsMenuItems = [{
     name: 'Measurements',
     path: '/measurements',
@@ -62,6 +68,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
     path: '/suppliers',
     icon: Truck
   }];
+
   const settingsMenuItems = [{
     name: 'Settings',
     path: '/settings',
@@ -71,6 +78,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
     path: '/help',
     icon: HelpCircle
   }];
+
   return <motion.div initial={{
     width: collapsed ? 64 : 240
   }} animate={{
@@ -105,4 +113,5 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
       <SidebarUserProfile collapsed={collapsed} avatarUrl="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" name="Alex Morgan" role="Project Manager" />
     </motion.div>;
 };
+
 export default DashboardSidebar;
