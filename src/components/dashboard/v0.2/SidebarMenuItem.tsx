@@ -21,8 +21,14 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   collapsed,
   layoutId
 }) => {
-  // Update paths to use the new Projects page
-  const actualPath = path === '/projects' ? '/projects-new' : path;
+  // Update paths to use the new pages
+  const getActualPath = () => {
+    if (path === '/projects') return '/projects-new';
+    if (path === '/teams') return '/teams';
+    return path;
+  };
+  
+  const actualPath = getActualPath();
   
   return (
     <Link 

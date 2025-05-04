@@ -9,15 +9,15 @@ import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
 import Teams from "./pages/Teams";
-import Schedule from "./pages/Schedule";
+import SchedulePage from "./pages/SchedulePage"; // Import the new Schedule page
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; // Import the debug page
-import Overview from "./pages/Overview"; // Import the new Overview page
-import TeamManagement from "./pages/TeamManagement"; // Import our TeamManagement page
+import Overview from "./pages/Overview"; // Import the Overview page
+import TeamManagement from "./pages/TeamManagement"; // Import TeamManagement page
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -48,11 +48,11 @@ const App = () => (
               <Route path="/dashboard" element={<DashboardV2 />} />
               <Route path="/actions" element={<ActionViewer />} />
               <Route path="/projects-new" element={<ProjectsNew />} />
-              <Route path="/teams" element={<TeamManagement />} /> {/* Set /teams to use TeamManagement */}
+              <Route path="/teams" element={<TeamManagement />} /> 
+              <Route path="/schedule" element={<SchedulePage />} /> {/* Add the Schedule page route */}
               {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
-                <Route path="schedule" element={<Schedule />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
