@@ -24,6 +24,7 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   // Update paths to use the new pages
   const getActualPath = () => {
     if (path === '/projects') return '/projects-new';
+    if (path === '/settings') return '/user/current/settings'; // Update settings path
     return path;
   };
   

@@ -13,13 +13,14 @@ import SchedulePage from "./pages/SchedulePage";
 import ReportsNew from "./pages/ReportsNew";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import UserSettingsPage from "./pages/User/[id]/settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; 
 import Overview from "./pages/Overview"; 
 import TeamManagement from "./pages/TeamManagement"; 
-import Measurements from "./pages/Measurements"; // Import the new Measurements page
+import Measurements from "./pages/Measurements"; 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -53,7 +54,8 @@ const App = () => (
               <Route path="/teams" element={<TeamManagement />} /> 
               <Route path="/schedule" element={<SchedulePage />} /> 
               <Route path="/reports" element={<ReportsNew />} />
-              <Route path="/measurements" element={<Measurements />} /> {/* Add route to new Measurements page */}
+              <Route path="/measurements" element={<Measurements />} />
+              <Route path="/user/:id/settings" element={<UserSettingsPage />} />
               {isDev && <Route path="/__debug" element={<DebugPage />} />} 
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
