@@ -92,46 +92,7 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 }) => {
   return <DashboardShell>
       <div className="grid gap-4">
-        <Card className="col-span-4">
-          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 p-6">
-            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
-              <div>
-                <Icons.revenue className="h-8 w-8" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Revenue</p>
-                <p className="text-lg font-semibold">$45,231.89</p>
-              </div>
-            </div>
-            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
-              <div>
-                <Icons.average_order_value className="h-8 w-8" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Average Order Value</p>
-                <p className="text-lg font-semibold">$231.89</p>
-              </div>
-            </div>
-            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
-              <div>
-                <Icons.customers className="h-8 w-8" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Customers</p>
-                <p className="text-lg font-semibold">+2350</p>
-              </div>
-            </div>
-            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
-              <div>
-                <Icons.page_views className="h-8 w-8" />
-              </div>
-              <div>
-                <p className="text-sm text-muted-foreground">Page Views</p>
-                <p className="text-lg font-semibold">+12,234</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        
 
         
 
