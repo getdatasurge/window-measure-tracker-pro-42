@@ -14,33 +14,70 @@ const JSON_PATH = path.resolve(process.cwd(), 'public/data/window-actions.json')
 const LOG_PATH = path.resolve(process.cwd(), 'logs/prompt-response-log.md');
 const LOGS_DIR = path.resolve(process.cwd(), 'logs');
 
-// Log formatting
-const success = (msg: string) => chalk.green(`✓ ${msg}`);
-const warning = (msg: string) => chalk.yellow(`⚠ ${msg}`);
-const error = (msg: string) => chalk.red(`✗ ${msg}`);
-const info = (msg: string) => chalk.blue(`ℹ ${msg}`);
+// Types
+interface TestResult {
+  success: boolean;
+  message: string;
+  details?: string[];
+}
+
+// Log formatting helpers
+const formatters = {
+  success: (msg: string) => chalk.green(`✓ ${msg}`),
+  warning: (msg: string) => chalk.yellow(`⚠ ${msg}`),
+  error: (msg: string) => chalk.red(`✗ ${msg}`),
+  info: (msg: string) => chalk.blue(`ℹ ${msg}`)
+};
 
 // Keep track of errors
 let hasErrors = false;
 
-console.log(chalk.bold('\n🔍 Knowledgebase Debug Tool\n'));
+/**
+ * Runs all knowledge base tests and reports results
+ */
+function runTests() {
+  console.log(chalk.bold('\n🔍 Knowledgebase Debug Tool\n'));
 
-// SECTION 1: Parse test
+  // Run each test suite
+  runParseTest();
+  runSyncTest();
+  runLoggingTest();
+
+  // Final summary
+  console.log(chalk.bold('\n📋 Summary'));
+
+  if (hasErrors) {
+    console.log(formatters.error('Knowledgebase debug completed with errors'));
+    process.exit(1);
+  } else {
+    console.log(formatters.success('All knowledgebase tests passed! ✨'));
+    process.exit(0);
+  }
+}
+
+/**
+ * Tests the markdown parsing functionality
+ */
 function runParseTest() {
   console.log(chalk.bold('1. Markdown Parse Test'));
   
   try {
-    if (!fs.existsSync(MD_SOURCE_PATH)) {
-      console.log(error(`Source file not found: ${MD_SOURCE_PATH}`));
-      hasErrors = true;
+    // Check if source file exists
+    if (!fileExists(MD_SOURCE_PATH)) {
+      logTestResult({
+        success: false,
+        message: `Source file not found: ${MD_SOURCE_PATH}`
+      });
       return;
     }
     
     const markdownContent = fs.readFileSync(MD_SOURCE_PATH, 'utf-8');
     
     if (!markdownContent.trim()) {
-      console.log(warning(`Source file is empty: ${MD_SOURCE_PATH}`));
-      hasErrors = true;
+      logTestResult({
+        success: false,
+        message: `Source file is empty: ${MD_SOURCE_PATH}`
+      });
       return;
     }
     
@@ -54,40 +91,53 @@ function runParseTest() {
     const malformedEntries = actions.filter(action => action.type === 'error');
     
     if (malformedEntries.length > 0) {
-      console.log(warning(`Parsed with ${malformedEntries.length} malformed entries`));
-      malformedEntries.forEach(entry => {
-        console.log(`  - ${entry.label}`);
+      logTestResult({
+        success: false,
+        message: `Parsed with ${malformedEntries.length} malformed entries`,
+        details: malformedEntries.map(entry => `  - ${entry.label}`)
       });
     } else {
-      console.log(success(`Markdown parsed: ${actions.length} entries (${categories.size} categories)`));
+      logTestResult({
+        success: true,
+        message: `Markdown parsed: ${actions.length} entries (${categories.size} categories)`
+      });
     }
     
     // Additional stats
-    console.log(info(`Categories: ${Array.from(categories).join(', ')}`));
+    console.log(formatters.info(`Categories: ${Array.from(categories).join(', ')}`));
     
   } catch (err) {
-    console.log(error(`Parse test failed: ${(err as Error).message}`));
+    logTestResult({
+      success: false,
+      message: `Parse test failed: ${(err as Error).message}`
+    });
     console.error(err);
-    hasErrors = true;
   }
   
   console.log(''); // Empty line for spacing
 }
 
-// SECTION 2: Sync test
+/**
+ * Tests if the JSON file is in sync with the markdown source
+ */
 function runSyncTest() {
   console.log(chalk.bold('2. JSON Sync Test'));
   
   try {
-    if (!fs.existsSync(JSON_PATH)) {
-      console.log(error(`JSON file not found: ${JSON_PATH}`));
-      hasErrors = true;
+    // Check if files exist
+    if (!fileExists(JSON_PATH)) {
+      logTestResult({
+        success: false,
+        message: `JSON file not found: ${JSON_PATH}`
+      });
       return;
     }
     
-    if (!fs.existsSync(MD_SOURCE_PATH)) {
-      console.log(error(`Source file not found: ${MD_SOURCE_PATH}`));
-      hasErrors = true;
+    if (!fileExists(MD_SOURCE_PATH)) {
+      logTestResult({
+        success: false,
+        message: `Source file not found: ${MD_SOURCE_PATH}`
+      });
       return;
     }
     
@@ -101,50 +151,65 @@ function runSyncTest() {
     // If JSON is older than markdown, it's stale
     if (jsonMtime < mdMtime) {
       const timeDiff = (mdMtime - jsonMtime) / 1000; // seconds
-      console.log(warning(`JSON sync: stale by ${timeDiff.toFixed(1)} seconds`));
-      console.log(info(`Run 'npm run build:kb' to update JSON`));
-      hasErrors = true;
+      logTestResult({
+        success: false,
+        message: `JSON sync: stale by ${timeDiff.toFixed(1)} seconds`,
+        details: [`Run 'npm run build:kb' to update JSON`]
+      });
     } else {
-      console.log(success('JSON sync: up to date ✅'));
+      logTestResult({
+        success: true,
+        message: 'JSON sync: up to date ✅'
+      });
     }
     
     // Additional info
-    console.log(info(`Markdown updated: ${mdStats.mtime.toISOString()}`));
-    console.log(info(`JSON generated: ${jsonStats.mtime.toISOString()}`));
+    console.log(formatters.info(`Markdown updated: ${mdStats.mtime.toISOString()}`));
+    console.log(formatters.info(`JSON generated: ${jsonStats.mtime.toISOString()}`));
     
   } catch (err) {
-    console.log(error(`Sync test failed: ${(err as Error).message}`));
+    logTestResult({
+      success: false,
+      message: `Sync test failed: ${(err as Error).message}`
+    });
     console.error(err);
-    hasErrors = true;
   }
   
   console.log(''); // Empty line for spacing
 }
 
-// SECTION 3: Logging test
+/**
+ * Tests log file existence and validation
+ */
 function runLoggingTest() {
   console.log(chalk.bold('3. Logging Test'));
   
   try {
     // Check if logs directory exists
     if (!fs.existsSync(LOGS_DIR)) {
-      console.log(warning(`Logs directory doesn't exist. Creating: ${LOGS_DIR}`));
+      console.log(formatters.warning(`Logs directory doesn't exist. Creating: ${LOGS_DIR}`));
       fs.mkdirSync(LOGS_DIR, { recursive: true });
     }
     
     // Check if log file exists
-    const logExists = fs.existsSync(LOG_PATH);
+    const logExists = fileExists(LOG_PATH);
     
     if (!logExists) {
-      console.log(warning(`Log file doesn't exist: ${LOG_PATH}`));
-      console.log(info('Creating empty log file...'));
+      console.log(formatters.warning(`Log file doesn't exist: ${LOG_PATH}`));
+      console.log(formatters.info('Creating empty log file...'));
       
       // Create empty log file with header
       const header = '# Prompt Response Log\n\nThis file contains recorded prompts and responses.\n\n';
       fs.writeFileSync(LOG_PATH, header);
-      console.log(success('Created empty log file'));
+      logTestResult({
+        success: true,
+        message: 'Created empty log file'
+      });
     } else {
-      console.log(success('Log file exists'));
+      logTestResult({
+        success: true,
+        message: 'Log file exists'
+      });
       
       // Test write permissions by appending to the log file (and then rolling back)
       try {
@@ -153,33 +218,42 @@ function runLoggingTest() {
         fs.appendFileSync(LOG_PATH, testContent);
         // Restore original content
         fs.writeFileSync(LOG_PATH, originalContent);
-        console.log(success('Log file is writable ✍️'));
+        logTestResult({
+          success: true,
+          message: 'Log file is writable ✍️'
+        });
         
         // Validate log entries formatting
         validateLogEntries(originalContent);
         
       } catch (writeErr) {
-        console.log(error(`Log file not writable: ${(writeErr as Error).message}`));
-        hasErrors = true;
+        logTestResult({
+          success: false,
+          message: `Log file not writable: ${(writeErr as Error).message}`
+        });
       }
     }
   } catch (err) {
-    console.log(error(`Logging test failed: ${(err as Error).message}`));
+    logTestResult({
+      success: false,
+      message: `Logging test failed: ${(err as Error).message}`
+    });
     console.error(err);
-    hasErrors = true;
   }
   
   console.log(''); // Empty line for spacing
 }
 
-// Helper function to validate log entries
+/**
+ * Helper function to validate log entries
+ */
 function validateLogEntries(logContent: string) {
   // Look for markdown headings that indicate prompt entries
   const promptHeadingRegex = /^## 🧠 Prompt - (.+)$/gm;
   const matches = [...logContent.matchAll(promptHeadingRegex)];
   
   if (matches.length === 0) {
-    console.log(warning('No prompt entries found in log file'));
+    console.log(formatters.warning('No prompt entries found in log file'));
     return;
   }
   
@@ -211,28 +285,43 @@ function validateLogEntries(logContent: string) {
     }
   }
   
-  console.log(info(`Examined last ${lastEntries.length} log entries`));
+  console.log(formatters.info(`Examined last ${lastEntries.length} log entries`));
   
   if (invalidEntries > 0) {
-    console.log(warning(`Found ${invalidEntries} malformed entries in log file`));
-    hasErrors = true;
+    logTestResult({
+      success: false,
+      message: `Found ${invalidEntries} malformed entries in log file`
+    });
   } else {
-    console.log(success(`All ${validEntries} log entries properly formatted`));
+    logTestResult({
+      success: true,
+      message: `All ${validEntries} log entries properly formatted`
+    });
+  }
+}
+
+/**
+ * Helper function to check if a file exists
+ */
+function fileExists(filePath: string): boolean {
+  return fs.existsSync(filePath);
+}
+
+/**
+ * Helper function to log test results in a consistent format
+ */
+function logTestResult(result: TestResult) {
+  if (result.success) {
+    console.log(formatters.success(result.message));
+  } else {
+    console.log(formatters.error(result.message));
+    hasErrors = true;
+    
+    if (result.details && result.details.length > 0) {
+      result.details.forEach(detail => console.log(formatters.info(detail)));
+    }
   }
 }
 
 // Run all tests
-runParseTest();
-runSyncTest();
-runLoggingTest();
-
-// Final summary
-console.log(chalk.bold('\n📋 Summary'));
-
-if (hasErrors) {
-  console.log(error('Knowledgebase debug completed with errors'));
-  process.exit(1);
-} else {
-  console.log(success('All knowledgebase tests passed! ✨'));
-  process.exit(0);
-}
+runTests();

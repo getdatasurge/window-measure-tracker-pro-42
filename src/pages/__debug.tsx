@@ -8,10 +8,13 @@ import { useLiveFileSync } from '@/hooks/useLiveFileSync';
 import { usePromptLogger } from '@/hooks/usePromptLogger';
 
 // Imported components
-import RawMarkdownViewer from '@/components/debug/RawMarkdownViewer';
-import ParsedActionsViewer from '@/components/debug/ParsedActionsViewer';
-import ContextInjectionTest from '@/components/debug/ContextInjectionTest';
-import LogHistoryCard from '@/components/debug/LogHistoryCard';
+import { 
+  RawMarkdownViewer, 
+  ParsedActionsViewer, 
+  ContextInjectionTest, 
+  LogHistoryCard,
+  WindowAction
+} from '@/components/debug';
 
 const DebugPage: React.FC = () => {
   // Check if we're in dev mode
