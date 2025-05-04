@@ -1,6 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import ProjectHeader from '../components/projects/ProjectHeader';
+import ProjectMetricsSection from '../components/projects/ProjectMetricsSection';
+import ProjectFilters from '../components/projects/ProjectFilters';
+import ProjectTable from '../components/projects/ProjectTable';
+import ProjectWidgetsSection from '../components/projects/ProjectWidgetsSection';
+import { activeProjects } from '../data/projectsData';
 import DashboardShell from '../components/layout/DashboardShell';
 
 const Dashboards = () => {
