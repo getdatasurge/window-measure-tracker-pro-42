@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, UserPlus, CheckCircle, Calendar, AlertCircle } from 'lucide-react';
@@ -118,7 +117,6 @@ const TeamActivityFeed: React.FC = () => {
       variants={container}
       className="bg-[#1a1a1a] rounded-xl shadow-lg p-4 h-full border border-zinc-800/70"
     >
-      <h2 className="text-xl font-semibold text-white mb-4">Team Activity</h2>
       <div className="space-y-5">
         {activities.map((activity) => (
           <motion.div key={activity.id} variants={item} className="flex gap-3 group">
