@@ -3,6 +3,11 @@ import express from 'express';
 import cors from 'cors';
 import fs from 'fs';
 import path from 'path';
+import { exec } from 'child_process';
+import { promisify } from 'util';
+
+// Promisify exec for cleaner async/await usage
+const execAsync = promisify(exec);
 
 // Only run this server in development mode
 if (process.env.NODE_ENV !== 'development') {
@@ -18,11 +23,22 @@ const TARGET_FILE_PATH = path.resolve(process.cwd(), 'public/window-tracker-prd.
 app.use(express.json({ limit: '1mb' }));
 app.use(cors({
   origin: 'http://localhost:3000',
-  methods: ['POST'],
+  methods: ['GET', 'POST'],
 }));
 
+// Helper function to run Git commands
+async function runGitCommand(command: string): Promise<string> {
+  try {
+    const { stdout } = await execAsync(command);
+    return stdout.trim();
+  } catch (error) {
+    console.error(`❌ Git command failed: ${command}`, error);
+    throw new Error(`Git command failed: ${(error as Error).message}`);
+  }
+}
+
 // Save markdown endpoint
-app.post('/save-markdown', (req, res) => {
+app.post('/save-markdown', async (req, res) => {
   try {
     const { content } = req.body;
     
@@ -41,11 +57,34 @@ app.post('/save-markdown', (req, res) => {
     fs.writeFileSync(TARGET_FILE_PATH, content);
     
     console.log(`✅ Markdown saved successfully to ${TARGET_FILE_PATH}`);
-    return res.status(200).json({ 
-      success: true, 
-      message: 'Markdown saved successfully',
-      filePath: TARGET_FILE_PATH
-    });
+    
+    // Git operations
+    try {
+      const timestamp = new Date().toISOString();
+      await runGitCommand(`git add ${TARGET_FILE_PATH}`);
+      const commitResult = await runGitCommand(`git commit -m "Updated window-tracker-prd.md via UI at ${timestamp}"`);
+      
+      // Extract commit hash from git commit output
+      const commitHashMatch = commitResult.match(/\[[\w\s]+\s([a-f0-9]+)\]/);
+      const commitHash = commitHashMatch ? commitHashMatch[1] : 'unknown';
+      
+      return res.status(200).json({ 
+        success: true, 
+        message: 'Markdown saved and committed successfully',
+        filePath: TARGET_FILE_PATH,
+        commitHash,
+        timestamp
+      });
+    } catch (gitError) {
+      // If git operations fail, still return success for the file save
+      console.warn('⚠️ File saved but git operations failed:', gitError);
+      return res.status(200).json({
+        success: true,
+        message: 'Markdown saved successfully, but git operations failed',
+        filePath: TARGET_FILE_PATH,
+        gitError: (gitError as Error).message
+      });
+    }
   } catch (error) {
     console.error('❌ Error saving markdown:', error);
     return res.status(500).json({ 
@@ -55,9 +94,35 @@ app.post('/save-markdown', (req, res) => {
   }
 });
 
+// Get commit history endpoint
+app.get('/history', async (req, res) => {
+  try {
+    // Get the last 5 commits for the target file
+    const gitLogCommand = `git log -n 5 --pretty=format:"%h|%s|%an|%ad" -- ${TARGET_FILE_PATH}`;
+    const gitLogOutput = await runGitCommand(gitLogCommand);
+    
+    const history = gitLogOutput.split('\n').map(line => {
+      const [hash, message, author, date] = line.split('|');
+      return { hash, message, author, date };
+    });
+    
+    return res.status(200).json({
+      success: true,
+      history
+    });
+  } catch (error) {
+    console.error('❌ Error fetching git history:', error);
+    return res.status(500).json({
+      success: false,
+      message: `Failed to fetch git history: ${(error as Error).message}`
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`🚀 Development markdown server running on http://localhost:${PORT}`);
   console.log(`📄 Target file: ${TARGET_FILE_PATH}`);
   console.log('🔒 Only accepting requests from localhost:3000');
+  console.log('🔄 Git integration enabled for commits');
 });

@@ -94,8 +94,22 @@ This allows you to:
 1. Upload markdown files via the UI
 2. Save changes directly to disk
 3. Test parsing and viewing functionality end-to-end
+4. Automatically commit changes to Git for version tracking
 
 The markdown server only runs in development mode and only accepts requests from localhost.
+
+### Collaborative Features
+
+The development server provides Git integration for tracking changes:
+- Each save creates a Git commit with timestamp
+- View recent commit history for the markdown file
+- Changes are tracked for auditability and rollback
+
+To use the real-time editor:
+1. Navigate to the "Actions" page
+2. Select the "Edit Markdown" tab
+3. Make changes to the markdown file
+4. Click "Save & Commit" to persist changes and create a Git record
 
 ### Building for Production
 
