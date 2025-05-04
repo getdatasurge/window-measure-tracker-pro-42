@@ -17,6 +17,7 @@ import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; // Import the debug page
 import Overview from "./pages/Overview"; // Import the new Overview page
+import TeamManagement from "./pages/TeamManagement"; // Import our new TeamManagement page
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
@@ -45,6 +46,7 @@ const App = () => (
             <Route path="/dashboard" element={<DashboardV2 />} />
             <Route path="/actions" element={<ActionViewer />} />
             <Route path="/projects-new" element={<ProjectsNew />} />
+            <Route path="/team-management" element={<TeamManagement />} /> {/* Add the new TeamManagement route */}
             {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
             <Route path="/" element={<MainLayout />}>
               <Route path="projects" element={<Projects />} />
