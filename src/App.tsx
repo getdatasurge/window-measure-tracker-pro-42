@@ -17,38 +17,47 @@ import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; // Import the debug page
 import Overview from "./pages/Overview"; // Import the new Overview page
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
 const queryClient = new QueryClient();
 
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
 
+// Home route component that redirects based on authentication status
+const HomeRoute = () => {
+  const { isAuthenticated } = useAuth();
+  return isAuthenticated ? <Navigate to="/projects" replace /> : <Navigate to="/overview" replace />;
+};
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <div className="fixed bottom-4 right-4 z-50">
-          <PromptHistoryViewer variant="dialog" />
-        </div>
-        <Routes>
-          <Route path="/" element={<Navigate to="/projects" replace />} />
-          <Route path="/dashboard" element={<DashboardV2 />} />
-          <Route path="/actions" element={<ActionViewer />} />
-          <Route path="/projects-new" element={<ProjectsNew />} />
-          <Route path="/overview" element={<Overview />} /> {/* Add the new Overview route */}
-          {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
-          <Route path="/" element={<MainLayout />}>
-            <Route path="projects" element={<Projects />} />
-            <Route path="teams" element={<Teams />} />
-            <Route path="schedule" element={<Schedule />} />
-            <Route path="reports" element={<Reports />} />
-            <Route path="settings" element={<Settings />} />
-          </Route>
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider initialState={false}> {/* Set to false to test unauthenticated flow */}
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <div className="fixed bottom-4 right-4 z-50">
+            <PromptHistoryViewer variant="dialog" />
+          </div>
+          <Routes>
+            <Route path="/" element={<HomeRoute />} />
+            <Route path="/dashboard" element={<DashboardV2 />} />
+            <Route path="/actions" element={<ActionViewer />} />
+            <Route path="/projects-new" element={<ProjectsNew />} />
+            <Route path="/overview" element={<Overview />} />
+            {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
+            <Route path="/" element={<MainLayout />}>
+              <Route path="projects" element={<Projects />} />
+              <Route path="teams" element={<Teams />} />
+              <Route path="schedule" element={<Schedule />} />
+              <Route path="reports" element={<Reports />} />
+              <Route path="settings" element={<Settings />} />
+            </Route>
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

@@ -1,16 +1,26 @@
 
 import React, { useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import DashboardShell from '../components/layout/DashboardShell';
 import ProjectMetricsSection from '../components/projects/ProjectMetricsSection';
 import RecentMeasurements from '../components/dashboard/RecentMeasurements';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
-import { activeProjects } from '../data/projectsData';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Overview = () => {
+  const { isAuthenticated, login } = useAuth();
+  const navigate = useNavigate();
+  
   useEffect(() => {
     console.log("📊 Overview page mounted");
   }, []);
+  
+  const handleLogin = () => {
+    login();
+    navigate('/projects');
+  };
   
   return (
     <DashboardShell>
@@ -21,6 +31,9 @@ const Overview = () => {
             <h1 className="text-2xl font-bold text-white">Overview</h1>
             <p className="text-sm text-zinc-400">A snapshot of your project's performance and team activity.</p>
           </div>
+          <Button onClick={handleLogin} className="bg-indigo-600 hover:bg-indigo-700">
+            {isAuthenticated ? 'Go to Projects' : 'Sign In'}
+          </Button>
         </div>
         
         {/* Overview Metrics */}
