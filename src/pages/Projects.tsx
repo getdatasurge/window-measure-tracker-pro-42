@@ -1,10 +1,10 @@
+
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Filter, Search, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
-import DashboardHeader from '../components/dashboard/DashboardHeader';
-import KpiCard from '../components/dashboard/KpiCard';
+import { PlusCircle } from 'lucide-react';
 import ProjectTable from '../components/projects/ProjectTable';
+import ProjectFilters from '../components/projects/ProjectFilters';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -128,7 +128,9 @@ const Projects = () => {
                 <div className="mt-1 flex items-baseline">
                   <span className="text-2xl font-semibold text-white">24</span>
                   <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
-                    <ArrowUp size={12} className="mr-0.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-0.5">
+                      <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.06l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
+                    </svg>
                     8%
                   </span>
                 </div>
@@ -147,7 +149,9 @@ const Projects = () => {
                 <div className="mt-1 flex items-baseline">
                   <span className="text-2xl font-semibold text-white">11</span>
                   <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
-                    <ArrowUp size={12} className="mr-0.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-0.5">
+                      <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.06l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
+                    </svg>
                     3%
                   </span>
                 </div>
@@ -166,7 +170,9 @@ const Projects = () => {
                 <div className="mt-1 flex items-baseline">
                   <span className="text-2xl font-semibold text-white">1,254</span>
                   <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
-                    <ArrowUp size={12} className="mr-0.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-0.5">
+                      <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.06l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
+                    </svg>
                     12%
                   </span>
                 </div>
@@ -185,7 +191,9 @@ const Projects = () => {
                 <div className="mt-1 flex items-baseline">
                   <span className="text-2xl font-semibold text-white">386</span>
                   <span className="ml-2 text-xs font-medium flex items-center text-red-500">
-                    <ArrowDown size={12} className="mr-0.5" />
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-0.5">
+                      <path fillRule="evenodd" d="M10 3a.75.75 0 01.75.75v10.638l3.96-4.158a.75.75 0 111.08 1.04l-5.25 5.5a.75.75 0 01-1.08 0l-5.25-5.5a.75.75 0 111.08-1.04l3.96 4.158V3.75A.75.75 0 0110 3z" clipRule="evenodd" />
+                    </svg>
                     5%
                   </span>
                 </div>
@@ -197,38 +205,22 @@ const Projects = () => {
         </Card>
       </div>
       
-      {/* Filters Toolbar - Placeholder */}
+      {/* Filters Toolbar */}
       <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
         <CardContent className="p-4">
-          <h2 className="text-lg font-semibold text-white mb-4">Project Filters</h2>
-          <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              All Projects
-            </Button>
-            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Active
-            </Button>
-            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Upcoming
-            </Button>
-            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
-              Completed
-            </Button>
-          </div>
+          <ProjectFilters />
         </CardContent>
       </Card>
       
-      {/* Active Projects Table - Placeholder */}
+      {/* Active Projects Table */}
       <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
         <CardContent className="p-4">
           <h2 className="text-lg font-semibold text-white mb-4">Active Projects</h2>
-          <div className="text-zinc-400 text-sm">
-            Project listing will appear here in Phase 4.
-          </div>
+          <ProjectTable projects={activeProjects} />
         </CardContent>
       </Card>
       
-      {/* Bottom Widget Grid - Placeholders */}
+      {/* Bottom Widget Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Measurement Statistics */}
         <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
