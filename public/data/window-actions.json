@@ -1,0 +1,24 @@
+
+[
+  {
+    "id": "sample-1",
+    "type": "Navigation Actions",
+    "label": "User clicked on dashboard link",
+    "timestamp": "2023-05-01 14:32:15"
+  },
+  {
+    "id": "sample-2",
+    "type": "Form Interactions",
+    "label": "User filled email field",
+    "timestamp": "2023-05-01 14:35:01",
+    "metadata": {
+      "value": "user@example.com"
+    }
+  },
+  {
+    "id": "sample-3",
+    "type": "System Events",
+    "label": "Application loaded",
+    "timestamp": "2023-05-01 14:30:00"
+  }
+]
