@@ -1,50 +1,44 @@
 
 import React from 'react';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 interface TeamFilterTabsProps {
-  defaultValue?: string;
-  onValueChange?: (value: string) => void;
+  activeTab: string;
+  onTabChange: (tab: string) => void;
 }
 
 const TeamFilterTabs: React.FC<TeamFilterTabsProps> = ({ 
-  defaultValue = "all-teams",
-  onValueChange 
+  activeTab,
+  onTabChange
 }) => {
+  const tabs = [
+    { id: 'all-teams', label: 'All Teams' },
+    { id: 'residential', label: 'Residential' },
+    { id: 'commercial', label: 'Commercial' },
+    { id: 'specialty', label: 'Specialty' }
+  ];
+
   return (
-    <div className="border-b border-zinc-800/70">
-      <Tabs 
-        defaultValue={defaultValue} 
-        className="w-full"
-        onValueChange={onValueChange}
-      >
-        <TabsList className="flex flex-wrap bg-transparent">
-          <TabsTrigger 
-            value="all-teams" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none bg-transparent"
+    <div className="border-b border-zinc-800/70 mb-6">
+      <div className="flex flex-wrap">
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            onClick={() => onTabChange(tab.id)}
+            className={`
+              px-4 py-2 text-sm font-medium relative
+              ${activeTab === tab.id 
+                ? 'text-white' 
+                : 'text-zinc-400 hover:text-zinc-200'
+              }
+            `}
           >
-            All Teams
-          </TabsTrigger>
-          <TabsTrigger 
-            value="residential" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none bg-transparent"
-          >
-            Residential
-          </TabsTrigger>
-          <TabsTrigger 
-            value="commercial" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none bg-transparent"
-          >
-            Commercial
-          </TabsTrigger>
-          <TabsTrigger 
-            value="specialty" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600 rounded-none bg-transparent"
-          >
-            Specialty
-          </TabsTrigger>
-        </TabsList>
-      </Tabs>
+            {tab.label}
+            {activeTab === tab.id && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-500"></span>
+            )}
+          </button>
+        ))}
+      </div>
     </div>
   );
 };

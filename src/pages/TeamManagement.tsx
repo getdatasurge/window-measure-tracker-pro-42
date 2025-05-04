@@ -1,31 +1,46 @@
 
-import React from 'react';
-import { Users, Building, Briefcase, UserCog, Download, Upload, Plus, Search, Filter, UserPlus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Search, Download, UserPlus } from 'lucide-react';
 import DashboardShell from '@/components/layout/DashboardShell';
-import { Card } from '@/components/ui/card';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger 
-} from '@/components/ui/dropdown-menu';
-import DashboardGridRow from '@/components/layout/DashboardGridRow';
-import TeamListPanel from '@/components/teams/TeamListPanel';
+import TeamFilterTabs from '@/components/teams/TeamFilterTabs';
+import TeamMemberList from '@/components/teams/TeamMemberList';
+import TeamsGrid from '@/components/teams/TeamsGrid';
 import RoleDefinitionsPanel from '@/components/teams/RoleDefinitionsPanel';
 import TeamStructurePanel from '@/components/teams/TeamStructurePanel';
+import TeamFilterDropdown from '@/components/teams/TeamFilterDropdown';
+import DashboardGridRow from '@/components/layout/DashboardGridRow';
+import { 
+  teamMembersData,
+  teamRolesData,
+  roleFilterOptions,
+  statusFilterOptions
+} from '@/data/teamData';
 
 const TeamManagement = () => {
+  const [activeTab, setActiveTab] = useState('all-teams');
+  const [roleFilter, setRoleFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [searchQuery, setSearchQuery] = useState('');
+
+  // Filter team members based on active filters
+  const filteredMembers = teamMembersData.filter(member => {
+    const matchesTeam = activeTab === 'all-teams' || 
+      member.team.toLowerCase() === activeTab.toLowerCase();
+    
+    const matchesRole = roleFilter === 'all' || 
+      member.role.toLowerCase().replace(' ', '-') === roleFilter.toLowerCase();
+    
+    const matchesStatus = statusFilter === 'all' || 
+      member.status === statusFilter;
+    
+    const matchesSearch = searchQuery === '' || 
+      member.name.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return matchesTeam && matchesRole && matchesStatus && matchesSearch;
+  });
+
   return (
     <DashboardShell>
       <div className="flex flex-col space-y-6">
@@ -33,11 +48,11 @@ const TeamManagement = () => {
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <h1 className="text-2xl font-bold tracking-tight">Team Management</h1>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <Button variant="outline" size="sm" className="flex items-center gap-2 border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/50">
               <Download className="h-4 w-4" />
               Export
             </Button>
-            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2">
+            <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
               Add Team Member
             </Button>
@@ -46,13 +61,13 @@ const TeamManagement = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <Card className="p-4 border">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Total Team Members</p>
-                <h3 className="text-2xl font-bold mt-1">18</h3>
+                <p className="text-sm font-medium text-zinc-400">Total Team Members</p>
+                <h3 className="text-2xl font-bold mt-1 text-white">18</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-xs font-medium text-green-600 flex items-center">
+                  <span className="text-xs font-medium text-green-500 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
                       <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.061l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
                     </svg>
@@ -60,36 +75,36 @@ const TeamManagement = () => {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                <Users className="h-5 w-5 text-blue-600" />
+              <div className="w-10 h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4 border">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Teams</p>
-                <h3 className="text-2xl font-bold mt-1">3</h3>
+                <p className="text-sm font-medium text-zinc-400">Teams</p>
+                <h3 className="text-2xl font-bold mt-1 text-white">3</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-zinc-400">
                     Residential, Commercial, Specialty
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
-                <Building className="h-5 w-5 text-purple-600" />
+              <div className="w-10 h-10 rounded-full bg-purple-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4 border">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Active Projects</p>
-                <h3 className="text-2xl font-bold mt-1">24</h3>
+                <p className="text-sm font-medium text-zinc-400">Active Projects</p>
+                <h3 className="text-2xl font-bold mt-1 text-white">24</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-xs font-medium text-green-600 flex items-center">
+                  <span className="text-xs font-medium text-green-500 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
                       <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.061l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
                     </svg>
@@ -97,90 +112,67 @@ const TeamManagement = () => {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
-                <Briefcase className="h-5 w-5 text-green-600" />
+              <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
               </div>
             </div>
-          </Card>
+          </div>
 
-          <Card className="p-4 border">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-500">Roles</p>
-                <h3 className="text-2xl font-bold mt-1">6</h3>
+                <p className="text-sm font-medium text-zinc-400">Roles</p>
+                <h3 className="text-2xl font-bold mt-1 text-white">6</h3>
                 <div className="flex items-center mt-1">
-                  <span className="text-xs font-medium text-gray-500">
+                  <span className="text-xs font-medium text-zinc-400">
                     Team Lead, Installer, Measurer, etc.
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
-                <UserCog className="h-5 w-5 text-yellow-600" />
+              <div className="w-10 h-10 rounded-full bg-yellow-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
-          </Card>
+          </div>
         </div>
 
         {/* Team Filter Tabs */}
-        <div className="border-b">
-          <Tabs defaultValue="all-teams" className="w-full">
-            <TabsList className="flex flex-wrap">
-              <TabsTrigger value="all-teams" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
-                All Teams
-              </TabsTrigger>
-              <TabsTrigger value="residential" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
-                Residential
-              </TabsTrigger>
-              <TabsTrigger value="commercial" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
-                Commercial
-              </TabsTrigger>
-              <TabsTrigger value="specialty" className="data-[state=active]:border-b-2 data-[state=active]:border-blue-600">
-                Specialty
-              </TabsTrigger>
-            </TabsList>
-          </Tabs>
-        </div>
+        <TeamFilterTabs 
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+        />
 
         {/* Filters and Search */}
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex flex-1 flex-col sm:flex-row gap-3">
-            <Select defaultValue="all-roles">
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="All Roles" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-roles">All Roles</SelectItem>
-                <SelectItem value="team-lead">Team Lead</SelectItem>
-                <SelectItem value="installer">Installer</SelectItem>
-                <SelectItem value="measurer">Measurer</SelectItem>
-                <SelectItem value="apprentice">Apprentice</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select defaultValue="all-statuses">
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="All Statuses" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all-statuses">All Statuses</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="on-leave">On Leave</SelectItem>
-                <SelectItem value="training">Training</SelectItem>
-              </SelectContent>
-            </Select>
+            <TeamFilterDropdown
+              label="All Roles"
+              options={roleFilterOptions}
+              selectedValue={roleFilter}
+              onSelect={setRoleFilter}
+            />
+            
+            <TeamFilterDropdown
+              label="All Statuses"
+              options={statusFilterOptions}
+              selectedValue={statusFilter}
+              onSelect={setStatusFilter}
+            />
           </div>
           
           <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input 
               placeholder="Search team members..." 
-              className="pl-9 w-full sm:w-[250px]" 
+              className="pl-9 w-full sm:w-[250px] bg-zinc-800/50 border-zinc-700 text-zinc-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)} 
             />
           </div>
         </div>
 
-        {/* Team List Panel */}
-        <TeamListPanel />
+        {/* Team Member List */}
+        <TeamMemberList members={filteredMembers} />
 
         {/* Role Definitions and Team Structure */}
         <DashboardGridRow>

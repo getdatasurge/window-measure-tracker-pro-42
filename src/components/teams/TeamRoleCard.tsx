@@ -1,7 +1,5 @@
 
 import React from 'react';
-import { Card } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Users } from 'lucide-react';
 
 interface TeamRoleCardProps {
@@ -18,7 +16,7 @@ const TeamRoleCard: React.FC<TeamRoleCardProps> = ({
   color = "#8B5CF6" // Default to purple
 }) => {
   return (
-    <Card className="p-5 border border-zinc-800/50 bg-zinc-900/50 hover:bg-zinc-800/30 transition-colors cursor-pointer">
+    <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-5 hover:bg-zinc-800/70 transition-colors cursor-pointer">
       <div className="flex items-start justify-between">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -26,9 +24,9 @@ const TeamRoleCard: React.FC<TeamRoleCardProps> = ({
               className="w-2 h-2 rounded-full" 
               style={{ backgroundColor: color }}
             />
-            <h3 className="font-medium text-sm">{title}</h3>
+            <h3 className="font-medium text-sm text-zinc-200">{title}</h3>
           </div>
-          <p className="text-2xl font-bold">{count}</p>
+          <p className="text-2xl font-bold text-white">{count}</p>
           <p className="text-xs text-zinc-400">{description}</p>
         </div>
         <div 
@@ -38,7 +36,7 @@ const TeamRoleCard: React.FC<TeamRoleCardProps> = ({
           <Users size={18} style={{ color }} />
         </div>
       </div>
-    </Card>
+    </div>
   );
 };
 
