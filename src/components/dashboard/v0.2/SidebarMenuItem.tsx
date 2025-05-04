@@ -24,10 +24,6 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   // Update paths to use the new pages
   const getActualPath = () => {
     if (path === '/projects') return '/projects-new';
-    if (path === '/teams') return '/teams';
-    if (path === '/schedule') return '/schedule';
-    if (path === '/reports') return '/reports';
-    if (path === '/measurements') return '/measurements';
     return path;
   };
   
