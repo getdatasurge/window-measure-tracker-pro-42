@@ -79,6 +79,16 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
     setSelectedArea('');
     setSelectedType('');
   };
+
+  // Type-safe handler for the Select's onValueChange
+  const handleAreaChange = (value: string) => {
+    setSelectedArea(value as FeatureArea | '');
+  };
+
+  // Type-safe handler for the Select's onValueChange
+  const handleTypeChange = (value: string) => {
+    setSelectedType(value);
+  };
   
   return (
     <div className="border rounded-lg bg-white shadow-sm">
@@ -110,7 +120,7 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          <Select value={selectedArea} onValueChange={setSelectedArea}>
+          <Select value={selectedArea} onValueChange={handleAreaChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by feature area" />
             </SelectTrigger>
@@ -125,7 +135,7 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
             </SelectContent>
           </Select>
           
-          <Select value={selectedType} onValueChange={setSelectedType}>
+          <Select value={selectedType} onValueChange={handleTypeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by action type" />
             </SelectTrigger>
