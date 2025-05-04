@@ -6,12 +6,19 @@ import DashboardKpiSection from '@/components/dashboard/DashboardKpiSection';
 import DashboardChartsSection from '@/components/dashboard/DashboardChartsSection';
 import DashboardActionsSection from '@/components/dashboard/DashboardActionsSection';
 import DocumentationLinks from '@/components/dashboard/DocumentationLinks';
+import { Button } from '@/components/ui/button';
+import { FileText } from 'lucide-react';
 
 const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <div className="flex flex-col gap-8 px-4 py-6 md:gap-12 md:px-6 lg:px-8">
-        <DashboardHeader title="Knowledge Base Dashboard" />
+        <DashboardHeader title="Knowledge Base Dashboard">
+          <Button variant="outline" size="sm" className="flex items-center gap-2">
+            <FileText size={16} />
+            Documentation
+          </Button>
+        </DashboardHeader>
         <DashboardKpiSection />
         <DashboardChartsSection />
         
