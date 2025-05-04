@@ -14,8 +14,12 @@ import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/PromptHistoryViewer";
+import DebugPage from "./pages/__debug"; // Import the debug page
 
 const queryClient = new QueryClient();
+
+// Only show debug route in development
+const isDev = process.env.NODE_ENV === 'development';
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -30,6 +34,7 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardV2 />} />
           <Route path="/actions" element={<ActionViewer />} />
+          {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
           <Route path="/" element={<MainLayout />}>
             <Route path="projects" element={<Projects />} />
             <Route path="teams" element={<Teams />} />
