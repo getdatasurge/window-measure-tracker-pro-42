@@ -1,17 +1,6 @@
 
 import React from 'react';
-
-interface Project {
-  id: number;
-  name: string;
-  color: string;
-  client: string;
-  location: string;
-  windows: number;
-  progress: number;
-  deadline: string;
-  status: string;
-}
+import { Project } from "../../data/projectsData";
 
 interface ProjectTableProps {
   projects: Project[];
