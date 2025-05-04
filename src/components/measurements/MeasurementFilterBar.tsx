@@ -1,24 +1,14 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuTrigger,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuCheckboxItem
-} from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { Calendar as CalendarIcon, Filter, ChevronDown } from 'lucide-react';
 import { installers, projects, statuses } from '@/data/measurementsData';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-
 interface MeasurementFilterBarProps {
   onFilterChange: (filters: FilterState) => void;
 }
-
 interface FilterState {
   project: string;
   installer: string;
@@ -28,8 +18,9 @@ interface FilterState {
     to: Date | undefined;
   };
 }
-
-const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterChange }) => {
+const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
+  onFilterChange
+}) => {
   const [filters, setFilters] = useState<FilterState>({
     project: 'all',
     installer: 'all',
@@ -39,15 +30,15 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterCha
       to: undefined
     }
   });
-  
   const handleFilterChange = (key: keyof FilterState, value: any) => {
-    const newFilters = { ...filters, [key]: value };
+    const newFilters = {
+      ...filters,
+      [key]: value
+    };
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
-  
-  return (
-    <div className="flex flex-wrap gap-2 mb-6">
+  return <div className="flex flex-wrap gap-2 mb-6">
       {/* Project Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -59,15 +50,9 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterCha
         <DropdownMenuContent className="w-56 bg-zinc-800 border-zinc-700 text-zinc-200">
           <DropdownMenuLabel>Select Project</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-700" />
-          {projects.map(project => (
-            <DropdownMenuCheckboxItem
-              key={project.id}
-              checked={filters.project === project.id}
-              onCheckedChange={() => handleFilterChange('project', project.id)}
-            >
+          {projects.map(project => <DropdownMenuCheckboxItem key={project.id} checked={filters.project === project.id} onCheckedChange={() => handleFilterChange('project', project.id)}>
               {project.name}
-            </DropdownMenuCheckboxItem>
-          ))}
+            </DropdownMenuCheckboxItem>)}
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -82,15 +67,9 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterCha
         <DropdownMenuContent className="w-56 bg-zinc-800 border-zinc-700 text-zinc-200">
           <DropdownMenuLabel>Select Installer</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-700" />
-          {installers.map(installer => (
-            <DropdownMenuCheckboxItem
-              key={installer.id}
-              checked={filters.installer === installer.id}
-              onCheckedChange={() => handleFilterChange('installer', installer.id)}
-            >
+          {installers.map(installer => <DropdownMenuCheckboxItem key={installer.id} checked={filters.installer === installer.id} onCheckedChange={() => handleFilterChange('installer', installer.id)}>
               {installer.name}
-            </DropdownMenuCheckboxItem>
-          ))}
+            </DropdownMenuCheckboxItem>)}
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -105,15 +84,9 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterCha
         <DropdownMenuContent className="w-56 bg-zinc-800 border-zinc-700 text-zinc-200">
           <DropdownMenuLabel>Select Status</DropdownMenuLabel>
           <DropdownMenuSeparator className="bg-zinc-700" />
-          {statuses.map(status => (
-            <DropdownMenuCheckboxItem
-              key={status.value}
-              checked={filters.status === status.value}
-              onCheckedChange={() => handleFilterChange('status', status.value)}
-            >
+          {statuses.map(status => <DropdownMenuCheckboxItem key={status.value} checked={filters.status === status.value} onCheckedChange={() => handleFilterChange('status', status.value)}>
               {status.label}
-            </DropdownMenuCheckboxItem>
-          ))}
+            </DropdownMenuCheckboxItem>)}
         </DropdownMenuContent>
       </DropdownMenu>
       
@@ -122,44 +95,26 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({ onFilterCha
         <PopoverTrigger asChild>
           <Button variant="outline" className="bg-zinc-800 border-zinc-700 text-zinc-300">
             <CalendarIcon className="mr-2 h-4 w-4" />
-            {filters.dateRange.from ? (
-              filters.dateRange.to ? (
-                <>
+            {filters.dateRange.from ? filters.dateRange.to ? <>
                   {format(filters.dateRange.from, "MMM d, yyyy")} - {format(filters.dateRange.to, "MMM d, yyyy")}
-                </>
-              ) : (
-                format(filters.dateRange.from, "MMM d, yyyy")
-              )
-            ) : (
-              <span>Select date range</span>
-            )}
+                </> : format(filters.dateRange.from, "MMM d, yyyy") : <span>Select date range</span>}
           </Button>
         </PopoverTrigger>
         <PopoverContent className="w-auto p-0 bg-zinc-800 border-zinc-700" align="start">
-          <Calendar
-            initialFocus
-            mode="range"
-            defaultMonth={filters.dateRange.from}
-            selected={filters.dateRange}
-            onSelect={(range) => handleFilterChange('dateRange', range || { from: undefined, to: undefined })}
-            numberOfMonths={1}
-            className="bg-zinc-800 text-zinc-200"
-          />
+          <Calendar initialFocus mode="range" defaultMonth={filters.dateRange.from} selected={filters.dateRange} onSelect={range => handleFilterChange('dateRange', range || {
+          from: undefined,
+          to: undefined
+        })} numberOfMonths={1} className="bg-zinc-800 text-zinc-200" />
         </PopoverContent>
       </Popover>
       
       {/* Advanced Filter Button */}
-      <Button variant="outline" className="bg-zinc-800 border-zinc-700 text-zinc-300 ml-auto">
-        <Filter className="mr-2 h-4 w-4" />
-        Advanced Filter
-      </Button>
+      
       
       {/* New Entry Button */}
       <Button className="bg-green-600 hover:bg-green-700">
         + New Entry
       </Button>
-    </div>
-  );
+    </div>;
 };
-
 export default MeasurementFilterBar;
