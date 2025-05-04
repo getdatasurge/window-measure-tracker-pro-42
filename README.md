@@ -1,3 +1,4 @@
+
 # 🧠 Dynamic Markdown Knowledgebase
 
 This project transforms markdown logs of tracked user actions into a dynamic, scrollable React UI. It syncs directly with Lovable's Knowledge Base and logs prompt-response activity to help build smarter AI-driven apps.
@@ -5,70 +6,55 @@ This project transforms markdown logs of tracked user actions into a dynamic, sc
 ## 🚀 Quick Start
 
 ```bash
+# Step 1: Clone the repository
 git clone https://github.com/your-org/your-project
 cd your-project
+
+# Step 2: Install dependencies (REQUIRED before running any other commands)
 yarn install
 
-
-# Welcome to your Lovable project
-
-## 📚 Project Overview
-
-This application is a dynamic window actions tracking and knowledgebase system that:
-
-- Converts markdown-based user action logs into structured JSON data
-- Displays real-time UI for visualizing and searching user actions
-- Auto-syncs to Lovable's Knowledge Base for context-aware AI assistance
-- Logs AI prompts and responses for auditability and improvement
-
-At its core, this system transforms chronological user actions recorded in markdown format into an intelligent knowledgebase that enhances AI interactions by providing relevant context.
-
-## 🚀 Quick Start
-
-### Development Setup
-
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
-
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
-
-# Step 3: Install the necessary dependencies.
-npm i
-
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# Step 3: Start the development server
+yarn dev
 ```
+
+### Important: Always Install Dependencies First
+
+Before running any scripts, make sure you have installed the project dependencies:
+
+```bash
+yarn install
+```
+
+Without this step, commands like `yarn dev` will fail with errors like `/bin/sh: 1: vite: not found`.
 
 ### Running the Markdown Server
 
 For local development with live markdown syncing, run:
 
-```sh
+```bash
 # Start the markdown server (in a separate terminal)
-npm run dev:markdown-server
+yarn dev:markdown-server
 
 # Then start the normal dev server (if not already running)
-npm run dev
+yarn dev
 ```
 
 ### Generating Production JSON
 
 Before deploying to production, generate the actions JSON file:
 
-```sh
-npm run generate-actions-json
+```bash
+yarn run generate-actions-json
 # or the alias
-npm run build:kb
+yarn run build:kb
 ```
 
 ### Debug Tools
 
 To verify knowledgebase integrity:
 
-```sh
-npm run debug:kb
+```bash
+yarn run debug:kb
 ```
 
 Visit `http://localhost:3000/__debug` while running the dev server to access the full debug UI with live file watchers, parsing previews, and test tools.
@@ -77,11 +63,11 @@ Visit `http://localhost:3000/__debug` while running the dev server to access the
 
 | Script | Description |
 |--------|-------------|
-| `npm run debug:kb` | Validates knowledgebase integrity by checking markdown format, JSON sync status, and log file health |
-| `npm run generate-actions-json` | Builds the window actions JSON file from markdown source for production use |
-| `npm run build:kb` | Alias for `generate-actions-json` |
-| `npm run dev:markdown-server` | Runs a local server for saving markdown files with Git integration during development |
-| `npm run kb:ci` | CI-friendly wrapper for debug:kb that ensures proper exit codes for CI environments |
+| `yarn run debug:kb` | Validates knowledgebase integrity by checking markdown format, JSON sync status, and log file health |
+| `yarn run generate-actions-json` | Builds the window actions JSON file from markdown source for production use |
+| `yarn run build:kb` | Alias for `generate-actions-json` |
+| `yarn run dev:markdown-server` | Runs a local server for saving markdown files with Git integration during development |
+| `yarn run kb:ci` | CI-friendly wrapper for debug:kb that ensures proper exit codes for CI environments |
 
 ## 🧪 Pre-Commit & CI
 
@@ -89,7 +75,7 @@ This project includes automated validation for the knowledgebase:
 
 - **Pre-commit Hook**: Prevents commits if the knowledgebase is malformed, out of sync, or logging files are unwritable.
 - **CI Workflow**: Automatically validates the knowledgebase on GitHub for pushes and pull requests to main.
-- **Script Aliases**: Use `npm run kb:ci` to manually validate the knowledgebase.
+- **Script Aliases**: Use `yarn run kb:ci` to manually validate the knowledgebase.
 
 After installation, set up the pre-commit hooks by running:
 
@@ -147,10 +133,10 @@ To enable saving markdown files during development:
 
 ```sh
 # Start the markdown server (in a separate terminal)
-npm run dev:markdown-server
+yarn run dev:markdown-server
 
 # Then start the normal dev server
-npm run dev
+yarn run dev
 ```
 
 This allows you to:
@@ -174,9 +160,9 @@ Before deploying, generate the static JSON file from your markdown using:
 
 ```sh
 # Generate actions JSON from markdown file
-npm run generate-actions-json
+yarn run generate-actions-json
 # or
-npx tsx scripts/generate-actions-json.ts
+yarn run build:kb
 ```
 
 This will parse `public/window-tracker-prd.md` and output to `public/data/window-actions.json`.
