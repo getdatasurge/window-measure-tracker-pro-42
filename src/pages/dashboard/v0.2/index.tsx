@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, CheckCheck, LayoutDashboard, ListChecks, Users2 } from 'lucide-react';
 import DashboardHeader from '../../../components/dashboard/DashboardHeader';
@@ -10,6 +11,7 @@ import MeasurementOverview from '../../../components/dashboard/MeasurementOvervi
 import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
 import ActivityFeed from '../../../components/dashboard/ActivityFeed';
 import DashboardGridRow from '../../../components/layout/DashboardGridRow';
+import DashboardMeasurementSection from '../../../components/dashboard/DashboardMeasurementSection';
 
 interface DashboardPageProps {
   className?: string;
@@ -95,6 +97,8 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
 }) => {
   return <DashboardShell>
       <div className="grid gap-4">
+        {/* New Measurement Section added at the top */}
+        <DashboardMeasurementSection />
         
         {/* Team Activity and Active Projects Section using the reusable DashboardGridRow */}
         <DashboardGridRow>

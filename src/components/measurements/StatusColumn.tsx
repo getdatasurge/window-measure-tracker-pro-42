@@ -48,7 +48,7 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
   const filteredMeasurements = measurements.filter(m => m.status === status);
   
   return (
-    <div className="h-full flex-1">
+    <div className="h-full flex-1 bg-zinc-900/50 rounded-md">
       <div className={`flex items-center gap-2 py-2 px-4 border-t-2 ${getBorderColor()}`}>
         <div className={`p-1 rounded-full ${color}`}>
           {getIcon()}

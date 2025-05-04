@@ -77,7 +77,7 @@ const MeasurementStatusBoard: React.FC = () => {
       <WeeklyNavBar onSelectDate={handleDateSelect} selectedDate={selectedDate} />
       
       <div className="mb-6">
-        <div className="grid grid-cols-3 gap-4" style={{ minHeight: "500px" }}>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4" style={{ minHeight: "500px" }}>
           <StatusColumn 
             title="Measured" 
             status="Pending" 
