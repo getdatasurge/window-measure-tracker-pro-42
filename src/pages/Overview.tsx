@@ -8,6 +8,7 @@ import RecentMeasurements from '../components/dashboard/RecentMeasurements';
 import ActivityFeed from '../components/dashboard/ActivityFeed';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import MeasurementStatusBoard from '../components/measurements/MeasurementStatusBoard';
 
 const Overview = () => {
   const { isAuthenticated, login } = useAuth();
@@ -24,7 +25,10 @@ const Overview = () => {
   
   return (
     <DashboardShell>
-      <div className="space-y-6" data-testid="overview-page">
+      <div className="space-y-8" data-testid="overview-page">
+        {/* New Measurement Status Board Component */}
+        <MeasurementStatusBoard />
+        
         {/* Page Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
