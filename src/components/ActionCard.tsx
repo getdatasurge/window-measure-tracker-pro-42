@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { WindowAction } from '@/lib/parseWindowActions';
 
 interface ActionCardProps {
@@ -26,6 +27,11 @@ const ActionCard: React.FC<ActionCardProps> = ({ action }) => {
         textColor: "text-red-800",
         borderColor: "border-red-200"  
       },
+      "UI Interactions": { 
+        bgColor: "bg-green-50", 
+        textColor: "text-green-800",
+        borderColor: "border-green-200"  
+      },
       "unknown": { 
         bgColor: "bg-gray-50", 
         textColor: "text-gray-800",
@@ -46,38 +52,46 @@ const ActionCard: React.FC<ActionCardProps> = ({ action }) => {
   // Format metadata for display
   const renderMetadata = () => {
     if (!action.metadata || Object.keys(action.metadata).length === 0) {
-      return null;
+      return (
+        <div className="text-xs text-gray-400">
+          No metadata available
+        </div>
+      );
     }
     
     return (
       <div className="mt-2 text-xs">
         {Object.entries(action.metadata).map(([key, value]) => (
-          <span key={key} className="inline-block mr-2 mb-1 px-2 py-0.5 rounded bg-gray-100">
+          <Badge key={key} variant="outline" className="mr-2 mb-1">
             <span className="font-medium">{key}:</span> {JSON.stringify(value)}
-          </span>
+          </Badge>
         ))}
       </div>
     );
   };
   
   return (
-    <Card className={`mb-3 border ${borderColor} ${bgColor} hover:shadow-md transition-shadow duration-200`}>
-      <CardContent className="p-4">
+    <Card className={`mb-3 border ${borderColor} ${bgColor} hover:bg-gray-50 transition-all duration-200 hover:shadow-md`}>
+      <CardContent className="p-4 space-y-1">
         <div className="flex justify-between items-start">
-          <h3 className={`font-medium ${textColor} flex-grow`}>
+          <h3 className={`font-bold ${textColor}`}>
             {action.label || 'Unnamed Action'}
           </h3>
           
           {action.type !== 'unknown' && action.type !== 'error' && (
-            <span className={`text-xs px-2 py-0.5 rounded-full ${bgColor} ${textColor} border ${borderColor}`}>
+            <Badge variant="secondary" className={`${bgColor} ${textColor}`}>
               {action.type}
-            </span>
+            </Badge>
           )}
         </div>
         
-        {action.timestamp && action.timestamp !== 'Unknown' && (
-          <div className="text-xs text-gray-500 mt-1">
+        {action.timestamp && action.timestamp !== 'Unknown' ? (
+          <div className="text-sm text-gray-500">
             {action.timestamp}
+          </div>
+        ) : (
+          <div className="text-sm text-gray-400">
+            Unknown Time
           </div>
         )}
         

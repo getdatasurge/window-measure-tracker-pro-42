@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { parseWindowActions, WindowAction, readMarkdownFile } from '../lib/parseWindowActions';
 
 // Time in ms to wait before re-parsing after a file change
-const DEBOUNCE_TIME = 500;
+const DEBOUNCE_TIME = 300;
 
 /**
  * Hook to synchronize markdown file changes with parsed JSON
