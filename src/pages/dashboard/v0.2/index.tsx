@@ -8,7 +8,6 @@ import RecentMeasurements from '@/components/dashboard/RecentMeasurements';
 import TeamActivityFeed from '@/components/dashboard/TeamActivityFeed';
 import DashboardSidebar from '@/components/dashboard/v0.2/DashboardSidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
-
 const DashboardV2: React.FC = () => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const isMobile = useIsMobile();
@@ -38,13 +37,10 @@ const DashboardV2: React.FC = () => {
   return <div className="min-h-screen bg-[#0f0f0f] text-white">
       <DashboardSidebar collapsed={sidebarCollapsed} toggleCollapsed={toggleSidebar} />
       
-      <div 
-        className="transition-all duration-200" 
-        style={{
-          marginLeft: sidebarCollapsed ? '64px' : '240px',
-          width: `calc(100% - ${sidebarCollapsed ? '64px' : '240px'})`
-        }}
-      >
+      <div className="transition-all duration-200" style={{
+      marginLeft: sidebarCollapsed ? '64px' : '240px',
+      width: `calc(100% - ${sidebarCollapsed ? '64px' : '240px'})`
+    }}>
         {/* Header */}
         <motion.div initial="hidden" animate="visible" variants={fadeIn} className="sticky top-0 z-10 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-zinc-800/70 px-6 py-4">
           <div className="flex justify-between items-center">
@@ -82,21 +78,26 @@ const DashboardV2: React.FC = () => {
         
         <div className="p-6 space-y-8">
           {/* Metrics */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.1
+        }}>
             <DashboardMetrics />
           </motion.div>
           
           {/* Recent Projects */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="space-y-4"
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.2
+        }} className="space-y-4">
             <div className="flex justify-between items-center">
               <h2 className="text-xl font-semibold">Recent Projects</h2>
               <Button variant="link" className="text-green-400 hover:text-green-300 p-0">View All</Button>
@@ -105,12 +106,14 @@ const DashboardV2: React.FC = () => {
           </motion.div>
           
           {/* Two-column layout for measurements and activity */}
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.5, delay: 0.3 }}
-            className="grid grid-cols-1 lg:grid-cols-3 gap-6"
-          >
+          <motion.div initial={{
+          opacity: 0
+        }} animate={{
+          opacity: 1
+        }} transition={{
+          duration: 0.5,
+          delay: 0.3
+        }} className="grid grid-cols-3 lg:grid-cols-4 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Recent Measurements</h2>
@@ -118,8 +121,8 @@ const DashboardV2: React.FC = () => {
               </div>
               <RecentMeasurements />
             </div>
-            <div className="space-y-4">
-              <h2 className="text-xl font-semibold">Team Activity</h2>
+            <div className="space-y-4 grid xs:grid-cols-4 3xl:grid-cols-6">
+              <h2 className="text-xl font-semibold lg:col-span-2 space-y-4 pb-[.65rem]">Team Activity</h2>
               <TeamActivityFeed />
             </div>
           </motion.div>
@@ -127,5 +130,4 @@ const DashboardV2: React.FC = () => {
       </div>
     </div>;
 };
-
 export default DashboardV2;
