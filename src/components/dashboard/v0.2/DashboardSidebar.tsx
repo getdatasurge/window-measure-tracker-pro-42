@@ -53,13 +53,13 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
     name: 'Reports',
     path: '/reports',
     icon: FileText
-  }];
-
-  const toolsMenuItems = [{
+  }, {
     name: 'Measurements',
     path: '/measurements',
     icon: Ruler
-  }, {
+  }];
+
+  const toolsMenuItems = [{
     name: 'Inventory',
     path: '/inventory',
     icon: PackageOpen

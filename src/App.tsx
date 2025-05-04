@@ -10,7 +10,7 @@ import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
 import Teams from "./pages/Teams";
 import SchedulePage from "./pages/SchedulePage"; 
-import ReportsNew from "./pages/ReportsNew"; // Import the new Reports page
+import ReportsNew from "./pages/ReportsNew";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
@@ -19,6 +19,7 @@ import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; 
 import Overview from "./pages/Overview"; 
 import TeamManagement from "./pages/TeamManagement"; 
+import Measurements from "./pages/Measurements"; // Import the new Measurements page
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -51,11 +52,12 @@ const App = () => (
               <Route path="/projects-new" element={<ProjectsNew />} />
               <Route path="/teams" element={<TeamManagement />} /> 
               <Route path="/schedule" element={<SchedulePage />} /> 
-              <Route path="/reports" element={<ReportsNew />} /> {/* Add route to new Reports page */}
+              <Route path="/reports" element={<ReportsNew />} />
+              <Route path="/measurements" element={<Measurements />} /> {/* Add route to new Measurements page */}
               {isDev && <Route path="/__debug" element={<DebugPage />} />} 
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
-                <Route path="reports-old" element={<Reports />} /> {/* Keep old Reports route as reports-old */}
+                <Route path="reports-old" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />
