@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,7 +12,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
-import PromptHistoryViewer from "./components/PromptHistoryViewer";
+import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; // Import the debug page
 
 const queryClient = new QueryClient();

@@ -1,17 +1,15 @@
-
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Info, FileText, RefreshCw, Database } from 'lucide-react';
 import { parseWindowActions, readMarkdownFile, WindowAction } from '@/lib/parseWindowActions';
 import { useLiveFileSync } from '@/hooks/useLiveFileSync';
 import { usePromptLogger } from '@/hooks/usePromptLogger';
-import PromptHistoryViewer from '@/components/PromptHistoryViewer';
+import PromptHistoryViewer from '@/components/prompt-history';
 
 const DebugPage: React.FC = () => {
   // Check if we're in dev mode
