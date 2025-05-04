@@ -11,11 +11,12 @@ interface MetricCardProps {
   };
   description: string;
   colorAccent: string;
+  testId?: string;
 }
 
-const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, description, colorAccent }) => {
+const MetricCard: React.FC<MetricCardProps> = ({ title, value, trend, description, colorAccent, testId }) => {
   return (
-    <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden">
+    <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden" data-testid={testId}>
       <CardContent className="p-0">
         <div className="flex items-stretch">
           <div className="py-4 px-5 flex-grow">
@@ -50,6 +51,7 @@ const ProjectMetricsSection: React.FC = () => {
         trend={{ value: "8%", positive: true }}
         description="vs last month"
         colorAccent="bg-indigo-500/20"
+        testId="kpi-active-projects"
       />
       
       <MetricCard 
@@ -58,6 +60,7 @@ const ProjectMetricsSection: React.FC = () => {
         trend={{ value: "3%", positive: true }}
         description="vs last month"
         colorAccent="bg-purple-500/20"
+        testId="kpi-upcoming-projects"
       />
       
       <MetricCard 
@@ -66,6 +69,7 @@ const ProjectMetricsSection: React.FC = () => {
         trend={{ value: "12%", positive: true }}
         description="total measured"
         colorAccent="bg-emerald-500/20"
+        testId="kpi-windows-measured"
       />
       
       <MetricCard 
@@ -74,6 +78,7 @@ const ProjectMetricsSection: React.FC = () => {
         trend={{ value: "5%", positive: false }}
         description="remaining to measure"
         colorAccent="bg-amber-500/20"
+        testId="kpi-pending-measurements"
       />
     </div>
   );
