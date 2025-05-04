@@ -33,7 +33,7 @@ const MainLayout: React.FC = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      <div className="relative">
+      <div className="relative z-20">
         <div 
           className={`
             fixed inset-y-0 left-0 z-20 
@@ -42,6 +42,7 @@ const MainLayout: React.FC = () => {
               ? `transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
               : `${sidebarOpen ? 'w-52' : 'w-16'}`
             }
+            h-screen
           `}
         >
           <Sidebar />
