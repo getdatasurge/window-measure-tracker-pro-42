@@ -1,8 +1,9 @@
-
-import React, { useState } from 'react';
-import KpiCard from '../components/dashboard/KpiCard';
-import ProjectTable from '../components/projects/ProjectTable';
-import { FileText, ArrowUp, ArrowDown } from 'lucide-react';
+import React from 'react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { PlusCircle, Filter, Search } from 'lucide-react';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
+import DashboardMetrics from '../components/dashboard/DashboardMetrics';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('all');

@@ -1,6 +1,8 @@
+
 import React from 'react';
 import { motion } from 'framer-motion';
 import { FileText, UserPlus, CheckCircle, Calendar, AlertCircle } from 'lucide-react';
+
 interface TeamActivity {
   id: number;
   avatar: string;
@@ -11,6 +13,7 @@ interface TeamActivity {
   timeAgo: string;
   icon: "measurement" | "team" | "complete" | "issue" | "update";
 }
+
 const TeamActivityFeed: React.FC = () => {
   const activities: TeamActivity[] = [{
     id: 1,
@@ -56,6 +59,7 @@ const TeamActivityFeed: React.FC = () => {
     timeAgo: '1 week ago',
     icon: 'team'
   }];
+
   const getActivityIcon = (icon: "measurement" | "team" | "complete" | "issue" | "update" | string) => {
     switch (icon) {
       case 'measurement':
@@ -72,6 +76,7 @@ const TeamActivityFeed: React.FC = () => {
         return <div className="p-2 rounded-full bg-gray-900/30 text-gray-400"><FileText size={16} /></div>;
     }
   };
+
   const getTargetStyles = (targetType?: 'project' | 'team' | 'measurement') => {
     switch (targetType) {
       case 'project':
@@ -84,6 +89,7 @@ const TeamActivityFeed: React.FC = () => {
         return 'text-zinc-200';
     }
   };
+
   const container = {
     hidden: {
       opacity: 0
@@ -95,6 +101,7 @@ const TeamActivityFeed: React.FC = () => {
       }
     }
   };
+
   const item = {
     hidden: {
       opacity: 0,
@@ -108,7 +115,8 @@ const TeamActivityFeed: React.FC = () => {
       }
     }
   };
-  return <motion.div initial="hidden" animate="show" variants={container} className="bg-[#1a1a1a] rounded-xl shadow-lg p-4 h-auto border border-zinc-800/70">
+
+  return <motion.div initial="hidden" animate="show" variants={container} className="bg-dark-200 rounded-xl shadow-lg p-4 h-auto border border-zinc-800/70">
       <div className="space-y-5">
         {activities.map(activity => <motion.div key={activity.id} variants={item} className="flex gap-3 group">
             <div className="shrink-0 mt-0.5">
@@ -133,4 +141,5 @@ const TeamActivityFeed: React.FC = () => {
       </div>
     </motion.div>;
 };
+
 export default TeamActivityFeed;
