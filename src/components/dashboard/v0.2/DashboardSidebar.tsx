@@ -78,7 +78,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
   }} transition={{
     duration: 0.2
   }} className="bg-[#0f0f0f] h-screen flex flex-col fixed left-0 top-0 border-r border-zinc-800/70 z-20">
-      <div className="p-4 flex items-center py-0 h-auto px-0">
+      <div className="p-4 flex items-center py-0 h-auto px-0 ">
         {!collapsed ? <WinTrackLogo /> : <div className="w-8 h-8 bg-[#92f877] rounded-md flex items-center justify-center text-black font-bold text-lg">
             WT
           </div>}
