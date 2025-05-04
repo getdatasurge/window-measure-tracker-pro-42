@@ -26,6 +26,7 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
     if (path === '/projects') return '/projects-new';
     if (path === '/teams') return '/teams';
     if (path === '/schedule') return '/schedule';
+    if (path === '/reports') return '/reports';
     return path;
   };
   

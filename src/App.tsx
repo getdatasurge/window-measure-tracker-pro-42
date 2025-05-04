@@ -9,15 +9,16 @@ import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
 import Teams from "./pages/Teams";
-import SchedulePage from "./pages/SchedulePage"; // Import the Schedule page
+import SchedulePage from "./pages/SchedulePage"; 
+import ReportsNew from "./pages/ReportsNew"; // Import the new Reports page
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
-import DebugPage from "./pages/__debug"; // Import the debug page
-import Overview from "./pages/Overview"; // Import the Overview page
-import TeamManagement from "./pages/TeamManagement"; // Import TeamManagement page
+import DebugPage from "./pages/__debug"; 
+import Overview from "./pages/Overview"; 
+import TeamManagement from "./pages/TeamManagement"; 
 import { AuthProvider } from "./contexts/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
@@ -49,11 +50,12 @@ const App = () => (
               <Route path="/actions" element={<ActionViewer />} />
               <Route path="/projects-new" element={<ProjectsNew />} />
               <Route path="/teams" element={<TeamManagement />} /> 
-              <Route path="/schedule" element={<SchedulePage />} /> {/* Schedule page route */}
-              {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
+              <Route path="/schedule" element={<SchedulePage />} /> 
+              <Route path="/reports" element={<ReportsNew />} /> {/* Add route to new Reports page */}
+              {isDev && <Route path="/__debug" element={<DebugPage />} />} 
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
-                <Route path="reports" element={<Reports />} />
+                <Route path="reports-old" element={<Reports />} /> {/* Keep old Reports route as reports-old */}
                 <Route path="settings" element={<Settings />} />
               </Route>
               <Route path="*" element={<NotFound />} />
