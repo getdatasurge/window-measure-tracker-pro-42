@@ -1,35 +1,46 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
-import { useScrollDirection } from '@/hooks/useScrollDirection';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarToggle } from '@/components/ui/SidebarToggle';
 
 const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const scrollDirection = useScrollDirection();
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
     setSidebarOpen(!sidebarOpen);
   };
 
-  // Auto collapse sidebar on mobile when scrolling down
+  // Function to check scroll direction and auto-collapse sidebar on mobile
+  const handleScroll = useCallback(() => {
+    if (isMobile) {
+      // Only collapse sidebar when scrolling down on mobile
+      if (window.scrollY > 10) {
+        setSidebarOpen(false);
+        console.log("Scroll detected, sidebar closed");
+      }
+    }
+  }, [isMobile]);
+
+  // Set up scroll event listener
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [handleScroll]);
+
+  // Auto collapse sidebar on mobile when component mounts
   useEffect(() => {
     if (isMobile) {
-      if (scrollDirection === 'down') {
-        setSidebarOpen(false);
-      } else if (scrollDirection === 'up') {
-        setSidebarOpen(true);
-      }
-      
-      // Debug logs
-      console.log("Scroll direction:", scrollDirection);
-      console.log("Sidebar open:", sidebarOpen);
+      setSidebarOpen(false);
+    } else {
+      setSidebarOpen(true);
     }
-  }, [scrollDirection, isMobile]);
+  }, [isMobile]);
 
   return (
     <div className="flex min-h-screen bg-gray-50">
@@ -40,7 +51,7 @@ const MainLayout: React.FC = () => {
             transition-all duration-300 ease-in-out
             ${isMobile 
               ? `transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`
-              : `${sidebarOpen ? 'w-52' : 'w-16'}`
+              : `${sidebarOpen ? 'w-64' : 'w-16'}`
             }
             h-screen
           `}
@@ -59,7 +70,7 @@ const MainLayout: React.FC = () => {
         )}
       </div>
 
-      <div className={`flex flex-col w-full transition-all duration-300 ${isMobile ? '' : sidebarOpen ? 'lg:ml-52' : 'lg:ml-16'}`}>
+      <div className={`flex flex-col w-full transition-all duration-300 ${isMobile ? '' : sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
         <Header toggleSidebar={toggleSidebar} />
         <main className="flex-1 p-6 overflow-auto">
           <Outlet />

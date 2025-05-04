@@ -24,7 +24,7 @@ export const SidebarToggle: React.FC<SidebarToggleProps> = ({
       aria-controls="sidebar"
       aria-label="Toggle Sidebar"
       className={cn(
-        "absolute top-1/2 -translate-y-1/2 z-30",
+        "absolute top-1/2 -translate-y-1/2 z-50",
         "bg-muted rounded-full shadow hover:ring-2 ring-accent",
         "size-6 flex items-center justify-center",
         "transition-all duration-300 ease-in-out",
