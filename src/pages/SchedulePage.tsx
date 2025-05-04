@@ -1,5 +1,6 @@
 
 import React from 'react';
+import { useTheme } from '@/contexts/ThemeContext';
 import ScheduleFilterBar from '../components/schedule/ScheduleFilterBar';
 import ScheduleOverview from '../components/schedule/ScheduleOverview';
 import ScheduleCharts from '../components/schedule/ScheduleCharts';
@@ -11,13 +12,11 @@ const SchedulePage: React.FC = () => {
 
   return (
     <DashboardShell>
-      <div className={`min-h-screen ${theme === 'dark' ? 'bg-zinc-900' : 'bg-gray-50'}`}>
-        <div className="max-w-7xl mx-auto">
-          <ScheduleFilterBar />
-          <ScheduleOverview />
-          <ScheduleCharts />
-          <ScheduleCalendar />
-        </div>
+      <div className="flex flex-col space-y-6">
+        <ScheduleFilterBar />
+        <ScheduleOverview />
+        <ScheduleCharts />
+        <ScheduleCalendar />
       </div>
     </DashboardShell>
   );

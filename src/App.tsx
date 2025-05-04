@@ -49,12 +49,12 @@ const App = () => (
               <Route path="/actions" element={<ActionViewer />} />
               <Route path="/projects-new" element={<ProjectsNew />} />
               <Route path="/teams" element={<TeamManagement />} /> 
+              <Route path="/schedule" element={<SchedulePage />} /> {/* Move Schedule page to the root level like TeamManagement */}
               {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
-                <Route path="schedule" element={<SchedulePage />} /> {/* Move Schedule page under MainLayout */}
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
