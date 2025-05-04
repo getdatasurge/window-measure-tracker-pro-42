@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PlusCircle, Filter, Search } from 'lucide-react';
+import { PlusCircle, Filter, Search, ArrowUp, ArrowDown, ChevronDown } from 'lucide-react';
 import DashboardHeader from '../components/dashboard/DashboardHeader';
-import DashboardMetrics from '../components/dashboard/DashboardMetrics';
+import KpiCard from '../components/dashboard/KpiCard';
+import ProjectTable from '../components/projects/ProjectTable';
 
 const Projects = () => {
   const [activeFilter, setActiveFilter] = useState('all');
@@ -103,389 +104,171 @@ const Projects = () => {
   ];
   
   return (
-    <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <KpiCard 
-          title="Active Projects" 
-          value="24" 
-          trend={{ value: 8, direction: 'up' }}
-          icon="projects"
-        />
-        <KpiCard 
-          title="Upcoming Projects" 
-          value="11" 
-          trend={{ value: 3, direction: 'up' }}
-          icon="projects"
-        />
-        <KpiCard 
-          title="Windows Measured" 
-          value="1,254" 
-          trend={{ value: 12, direction: 'up' }}
-          footnote="total measured"
-          icon="completed"
-        />
-        <KpiCard 
-          title="Pending Measurements" 
-          value="386" 
-          trend={{ value: 5, direction: 'down' }}
-          footnote="remaining to measure"
-          icon="pending"
-        />
+    <div className="space-y-6 p-6">
+      {/* Page Header */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Projects</h1>
+          <p className="text-sm text-zinc-400">Manage and track all your window projects</p>
+        </div>
+        
+        <Button className="bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-2">
+          <PlusCircle size={16} />
+          New Project
+        </Button>
       </div>
       
-      {/* Project Filters */}
-      <div className="bg-white rounded-lg shadow-sm p-5">
-        <h2 className="text-lg font-semibold mb-4">Project Filters</h2>
-        
-        <div className="flex flex-wrap gap-3">
-          <button 
-            className={`tab-button ${activeFilter === 'all' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('all')}
-          >
-            All Projects
-          </button>
-          <button 
-            className={`tab-button ${activeFilter === 'active' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('active')}
-          >
-            Active
-          </button>
-          <button 
-            className={`tab-button ${activeFilter === 'upcoming' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('upcoming')}
-          >
-            Upcoming
-          </button>
-          <button 
-            className={`tab-button ${activeFilter === 'completed' ? 'active' : ''}`}
-            onClick={() => setActiveFilter('completed')}
-          >
-            Completed
-          </button>
-        </div>
-        
-        <div className="mt-4 flex flex-col space-y-3 md:flex-row md:space-y-0 md:space-x-3">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder="Search projects..."
-              className="search-input"
-            />
-            <div className="absolute left-2 top-1/2 transform -translate-y-1/2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-400"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+      {/* Overview Metrics */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              <div className="py-4 px-5 flex-grow">
+                <div className="text-sm font-medium text-zinc-400">Active Projects</div>
+                <div className="mt-1 flex items-baseline">
+                  <span className="text-2xl font-semibold text-white">24</span>
+                  <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
+                    <ArrowUp size={12} className="mr-0.5" />
+                    8%
+                  </span>
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">vs last month</div>
+              </div>
+              <div className="w-2 bg-indigo-500/20"></div>
             </div>
-          </div>
-          
-          <button className="px-4 py-2 border rounded-md text-gray-700 flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-gray-500"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon></svg>
-            More Filters
-          </button>
-          
-          <button className="px-4 py-2 bg-wintrack-dark-blue text-white rounded-md text-sm font-medium flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><path d="M12 5v14M5 12h14"/></svg>
-            Add Project
-          </button>
-        </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              <div className="py-4 px-5 flex-grow">
+                <div className="text-sm font-medium text-zinc-400">Upcoming Projects</div>
+                <div className="mt-1 flex items-baseline">
+                  <span className="text-2xl font-semibold text-white">11</span>
+                  <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
+                    <ArrowUp size={12} className="mr-0.5" />
+                    3%
+                  </span>
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">vs last month</div>
+              </div>
+              <div className="w-2 bg-purple-500/20"></div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              <div className="py-4 px-5 flex-grow">
+                <div className="text-sm font-medium text-zinc-400">Windows Measured</div>
+                <div className="mt-1 flex items-baseline">
+                  <span className="text-2xl font-semibold text-white">1,254</span>
+                  <span className="ml-2 text-xs font-medium flex items-center text-emerald-500">
+                    <ArrowUp size={12} className="mr-0.5" />
+                    12%
+                  </span>
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">total measured</div>
+              </div>
+              <div className="w-2 bg-emerald-500/20"></div>
+            </div>
+          </CardContent>
+        </Card>
+        
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg overflow-hidden">
+          <CardContent className="p-0">
+            <div className="flex items-stretch">
+              <div className="py-4 px-5 flex-grow">
+                <div className="text-sm font-medium text-zinc-400">Pending Measurements</div>
+                <div className="mt-1 flex items-baseline">
+                  <span className="text-2xl font-semibold text-white">386</span>
+                  <span className="ml-2 text-xs font-medium flex items-center text-red-500">
+                    <ArrowDown size={12} className="mr-0.5" />
+                    5%
+                  </span>
+                </div>
+                <div className="mt-1 text-xs text-zinc-500">remaining to measure</div>
+              </div>
+              <div className="w-2 bg-amber-500/20"></div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
       
-      {/* Active Projects Table */}
-      <div className="bg-white rounded-lg shadow-sm p-5">
-        <h2 className="text-lg font-semibold mb-6">Active Projects</h2>
-        <ProjectTable projects={activeProjects} />
-        
-        <div className="mt-4 flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            Showing 5 of 24 projects
+      {/* Filters Toolbar - Placeholder */}
+      <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+        <CardContent className="p-4">
+          <h2 className="text-lg font-semibold text-white mb-4">Project Filters</h2>
+          <div className="flex flex-wrap gap-2">
+            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+              All Projects
+            </Button>
+            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+              Active
+            </Button>
+            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+              Upcoming
+            </Button>
+            <Button variant="outline" size="sm" className="bg-zinc-900/50 border-zinc-700 text-zinc-300 hover:bg-zinc-800">
+              Completed
+            </Button>
           </div>
-          <div className="flex space-x-1">
-            <button className="pagination-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <button className="pagination-button active">1</button>
-            <button className="pagination-button">2</button>
-            <button className="pagination-button">3</button>
-            <button className="pagination-button">4</button>
-            <button className="pagination-button">5</button>
-            <button className="pagination-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
       
-      {/* Upcoming Projects Table */}
-      <div className="bg-white rounded-lg shadow-sm p-5">
-        <h2 className="text-lg font-semibold mb-6">Upcoming Projects</h2>
-        <ProjectTable projects={upcomingProjects} />
-        
-        <div className="mt-4 flex justify-between items-center">
-          <div className="text-sm text-gray-500">
-            Showing 3 of 11 upcoming projects
+      {/* Active Projects Table - Placeholder */}
+      <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+        <CardContent className="p-4">
+          <h2 className="text-lg font-semibold text-white mb-4">Active Projects</h2>
+          <div className="text-zinc-400 text-sm">
+            Project listing will appear here in Phase 4.
           </div>
-          <div className="flex space-x-1">
-            <button className="pagination-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <button className="pagination-button active">1</button>
-            <button className="pagination-button">2</button>
-            <button className="pagination-button">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
       
-      {/* Measurement Statistics */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Measurement Statistics</h2>
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Windows Measured</span>
-                <span>684 (68%)</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-bar-value bg-green-500" style={{ width: '68%' }}></div>
-              </div>
+      {/* Bottom Widget Grid - Placeholders */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Measurement Statistics */}
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-lg font-semibold text-white mb-4">Measurement Statistics</h2>
+            <div className="text-zinc-400 text-sm">
+              Measurement statistics will appear here in Phase 5.
             </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Windows Pending</span>
-                <span>386 (32%)</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-bar-value bg-orange-500" style={{ width: '32%' }}></div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Film Installation</span>
-                <span>512 (41%)</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-bar-value bg-blue-500" style={{ width: '41%' }}></div>
-              </div>
-            </div>
-            
-            <div>
-              <div className="flex justify-between text-sm mb-1">
-                <span>Quality Checks</span>
-                <span>428 (34%)</span>
-              </div>
-              <div className="progress-bar">
-                <div className="progress-bar-value bg-purple-500" style={{ width: '34%' }}></div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6">
-            <h3 className="font-medium text-sm mb-4">Measurement Types</h3>
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-lg font-semibold">764</div>
-                <div className="text-xs text-gray-500">Standard Windows</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-lg font-semibold">90</div>
-                <div className="text-xs text-gray-500">Specialty Windows</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-lg font-semibold">284</div>
-                <div className="text-xs text-gray-500">Large Format</div>
-              </div>
-              <div className="bg-gray-50 p-3 rounded-md">
-                <div className="text-lg font-semibold">116</div>
-                <div className="text-xs text-gray-500">Custom Shapes</div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Recent Measurements</h2>
-            <button className="text-xs text-blue-600 font-medium">View All</button>
-          </div>
-          
-          <div className="space-y-5">
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-sm bg-blue-100 text-blue-600 flex items-center justify-center flex-shrink-0">L</div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div className="font-medium">Lakeside Residence</div>
-                  <div className="text-xs text-gray-500">Today, 10:23 AM</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Master Bedroom - 4 windows</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png" alt="Sarah Johnson" className="w-5 h-5 rounded-full" />
-                  <span className="text-xs">Sarah Johnson</span>
-                </div>
-              </div>
+        {/* Recent Measurements */}
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-lg font-semibold text-white mb-4">Recent Measurements</h2>
+            <div className="text-zinc-400 text-sm">
+              Recent measurements will appear here in Phase 5.
             </div>
-            
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-sm bg-purple-100 text-purple-600 flex items-center justify-center flex-shrink-0">D</div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div className="font-medium">Downtown Office Complex</div>
-                  <div className="text-xs text-gray-500">Today, 9:15 AM</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Floor 12 - South Wing (18 windows)</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="/lovable-uploads/211d8c12-4057-4c0f-80e4-5191abc30c81.png" alt="David Wilson" className="w-5 h-5 rounded-full" />
-                  <span className="text-xs">David Wilson</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-sm bg-orange-100 text-orange-600 flex items-center justify-center flex-shrink-0">H</div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div className="font-medium">Harbor View Apartments</div>
-                  <div className="text-xs text-gray-500">Yesterday, 2:45 PM</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Building B - Units 301-308 (24 windows)</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="/lovable-uploads/1147f83d-d82c-4ab7-a3de-51400ce914c1.png" alt="Emma Chen" className="w-5 h-5 rounded-full" />
-                  <span className="text-xs">Emma Chen</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-sm bg-green-100 text-green-600 flex items-center justify-center flex-shrink-0">W</div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div className="font-medium">Westlake Tower</div>
-                  <div className="text-xs text-gray-500">Yesterday, 11:30 AM</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Floor 5 - East Wing (12 windows)</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="/lovable-uploads/e9f29315-c127-4c60-97d6-bc6eb6936a7a.png" alt="Michael Brown" className="w-5 h-5 rounded-full" />
-                  <span className="text-xs">Michael Brown</span>
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3">
-              <div className="w-8 h-8 rounded-sm bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">S</div>
-              <div className="flex-1">
-                <div className="flex justify-between">
-                  <div className="font-medium">Sunnyvale Residence</div>
-                  <div className="text-xs text-gray-500">Jun 20, 2:15 PM</div>
-                </div>
-                <div className="text-xs text-gray-500 mt-1">Living Room & Kitchen (6 windows)</div>
-                <div className="flex items-center gap-2 mt-1">
-                  <img src="/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png" alt="Sarah Johnson" className="w-5 h-5 rounded-full" />
-                  <span className="text-xs">Sarah Johnson</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
         
-        <div className="bg-white rounded-lg shadow-sm p-5">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-lg font-semibold">Team Activity</h2>
-            <button className="text-xs text-blue-600 font-medium">View All</button>
-          </div>
-          
-          <div className="space-y-4">
-            <div className="flex gap-3 items-center">
-              <img src="/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png" alt="Sarah Johnson" className="w-8 h-8 rounded-full" />
-              <div>
-                <div className="text-sm">Sarah Johnson added new measurements to Lakeside Residence</div>
-                <div className="text-xs text-gray-500">Today, 10:23 AM</div>
-              </div>
+        {/* Team Activity */}
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-lg font-semibold text-white mb-4">Team Activity</h2>
+            <div className="text-zinc-400 text-sm">
+              Team activity feed will appear here in Phase 5.
             </div>
-            
-            <div className="flex gap-3 items-center">
-              <img src="/lovable-uploads/211d8c12-4057-4c0f-80e4-5191abc30c81.png" alt="David Wilson" className="w-8 h-8 rounded-full" />
-              <div>
-                <div className="text-sm">David Wilson completed measurements for Downtown Office Complex</div>
-                <div className="text-xs text-gray-500">Today, 9:18 AM</div>
-              </div>
+          </CardContent>
+        </Card>
+        
+        {/* Upcoming Schedule */}
+        <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+          <CardContent className="p-4">
+            <h2 className="text-lg font-semibold text-white mb-4">Upcoming Schedule</h2>
+            <div className="text-zinc-400 text-sm">
+              Schedule information will appear here in Phase 5.
             </div>
-            
-            <div className="flex gap-3 items-center">
-              <img src="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" alt="Alex Morgan" className="w-8 h-8 rounded-full" />
-              <div>
-                <div className="text-sm">Alex Morgan scheduled installation for Sunnyvale Residence</div>
-                <div className="text-xs text-gray-500">Today, 8:45 AM</div>
-              </div>
-            </div>
-            
-            <div className="flex gap-3 items-center">
-              <img src="/lovable-uploads/1147f83d-d82c-4ab7-a3de-51400ce914c1.png" alt="Emma Chen" className="w-8 h-8 rounded-full" />
-              <div>
-                <div className="text-sm">Emma Chen updated measurements for Harbor View Apartments</div>
-                <div className="text-xs text-gray-500">Yesterday, 2:45 PM</div>
-              </div>
-            </div>
-          </div>
-          
-          <div className="mt-6 border-t border-gray-100 pt-4">
-            <h3 className="font-medium text-sm mb-4">Upcoming Schedule</h3>
-            
-            <div className="space-y-4">
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-blue-100 text-blue-800 rounded-md flex items-center justify-center text-xs font-medium mr-3 flex-shrink-0">
-                  <div>JUN<br/>24</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Lakeside Residence</div>
-                  <div className="text-xs text-gray-500">Final measurements</div>
-                  <div className="text-xs text-gray-500">9:00 AM - 12:00 PM • Sarah Johnson</div>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-purple-100 text-purple-800 rounded-md flex items-center justify-center text-xs font-medium mr-3 flex-shrink-0">
-                  <div>JUN<br/>25</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Sunnyvale Residence</div>
-                  <div className="text-xs text-gray-500">Installation</div>
-                  <div className="text-xs text-gray-500">10:30 AM - 4:00 PM • Installation Team</div>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-orange-100 text-orange-800 rounded-md flex items-center justify-center text-xs font-medium mr-3 flex-shrink-0">
-                  <div>JUN<br/>27</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Downtown Office Complex</div>
-                  <div className="text-xs text-gray-500">Measurements - Floor 13</div>
-                  <div className="text-xs text-gray-500">8:00 AM - 3:00 PM • David Wilson, Michael Brown</div>
-                </div>
-              </div>
-              
-              <div className="flex items-start">
-                <div className="w-8 h-8 bg-green-100 text-green-800 rounded-md flex items-center justify-center text-xs font-medium mr-3 flex-shrink-0">
-                  <div>JUN<br/>30</div>
-                </div>
-                <div>
-                  <div className="text-sm font-medium">Harbor View Apartments</div>
-                  <div className="text-xs text-gray-500">Measurements - Building C</div>
-                  <div className="text-xs text-gray-500">9:30 AM - 3:30 PM • Emma Chen</div>
-                </div>
-              </div>
-            </div>
-            
-            <button className="mt-4 text-sm text-blue-600 hover:text-blue-800 font-medium">
-              Full Calendar
-            </button>
-          </div>
-        </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
