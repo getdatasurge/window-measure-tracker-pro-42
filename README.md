@@ -78,6 +78,25 @@ To run the development server with live syncing:
 npm run dev
 ```
 
+### Development Markdown Server
+
+To enable saving markdown files during development:
+
+```sh
+# Start the markdown server (in a separate terminal)
+npm run dev:markdown-server
+
+# Then start the normal dev server
+npm run dev
+```
+
+This allows you to:
+1. Upload markdown files via the UI
+2. Save changes directly to disk
+3. Test parsing and viewing functionality end-to-end
+
+The markdown server only runs in development mode and only accepts requests from localhost.
+
 ### Building for Production
 
 Before deploying, generate the static JSON file from your markdown using:
