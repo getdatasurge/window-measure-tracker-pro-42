@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -21,7 +20,6 @@ const Sidebar: React.FC = () => {
     { name: 'Overview', href: '/overview', icon: 'home' },
     { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { name: 'Projects', href: '/projects', icon: 'projects' },
-    { name: 'Team Management', href: '/teams', icon: 'team' }, // Updated the href to /teams
     { name: 'Teams', href: '/teams', icon: 'team' },
     { name: 'Schedule', href: '/schedule', icon: 'schedule' },
     { name: 'Reports', href: '/reports', icon: 'reports' },
@@ -33,7 +31,7 @@ const Sidebar: React.FC = () => {
     home: 'M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2zM9 22V12h6v10',
     dashboard: 'M3 13h8V3H3v10zm9 0h8V3h-8v10zm-9 8h8v-6H3v6zm9 0h8v-6h-8v6z',
     projects: 'M12 2L2 7l10 5 10-5-10-5zm0 13L2 18l10 5 10-5-10-5z',
-    team: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 118 0 4 4 0 01-8 0M22 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75',
+    team: 'M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2M9 7a4 4 0 118 0 4 4 0 01-8 0M22 21v-2a4 4 0 010 7.75',
     schedule: 'M8 2v20M16 2v20M3 6h18M3 18h18',
     reports: 'M16 17v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2h7a2 2 0 012 2v2m3-7V3a2 2 0 012-2h2a2 2 0 012 2v11a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2m-3-4h18',
     settings: 'M12 2v2m-4 0v2M4 2v2m16 0v2M21 12h-2m-4 0h-2M4 12h2m4 0h2M16 20v2m-4 0v2M4 20v2m16 0v2',
