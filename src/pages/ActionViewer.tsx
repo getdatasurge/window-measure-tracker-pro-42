@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import ActionPanel from '@/components/ActionPanel';
-import MarkdownUploader from '@/components/MarkdownUploader';
+import MarkdownUploader from '@/components/markdown-uploader';
 import MarkdownEditor from '@/components/MarkdownEditor';
 import { WindowAction, readMarkdownFile } from '@/lib/parseWindowActions';
 import { MarkdownSyncProvider } from '@/contexts/MarkdownSyncContext';
