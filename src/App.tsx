@@ -7,7 +7,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
-import ProjectsNew from "./pages/ProjectsNew"; // Import the new Projects page
+import ProjectsNew from "./pages/ProjectsNew";
+import Dashboards from "./pages/Dashboards"; // Import the new Dashboards page
 import Teams from "./pages/Teams";
 import Schedule from "./pages/Schedule";
 import Reports from "./pages/Reports";
@@ -35,7 +36,8 @@ const App = () => (
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardV2 />} />
           <Route path="/actions" element={<ActionViewer />} />
-          <Route path="/projects-new" element={<ProjectsNew />} /> {/* Add the new Projects route */}
+          <Route path="/projects-new" element={<ProjectsNew />} />
+          <Route path="/dashboards" element={<Dashboards />} /> {/* Add the new Dashboards route */}
           {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
           <Route path="/" element={<MainLayout />}>
             <Route path="projects" element={<Projects />} />
