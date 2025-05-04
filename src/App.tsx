@@ -11,6 +11,7 @@ import Teams from "./pages/Teams";
 import Schedule from "./pages/Schedule";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
+import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -24,6 +25,7 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardV2 />} />
+          <Route path="/actions" element={<ActionViewer />} />
           <Route path="/" element={<MainLayout />}>
             <Route path="projects" element={<Projects />} />
             <Route path="teams" element={<Teams />} />

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { ScrollArea } from "@/components/ui/scroll-area";
 import ActionCard from './ActionCard';
@@ -9,20 +8,25 @@ interface ActionPanelProps {
   filePath?: string;
   jsonPath?: string;
   maxHeight?: string | number;
+  actions?: WindowAction[]; // New prop for direct actions input
 }
 
 const ActionPanel: React.FC<ActionPanelProps> = ({ 
   filePath = 'window-tracker-prd.md',
   jsonPath = '/data/window-actions.json',
-  maxHeight = '70vh'
+  maxHeight = '70vh',
+  actions: providedActions // Renamed to avoid collision
 }) => {
   const [groupedActions, setGroupedActions] = useState<Record<string, WindowAction[]>>({});
   const isDev = process.env.NODE_ENV === 'development';
   
-  // Use live file sync in development, otherwise load from generated JSON
-  const { actions, loading, error } = isDev && filePath 
-    ? useLiveFileSync(filePath)
-    : useStaticJson(jsonPath);
+  // If actions are provided directly, use those
+  // Otherwise, use live file sync in development or load from generated JSON
+  const { actions, loading, error } = providedActions 
+    ? { actions: providedActions, loading: false, error: null }
+    : isDev && filePath 
+      ? useLiveFileSync(filePath)
+      : useStaticJson(jsonPath);
   
   // Group actions by type whenever actions change
   useEffect(() => {

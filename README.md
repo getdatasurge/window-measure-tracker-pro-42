@@ -1,3 +1,4 @@
+
 # Welcome to your Lovable project
 
 ## Project info
@@ -59,6 +60,64 @@ This project is built with:
 - React
 - shadcn-ui
 - Tailwind CSS
+
+## Window Actions Viewer
+
+This project includes a window actions viewer that parses markdown files containing user action records and displays them in a structured, interactive UI.
+
+### Local Development with Live Syncing
+
+During development mode:
+1. The app will automatically watch for changes to the `public/window-tracker-prd.md` file.
+2. When changes are detected, the UI will update in real-time without reloading the page.
+3. You can also upload markdown files via the built-in uploader (development mode only).
+
+To run the development server with live syncing:
+
+```sh
+npm run dev
+```
+
+### Building for Production
+
+Before deploying, generate the static JSON file from your markdown using:
+
+```sh
+# Generate actions JSON from markdown file
+npm run generate-actions-json
+# or
+npx tsx scripts/generate-actions-json.ts
+```
+
+This will parse `public/window-tracker-prd.md` and output to `public/data/window-actions.json`.
+
+### Production Deployment
+
+When deploying to production:
+
+1. Run the build script to generate the actions JSON:
+```sh
+npm run generate-actions-json
+```
+
+2. Build the application:
+```sh
+npm run build
+```
+
+3. Deploy to your preferred hosting platform:
+
+**Vercel:**
+```sh
+vercel deploy
+```
+
+**Netlify:**
+```sh
+netlify deploy
+```
+
+In production, the app will load actions directly from the pre-generated JSON file.
 
 ## How can I deploy this project?
 
