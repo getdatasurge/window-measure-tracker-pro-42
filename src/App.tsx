@@ -9,7 +9,7 @@ import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
 import Teams from "./pages/Teams";
-import SchedulePage from "./pages/SchedulePage"; // Import the new Schedule page
+import SchedulePage from "./pages/SchedulePage"; // Import the Schedule page
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
@@ -49,12 +49,12 @@ const App = () => (
               <Route path="/actions" element={<ActionViewer />} />
               <Route path="/projects-new" element={<ProjectsNew />} />
               <Route path="/teams" element={<TeamManagement />} /> 
-              <Route path="/schedule" element={<SchedulePage />} /> {/* Add the Schedule page route */}
               {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
               <Route path="/" element={<MainLayout />}>
                 <Route path="projects" element={<Projects />} />
                 <Route path="reports" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="schedule" element={<SchedulePage />} /> {/* Move Schedule page under MainLayout */}
               </Route>
               <Route path="*" element={<NotFound />} />
             </Routes>
