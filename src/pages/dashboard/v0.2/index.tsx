@@ -1,133 +1,147 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Bell, ChevronDown, Menu } from 'lucide-react';
-import { Button } from "@/components/ui/button";
-import { motion } from 'framer-motion';
-import DashboardMetrics from '@/components/dashboard/DashboardMetrics';
-import RecentProjectsTable from '@/components/dashboard/RecentProjectsTable';
-import RecentMeasurements from '@/components/dashboard/RecentMeasurements';
-import TeamActivityFeed from '@/components/dashboard/TeamActivityFeed';
-import DashboardSidebar from '@/components/dashboard/v0.2/DashboardSidebar';
-import { useIsMobile } from '@/hooks/use-mobile';
-const DashboardV2: React.FC = () => {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const isMobile = useIsMobile();
+import React from 'react';
+import { CalendarDays, CheckCheck, LayoutDashboard, ListChecks, LucideIcon, Users2 } from 'lucide-react';
+import { DashboardHeader } from '../../../components/dashboard/DashboardHeader';
+import { DashboardShell } from '../../../components/dashboard/DashboardShell';
+import { Card, CardContent } from '../../../components/ui/card';
+import { Badge } from '../../../components/ui/badge';
+import { Icons } from '../../../components/ui/icons';
+import { Button } from '../../../components/ui/button';
+import { MainNav } from '../../../components/dashboard/MainNav';
+import { Overview } from '../../../components/dashboard/Overview';
+import { RecentSales } from '../../../components/dashboard/RecentSales';
+import { Search } from '../../../components/dashboard/Search';
+import { UserAvatar } from '../../../components/dashboard/UserAvatar';
+import { TeamActivityFeed } from '../../../components/dashboard/TeamActivityFeed';
+import RecentMeasurements from '../../../components/dashboard/RecentMeasurements';
+import MeasurementOverview from '../../../components/dashboard/MeasurementOverview';
+import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
+import { ActivityFeed } from '../../../components/dashboard/ActivityFeed';
 
-  // Set sidebar collapsed by default on mobile
-  useEffect(() => {
-    if (isMobile) {
-      setSidebarCollapsed(true);
-    }
-  }, [isMobile]);
-  const toggleSidebar = () => {
-    setSidebarCollapsed(prev => !prev);
-  };
-  const fadeIn = {
-    hidden: {
-      opacity: 0,
-      y: 10
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.5
-      }
-    }
-  };
-  return <div className="min-h-screen bg-[#0f0f0f] text-white">
-      <DashboardSidebar collapsed={sidebarCollapsed} toggleCollapsed={toggleSidebar} />
-      
-      <div className="transition-all duration-200" style={{
-      marginLeft: sidebarCollapsed ? '64px' : '240px',
-      width: `calc(100% - ${sidebarCollapsed ? '64px' : '240px'})`
-    }}>
-        {/* Header */}
-        <motion.div initial="hidden" animate="visible" variants={fadeIn} className="sticky top-0 z-10 backdrop-blur-md bg-[#0f0f0f]/80 border-b border-zinc-800/70 px-6 py-4">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
-              {isMobile && <Button variant="ghost" size="icon" className="md:hidden text-zinc-400 hover:text-white" onClick={toggleSidebar}>
-                  <Menu size={20} />
-                </Button>}
-              <h1 className="text-2xl font-semibold">Dashboard <span className="bg-green-900/30 text-green-400 text-xs px-2 py-0.5 rounded ml-2 border border-green-700/30">Beta</span></h1>
-            </div>
-            <div className="flex gap-4 items-center">
-              <div className="relative hidden md:block">
-                <input type="text" placeholder="Search..." className="bg-zinc-800/70 border-zinc-700/50 text-zinc-200 rounded-lg py-2 pl-10 pr-4 w-[240px] focus:outline-none focus:ring-1 focus:ring-zinc-700" />
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Search size={16} className="text-zinc-500" />
-                </div>
+interface DashboardPageProps {
+  className?: string;
+}
+
+interface NavItem {
+  title: string;
+  href: string;
+  icon: LucideIcon;
+  disabled?: boolean;
+}
+
+const navItems: NavItem[] = [
+  {
+    title: 'Overview',
+    href: '/dashboard',
+    icon: LayoutDashboard,
+  },
+  {
+    title: 'Analytics',
+    href: '/dashboard/analytics',
+    icon: ListChecks,
+  },
+  {
+    title: 'Projects',
+    href: '/dashboard/projects',
+    icon: CalendarDays,
+  },
+  {
+    title: 'Team',
+    href: '/dashboard/team',
+    icon: Users2,
+    disabled: true,
+  },
+  {
+    title: 'Settings',
+    href: '/dashboard/settings',
+    icon: CheckCheck,
+    disabled: true,
+  },
+];
+
+const DashboardPage: React.FC<DashboardPageProps> = ({ className }) => {
+  return (
+    <DashboardShell>
+      <DashboardHeader heading="Dashboard" text="Track your progress and manage your projects." />
+      <div className="grid gap-4">
+        <Card className="col-span-4">
+          <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 p-6">
+            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
+              <div>
+                <Icons.revenue className="h-8 w-8" />
               </div>
-              
-              <div className="flex items-center gap-2">
-                <Button variant="ghost" size="icon" className="text-zinc-400 hover:text-white rounded-full">
-                  <Bell size={18} />
-                </Button>
-                
-                
+              <div>
+                <p className="text-sm text-muted-foreground">Revenue</p>
+                <p className="text-lg font-semibold">$45,231.89</p>
               </div>
-              
-              <Button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white">
-                <Plus size={16} />
-                <span className="hidden sm:inline">New Project</span>
-              </Button>
             </div>
-          </div>
-          
-          <h2 className="text-xl mt-6">Overview</h2>
-        </motion.div>
-        
-        <div className="p-6 space-y-8">
-          {/* Metrics */}
-          <motion.div initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          duration: 0.5,
-          delay: 0.1
-        }}>
-            <DashboardMetrics />
-          </motion.div>
-          
-          {/* Recent Projects */}
-          <motion.div initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          duration: 0.5,
-          delay: 0.2
-        }} className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-semibold">Recent Projects</h2>
-              <Button variant="link" className="text-green-400 hover:text-green-300 p-0">View All</Button>
+            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
+              <div>
+                <Icons.average_order_value className="h-8 w-8" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Average Order Value</p>
+                <p className="text-lg font-semibold">$231.89</p>
+              </div>
             </div>
-            <RecentProjectsTable />
-          </motion.div>
-          
-          {/* Two-column layout for measurements and activity */}
-          <motion.div initial={{
-          opacity: 0
-        }} animate={{
-          opacity: 1
-        }} transition={{
-          duration: 0.5,
-          delay: 0.3
-        }} className="grid grid-cols-4 gap-6">
-            <div className="lg:col-span-2 space-y-4">
+            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
+              <div>
+                <Icons.customers className="h-8 w-8" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Customers</p>
+                <p className="text-lg font-semibold">+2350</p>
+              </div>
+            </div>
+            <div className="border dark:border-zinc-800/50 rounded-lg p-4 flex space-x-4 items-center">
+              <div>
+                <Icons.page_views className="h-8 w-8" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Page Views</p>
+                <p className="text-lg font-semibold">+12,234</p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <Card className="col-span-4">
+            <CardContent className="flex flex-col gap-4 p-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-semibold">Recent Measurements</h2>
-                <Button variant="link" className="text-green-400 hover:text-green-300 p-0">View All</Button>
+                <h2 className="text-lg font-semibold">Overview</h2>
+                <Badge variant="secondary">
+                  Last 30 days
+                </Badge>
               </div>
-              <RecentMeasurements />
-            </div>
-            <div className="lg:col-span-2 space-y-4 ">
-              <h2 className="text-xl font-semibold lg:col-span-2 space-y-4 pb-[.65rem]">Team Activity</h2>
-              <TeamActivityFeed className="flex justify-between items-center" />
-            </div>
-          </motion.div>
+              <Overview />
+            </CardContent>
+          </Card>
+          <Card className="col-span-3">
+            <CardContent className="flex flex-col gap-4 p-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-lg font-semibold">Recent Sales</h2>
+                <Button size="sm" variant="outline">
+                  View all
+                </Button>
+              </div>
+              <RecentSales />
+            </CardContent>
+          </Card>
         </div>
+
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+          <div className="col-span-12 lg:col-span-4">
+            <MeasurementOverview />
+          </div>
+          <div className="col-span-12 lg:col-span-3">
+            <ActivityFeed />
+          </div>
+        </div>
+
+        <DashboardProjectsSection />
       </div>
-    </div>;
+    </DashboardShell>
+  );
 };
-export default DashboardV2;
+
+export default DashboardPage;
