@@ -14,10 +14,12 @@ import {
   HelpCircle
 } from 'lucide-react';
 import WinTrackLogo from '../logo/WinTrackLogo';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Sidebar = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const isMobile = useIsMobile();
 
   const isActive = (path: string) => {
     return currentPath === path;
@@ -43,7 +45,7 @@ const Sidebar = () => {
   ];
 
   return (
-    <div className="w-52 bg-wintrack-dark-blue h-screen flex flex-col fixed left-0 top-0">
+    <div className="w-full h-screen flex flex-col bg-wintrack-dark-blue" role="navigation">
       <div className="p-4">
         <Link to="/">
           <WinTrackLogo />
@@ -73,7 +75,7 @@ const Sidebar = () => {
               className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
             >
               {item.icon}
-              <span>{item.name}</span>
+              <span className="transition-opacity duration-300 ease-in-out">{item.name}</span>
             </Link>
           ))}
         </div>
@@ -87,7 +89,7 @@ const Sidebar = () => {
               className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
             >
               {item.icon}
-              <span>{item.name}</span>
+              <span className="transition-opacity duration-300 ease-in-out">{item.name}</span>
             </Link>
           ))}
         </div>
@@ -101,7 +103,7 @@ const Sidebar = () => {
               className={`sidebar-item ${isActive(item.path) ? 'active' : ''}`}
             >
               {item.icon}
-              <span>{item.name}</span>
+              <span className="transition-opacity duration-300 ease-in-out">{item.name}</span>
             </Link>
           ))}
         </div>
@@ -115,7 +117,7 @@ const Sidebar = () => {
             className="w-10 h-10 rounded-full object-cover"
           />
         </div>
-        <div className="ml-3">
+        <div className="ml-3 transition-opacity duration-300 ease-in-out">
           <div className="text-sm font-medium text-white">Alex Morgan</div>
           <div className="text-xs text-gray-400">Project Manager</div>
         </div>
