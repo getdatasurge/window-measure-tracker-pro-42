@@ -19,6 +19,7 @@ import DebugPage from "./pages/__debug"; // Import the debug page
 import Overview from "./pages/Overview"; // Import the new Overview page
 import TeamManagement from "./pages/TeamManagement"; // Import our TeamManagement page
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 const queryClient = new QueryClient();
 
@@ -33,31 +34,33 @@ const HomeRoute = () => {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <AuthProvider initialState={false}> {/* Set to false to test unauthenticated flow */}
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <div className="fixed bottom-4 right-4 z-50">
-            <PromptHistoryViewer variant="dialog" />
-          </div>
-          <Routes>
-            <Route path="/" element={<HomeRoute />} />
-            <Route path="/overview" element={<Overview />} />
-            <Route path="/dashboard" element={<DashboardV2 />} />
-            <Route path="/actions" element={<ActionViewer />} />
-            <Route path="/projects-new" element={<ProjectsNew />} />
-            <Route path="/teams" element={<TeamManagement />} /> {/* Set /teams to use TeamManagement */}
-            {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
-            <Route path="/" element={<MainLayout />}>
-              <Route path="projects" element={<Projects />} />
-              <Route path="schedule" element={<Schedule />} />
-              <Route path="reports" element={<Reports />} />
-              <Route path="settings" element={<Settings />} />
-            </Route>
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </AuthProvider>
+      <ThemeProvider>
+        <AuthProvider initialState={false}> {/* Set to false to test unauthenticated flow */}
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <div className="fixed bottom-4 right-4 z-50">
+              <PromptHistoryViewer variant="dialog" />
+            </div>
+            <Routes>
+              <Route path="/" element={<HomeRoute />} />
+              <Route path="/overview" element={<Overview />} />
+              <Route path="/dashboard" element={<DashboardV2 />} />
+              <Route path="/actions" element={<ActionViewer />} />
+              <Route path="/projects-new" element={<ProjectsNew />} />
+              <Route path="/teams" element={<TeamManagement />} /> {/* Set /teams to use TeamManagement */}
+              {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
+              <Route path="/" element={<MainLayout />}>
+                <Route path="projects" element={<Projects />} />
+                <Route path="schedule" element={<Schedule />} />
+                <Route path="reports" element={<Reports />} />
+                <Route path="settings" element={<Settings />} />
+              </Route>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </AuthProvider>
+      </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

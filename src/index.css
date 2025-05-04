@@ -91,7 +91,7 @@
   }
 
   .kpi-card {
-    @apply bg-white rounded-lg shadow-sm p-4 flex flex-col;
+    @apply bg-white dark:bg-zinc-800 rounded-lg shadow-sm p-4 flex flex-col;
   }
 
   .kpi-card-value {
@@ -99,7 +99,7 @@
   }
 
   .kpi-card-title {
-    @apply text-sm text-gray-500 font-medium;
+    @apply text-sm text-gray-500 dark:text-gray-400 font-medium;
   }
 
   .kpi-card-trend {
@@ -107,7 +107,7 @@
   }
 
   .progress-bar {
-    @apply h-2 rounded-full bg-gray-200 overflow-hidden;
+    @apply h-2 rounded-full bg-gray-200 dark:bg-zinc-700 overflow-hidden;
   }
 
   .progress-bar-value {
@@ -123,7 +123,7 @@
   }
 
   .tab-button:not(.active) {
-    @apply text-gray-500 bg-gray-100 hover:bg-gray-200;
+    @apply text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-zinc-800 hover:bg-gray-200 dark:hover:bg-zinc-700;
   }
 
   .status-badge {
@@ -131,7 +131,7 @@
   }
 
   .search-input {
-    @apply pl-8 pr-4 py-2 rounded-md border bg-white text-sm w-full focus:outline-none focus:ring-2 focus:ring-wintrack-green focus:border-transparent;
+    @apply pl-8 pr-4 py-2 rounded-md border bg-white dark:bg-zinc-800 text-sm w-full focus:outline-none focus:ring-2 focus:ring-wintrack-green focus:border-transparent;
   }
 
   .pagination-button {
@@ -143,7 +143,7 @@
   }
 
   .pagination-button:not(.active) {
-    @apply bg-white text-gray-700 border-gray-200 hover:bg-gray-50;
+    @apply bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-zinc-700 hover:bg-gray-50 dark:hover:bg-zinc-700;
   }
 
   .action-button {

@@ -18,7 +18,7 @@ const TeamFilterTabs: React.FC<TeamFilterTabsProps> = ({
   ];
 
   return (
-    <div className="border-b border-zinc-800/70 mb-6 overflow-x-auto">
+    <div className="border-b border-zinc-800/70 dark:border-zinc-800/70 border-gray-300/70 mb-6 overflow-x-auto">
       <div className="flex whitespace-nowrap">
         {tabs.map((tab) => (
           <button
@@ -27,8 +27,8 @@ const TeamFilterTabs: React.FC<TeamFilterTabsProps> = ({
             className={`
               px-4 py-2 text-sm font-medium relative
               ${activeTab === tab.id 
-                ? 'text-white' 
-                : 'text-zinc-400 hover:text-zinc-200'
+                ? 'text-gray-900 dark:text-white' 
+                : 'text-gray-500 dark:text-zinc-400 hover:text-gray-700 dark:hover:text-zinc-200'
               }
             `}
           >

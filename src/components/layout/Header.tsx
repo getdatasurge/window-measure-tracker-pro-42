@@ -6,6 +6,7 @@ import { useLocation } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import WinTrackLogo from '../logo/WinTrackLogo';
 import { Input } from '@/components/ui/input';
+import ThemeToggle from '../ui/ThemeToggle';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -32,11 +33,11 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
   };
   
   return (
-    <header className="sticky top-0 z-10 flex justify-between items-center h-16 px-6 bg-white border-b border-gray-200">
+    <header className="sticky top-0 z-10 flex justify-between items-center h-16 px-6 bg-white dark:bg-zinc-900 border-b border-gray-200 dark:border-zinc-800">
       <div className="flex items-center gap-10">
         <button 
           onClick={toggleSidebar} 
-          className="mr-4 text-gray-600 lg:hidden"
+          className="mr-4 text-gray-600 dark:text-gray-300 lg:hidden"
         >
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="4" x2="20" y1="12" y2="12"/><line x1="4" x2="20" y1="6" y2="6"/><line x1="4" x2="20" y1="18" y2="18"/></svg>
         </button>
@@ -47,27 +48,30 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           <Input
             type="text"
             placeholder="Search projects, measurements..."
-            className="pl-10 pr-4 py-2 h-10 w-80 rounded-full border border-gray-200 bg-gray-50 text-sm focus:border-gray-300"
+            className="pl-10 pr-4 py-2 h-10 w-80 rounded-full border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-sm focus:border-gray-300 dark:focus:border-zinc-600 text-gray-900 dark:text-gray-300"
           />
-          <Search size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          <Search size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
         </div>
       </div>
       
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <Bell size={20} className="text-gray-600" />
+          <ThemeToggle />
+          
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800">
+            <Bell size={20} className="text-gray-600 dark:text-gray-300" />
           </button>
-          <button className="p-2 rounded-full hover:bg-gray-100">
-            <HelpCircle size={20} className="text-gray-600" />
+          
+          <button className="p-2 rounded-full hover:bg-gray-100 dark:hover:bg-zinc-800">
+            <HelpCircle size={20} className="text-gray-600 dark:text-gray-300" />
           </button>
           
           <div className="flex items-center ml-2">
-            <Avatar className="h-9 w-9 border border-gray-200">
+            <Avatar className="h-9 w-9 border border-gray-200 dark:border-zinc-700">
               <AvatarImage src="/placeholder.svg" alt="User" />
               <AvatarFallback>JD</AvatarFallback>
             </Avatar>
-            <svg className="h-4 w-4 text-gray-500 ml-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+            <svg className="h-4 w-4 text-gray-500 dark:text-gray-400 ml-1" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6"/></svg>
           </div>
         </div>
         
