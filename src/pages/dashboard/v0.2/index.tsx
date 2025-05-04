@@ -113,7 +113,7 @@ const DashboardV2: React.FC = () => {
         }} transition={{
           duration: 0.5,
           delay: 0.3
-        }} className="grid grid-cols-3 gap-6">
+        }} className="grid grid-cols-4 gap-6">
             <div className="lg:col-span-2 space-y-4">
               <div className="flex justify-between items-center">
                 <h2 className="text-xl font-semibold">Recent Measurements</h2>
@@ -121,7 +121,7 @@ const DashboardV2: React.FC = () => {
               </div>
               <RecentMeasurements />
             </div>
-            <div className="lg:col-span-2 space-y-4">
+            <div className="lg:col-span-2 space-y-4 ">
               <h2 className="text-xl font-semibold lg:col-span-2 space-y-4 pb-[.65rem]">Team Activity</h2>
               <TeamActivityFeed className="flex justify-between items-center" />
             </div>
