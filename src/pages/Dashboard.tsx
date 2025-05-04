@@ -11,7 +11,7 @@ const Dashboard: React.FC = () => {
   return (
     <MainLayout>
       <div className="flex flex-col gap-8 px-4 py-6 md:gap-12 md:px-6 lg:px-8">
-        <DashboardHeader />
+        <DashboardHeader title="Knowledge Base Dashboard" />
         <DashboardKpiSection />
         <DashboardChartsSection />
         
@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
           <DocumentationLinks />
         </div>
         
-        <DashboardActionsSection />
+        <DashboardActionsSection onActionClick={() => {}} />
       </div>
     </MainLayout>
   );
