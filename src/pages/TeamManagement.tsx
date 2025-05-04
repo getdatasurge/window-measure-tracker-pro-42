@@ -44,28 +44,28 @@ const TeamManagement = () => {
   return (
     <DashboardShell>
       <div className="flex flex-col space-y-6">
-        {/* Page Header */}
+        {/* Page Header - Responsive */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-          <h1 className="text-2xl font-bold tracking-tight">Team Management</h1>
-          <div className="flex items-center gap-2">
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">Team Management</h1>
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" className="flex items-center gap-2 border-zinc-700 bg-zinc-800/50 text-zinc-300 hover:bg-zinc-700/50">
               <Download className="h-4 w-4" />
-              Export
+              <span className="sm:inline">Export</span>
             </Button>
             <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
-              Add Team Member
+              <span className="sm:inline">Add Team Member</span>
             </Button>
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+        {/* Stats Cards - Responsive Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Total Team Members</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">18</h3>
+                <p className="text-xs sm:text-sm font-medium text-zinc-400">Total Team Members</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">18</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs font-medium text-green-500 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
@@ -75,34 +75,36 @@ const TeamManagement = () => {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 sm:hidden"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500 hidden sm:block"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Teams</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">3</h3>
+                <p className="text-xs sm:text-sm font-medium text-zinc-400">Teams</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">3</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs font-medium text-zinc-400">
                     Residential, Commercial, Specialty
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-purple-900/30 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-purple-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500 sm:hidden"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500 hidden sm:block"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Active Projects</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">24</h3>
+                <p className="text-xs sm:text-sm font-medium text-zinc-400">Active Projects</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">24</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs font-medium text-green-500 flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
@@ -112,39 +114,41 @@ const TeamManagement = () => {
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-green-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 sm:hidden"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500 hidden sm:block"><path d="M22 12h-4l-3 9L9 3l-3 9H2"></path></svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-3 sm:p-4">
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-sm font-medium text-zinc-400">Roles</p>
-                <h3 className="text-2xl font-bold mt-1 text-white">6</h3>
+                <p className="text-xs sm:text-sm font-medium text-zinc-400">Roles</p>
+                <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">6</h3>
                 <div className="flex items-center mt-1">
                   <span className="text-xs font-medium text-zinc-400">
                     Team Lead, Installer, Measurer, etc.
                   </span>
                 </div>
               </div>
-              <div className="w-10 h-10 rounded-full bg-yellow-900/30 flex items-center justify-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+              <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-yellow-900/30 flex items-center justify-center">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500 sm:hidden"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-yellow-500 hidden sm:block"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Team Filter Tabs */}
+        {/* Team Filter Tabs - Already responsive with overflow-x-auto */}
         <TeamFilterTabs 
           activeTab={activeTab}
           onTabChange={setActiveTab}
         />
 
-        {/* Filters and Search */}
+        {/* Filters and Search - Now responsive */}
         <div className="flex flex-col sm:flex-row gap-4">
-          <div className="flex flex-1 flex-col sm:flex-row gap-3">
+          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
             <TeamFilterDropdown
               label="All Roles"
               options={roleFilterOptions}
@@ -160,11 +164,11 @@ const TeamManagement = () => {
             />
           </div>
           
-          <div className="relative w-full sm:w-auto">
+          <div className="relative w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
             <Input 
               placeholder="Search team members..." 
-              className="pl-9 w-full sm:w-[250px] bg-zinc-800/50 border-zinc-700 text-zinc-300"
+              className="pl-9 w-full bg-zinc-800/50 border-zinc-700 text-zinc-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)} 
             />
@@ -174,7 +178,7 @@ const TeamManagement = () => {
         {/* Team Member List */}
         <TeamMemberList members={filteredMembers} />
 
-        {/* Role Definitions and Team Structure */}
+        {/* Role Definitions and Team Structure - Now responsive */}
         <DashboardGridRow>
           <RoleDefinitionsPanel />
           <TeamStructurePanel />

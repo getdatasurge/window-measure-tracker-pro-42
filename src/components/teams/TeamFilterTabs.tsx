@@ -18,8 +18,8 @@ const TeamFilterTabs: React.FC<TeamFilterTabsProps> = ({
   ];
 
   return (
-    <div className="border-b border-zinc-800/70 mb-6">
-      <div className="flex flex-wrap">
+    <div className="border-b border-zinc-800/70 mb-6 overflow-x-auto">
+      <div className="flex whitespace-nowrap">
         {tabs.map((tab) => (
           <button
             key={tab.id}
