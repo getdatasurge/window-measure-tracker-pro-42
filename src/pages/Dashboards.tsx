@@ -1,11 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import ProjectHeader from '../components/projects/ProjectHeader';
-import ProjectMetricsSection from '../components/projects/ProjectMetricsSection';
-import ProjectFilters from '../components/projects/ProjectFilters';
-import ProjectTable from '../components/projects/ProjectTable';
-import ProjectWidgetsSection from '../components/projects/ProjectWidgetsSection';
+import RecentMeasurements from '../components/dashboard/RecentMeasurements';
+import MeasurementOverview from '../components/dashboard/MeasurementOverview';
+import DashboardProjectsSection from '../components/dashboard/DashboardProjectsSection';
 import { activeProjects } from '../data/projectsData';
 import DashboardShell from '../components/layout/DashboardShell';
 
