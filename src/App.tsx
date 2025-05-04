@@ -24,10 +24,9 @@ const queryClient = new QueryClient();
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
 
-// Home route component that redirects based on authentication status
+// Home route component that redirects to Overview page
 const HomeRoute = () => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? <Navigate to="/projects" replace /> : <Navigate to="/overview" replace />;
+  return <Navigate to="/overview" replace />;
 };
 
 const App = () => (
@@ -42,10 +41,10 @@ const App = () => (
           </div>
           <Routes>
             <Route path="/" element={<HomeRoute />} />
+            <Route path="/overview" element={<Overview />} />
             <Route path="/dashboard" element={<DashboardV2 />} />
             <Route path="/actions" element={<ActionViewer />} />
             <Route path="/projects-new" element={<ProjectsNew />} />
-            <Route path="/overview" element={<Overview />} />
             {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
             <Route path="/" element={<MainLayout />}>
               <Route path="projects" element={<Projects />} />
