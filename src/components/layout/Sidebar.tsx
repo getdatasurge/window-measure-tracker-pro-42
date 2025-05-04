@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -20,7 +21,7 @@ const Sidebar: React.FC = () => {
     { name: 'Overview', href: '/overview', icon: 'home' },
     { name: 'Dashboard', href: '/dashboard', icon: 'dashboard' },
     { name: 'Projects', href: '/projects', icon: 'projects' },
-    { name: 'Team Management', href: '/team-management', icon: 'team' }, // Add this line
+    { name: 'Team Management', href: '/teams', icon: 'team' }, // Updated the href to /teams
     { name: 'Teams', href: '/teams', icon: 'team' },
     { name: 'Schedule', href: '/schedule', icon: 'schedule' },
     { name: 'Reports', href: '/reports', icon: 'reports' },
