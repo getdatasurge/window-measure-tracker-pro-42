@@ -108,7 +108,7 @@ const TeamActivityFeed: React.FC = () => {
       }
     }
   };
-  return <motion.div initial="hidden" animate="show" variants={container} className="bg-[#1a1a1a] rounded-xl shadow-lg p-4 h-full border border-zinc-800/70">
+  return <motion.div initial="hidden" animate="show" variants={container} className="bg-[#1a1a1a] rounded-xl shadow-lg p-4 h-auto border border-zinc-800/70">
       <div className="space-y-5">
         {activities.map(activity => <motion.div key={activity.id} variants={item} className="flex gap-3 group">
             <div className="shrink-0 mt-0.5">
