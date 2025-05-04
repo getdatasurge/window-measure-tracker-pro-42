@@ -4,7 +4,6 @@ import ScheduleFilterBar from '../components/schedule/ScheduleFilterBar';
 import ScheduleOverview from '../components/schedule/ScheduleOverview';
 import ScheduleCharts from '../components/schedule/ScheduleCharts';
 import ScheduleCalendar from '../components/schedule/ScheduleCalendar';
-import { useTheme } from '../contexts/ThemeContext';
 import DashboardShell from '../components/layout/DashboardShell';
 
 const SchedulePage: React.FC = () => {
