@@ -74,7 +74,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({ collapsed, toggleCollapsed }
         {!collapsed ? (
           <WinTrackLogo />
         ) : (
-          <div className="w-8 h-8 bg-green-500 rounded-md flex items-center justify-center text-black font-bold text-lg">
+          <div className="w-8 h-8 bg-[#92f877] rounded-md flex items-center justify-center text-black font-bold text-lg">
             WT
           </div>
         )}

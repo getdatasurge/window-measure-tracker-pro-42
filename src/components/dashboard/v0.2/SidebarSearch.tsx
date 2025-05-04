@@ -23,7 +23,7 @@ const SidebarSearch: React.FC<SidebarSearchProps> = ({
         <input 
           type="text" 
           placeholder="Search..." 
-          className="w-full h-8 bg-zinc-800/50 border-none text-gray-300 text-sm rounded-md pl-8 pr-2 focus:outline-none focus:ring-1 focus:ring-green-500"
+          className="w-full h-8 bg-zinc-800/50 border-none text-gray-300 text-sm rounded-md pl-8 pr-2 focus:outline-none focus:ring-1 focus:ring-[#92f877]"
         />
         <div className="absolute left-3 top-1/2 transform -translate-y-1/2">
           <Search size={14} className="text-gray-500" />
