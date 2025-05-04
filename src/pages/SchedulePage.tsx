@@ -6,6 +6,7 @@ import ScheduleOverview from '../components/schedule/ScheduleOverview';
 import ScheduleCharts from '../components/schedule/ScheduleCharts';
 import ScheduleCalendar from '../components/schedule/ScheduleCalendar';
 import DashboardShell from '../components/layout/DashboardShell';
+import DashboardHeader from '../components/dashboard/DashboardHeader';
 
 const SchedulePage: React.FC = () => {
   const { theme } = useTheme();
@@ -13,6 +14,7 @@ const SchedulePage: React.FC = () => {
   return (
     <DashboardShell>
       <div className="flex flex-col space-y-6">
+        <DashboardHeader title="Schedule" />
         <ScheduleFilterBar />
         <ScheduleOverview />
         <ScheduleCharts />

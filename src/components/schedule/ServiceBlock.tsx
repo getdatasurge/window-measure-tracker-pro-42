@@ -2,15 +2,9 @@
 import React from 'react';
 import { AlertTriangle } from 'lucide-react';
 
-type ServiceType = 
-  | 'Window Measurement'
-  | 'Window Installation' 
-  | 'Final Quality Check'
-  | 'Window Verification';
-
 interface ServiceBlockProps {
   time: string;
-  type: ServiceType;
+  type: string;
   id: string;
   hasWarning?: boolean;
   color: string;
