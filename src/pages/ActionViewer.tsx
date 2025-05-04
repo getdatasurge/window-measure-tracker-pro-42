@@ -1,20 +1,30 @@
 
 import React, { useState, useEffect } from 'react';
 import ActionPanel from '@/components/ActionPanel';
+import ActionSearchPanel from '@/components/ActionSearchPanel';
 import MarkdownUploader from '@/components/markdown-uploader';
 import MarkdownEditor from '@/components/MarkdownEditor';
-import { WindowAction, readMarkdownFile } from '@/lib/parseWindowActions';
+import { WindowAction, readMarkdownFile, parseWindowActions } from '@/lib/parseWindowActions';
 import { MarkdownSyncProvider } from '@/contexts/MarkdownSyncContext';
+import { assignFeatureArea } from '@/utils/assignFeatureArea';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 const ActionViewer: React.FC = () => {
   const [uploadedActions, setUploadedActions] = useState<WindowAction[]>([]);
   const [useUploaded, setUseUploaded] = useState(false);
   const [initialMarkdown, setInitialMarkdown] = useState<string>('');
+  const [enrichedActions, setEnrichedActions] = useState<WindowAction[]>([]);
   
   const handleUpload = (actions: WindowAction[]) => {
-    setUploadedActions(actions);
+    // Enrich actions with feature areas
+    const enriched = actions.map(action => ({
+      ...action,
+      featureArea: assignFeatureArea(action)
+    }));
+    
+    setUploadedActions(enriched);
     setUseUploaded(true);
+    setEnrichedActions(enriched);
   };
   
   const isDevelopment = process.env.NODE_ENV === 'development';
@@ -25,6 +35,14 @@ const ActionViewer: React.FC = () => {
         try {
           const content = await readMarkdownFile('window-tracker-prd.md');
           setInitialMarkdown(content);
+          
+          // Parse and enrich actions for the search panel
+          const actions = parseWindowActions(content);
+          const enriched = actions.map(action => ({
+            ...action,
+            featureArea: assignFeatureArea(action)
+          }));
+          setEnrichedActions(enriched);
         } catch (error) {
           console.error('Error loading initial markdown:', error);
         }
@@ -43,6 +61,7 @@ const ActionViewer: React.FC = () => {
           <Tabs defaultValue="view" className="mb-6">
             <TabsList className="mb-2">
               <TabsTrigger value="view">View Actions</TabsTrigger>
+              <TabsTrigger value="search">Search Actions</TabsTrigger>
               <TabsTrigger value="upload">Upload Markdown</TabsTrigger>
               <TabsTrigger value="edit">Edit Markdown</TabsTrigger>
             </TabsList>
@@ -73,6 +92,13 @@ const ActionViewer: React.FC = () => {
               )}
             </TabsContent>
             
+            <TabsContent value="search">
+              <ActionSearchPanel 
+                actions={enrichedActions}
+                maxHeight="70vh"
+              />
+            </TabsContent>
+            
             <TabsContent value="upload">
               <MarkdownUploader onUpload={handleUpload} />
             </TabsContent>
@@ -80,7 +106,17 @@ const ActionViewer: React.FC = () => {
             <TabsContent value="edit">
               <MarkdownEditor 
                 initialContent={initialMarkdown}
-                onContentChange={content => setInitialMarkdown(content)}
+                onContentChange={content => {
+                  setInitialMarkdown(content);
+                  
+                  // Update enriched actions when content changes
+                  const actions = parseWindowActions(content);
+                  const enriched = actions.map(action => ({
+                    ...action,
+                    featureArea: assignFeatureArea(action)
+                  }));
+                  setEnrichedActions(enriched);
+                }}
               />
             </TabsContent>
           </Tabs>

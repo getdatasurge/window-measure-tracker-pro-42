@@ -7,6 +7,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { parseWindowActions, WindowAction } from '../src/lib/parseWindowActions';
+import { assignFeatureArea } from '../src/utils/assignFeatureArea';
 
 const SOURCE_FILE = 'public/window-tracker-prd.md';
 const OUTPUT_FILE = 'public/data/window-actions.json';
@@ -38,14 +39,21 @@ function generateActionsJson(): void {
     const actions: WindowAction[] = parseWindowActions(markdownContent);
     console.log(`✅ Successfully parsed ${actions.length} actions`);
     
+    // Enrich actions with feature areas
+    console.log('🔄 Enriching actions with feature areas...');
+    const enrichedActions = actions.map(action => ({
+      ...action,
+      featureArea: assignFeatureArea(action)
+    }));
+    
     // Ensure output directory exists
     const outputPath = path.resolve(process.cwd(), OUTPUT_FILE);
     ensureDirectoryExists(outputPath);
     
     // Write the JSON file
     console.log(`💾 Writing output to: ${outputPath}`);
-    fs.writeFileSync(outputPath, JSON.stringify(actions, null, 2));
-    console.log(`✅ Successfully wrote ${actions.length} actions to ${outputPath}`);
+    fs.writeFileSync(outputPath, JSON.stringify(enrichedActions, null, 2));
+    console.log(`✅ Successfully wrote ${enrichedActions.length} actions to ${outputPath}`);
     
     console.log('🎉 Action generation completed successfully!');
   } catch (error) {

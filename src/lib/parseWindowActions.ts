@@ -7,6 +7,7 @@ export interface WindowAction {
   type: string;
   label: string;
   timestamp: string;
+  featureArea?: string; // Added featureArea field
   metadata?: Record<string, any>;
 }
 
@@ -156,4 +157,15 @@ export async function readMarkdownFile(filePath: string): Promise<string> {
     console.error('Error reading markdown file:', error);
     return '';
   }
+}
+
+/**
+ * Enriches window actions with additional metadata like feature areas
+ * @param actions Array of window actions
+ * @returns Enriched window actions
+ */
+export function enrichActions(actions: WindowAction[]): WindowAction[] {
+  // This function will be used to apply transformations like feature area assignment
+  // The actual implementation is in assignFeatureArea.ts to keep this file clean
+  return actions;
 }
