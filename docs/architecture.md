@@ -110,9 +110,10 @@ The system intelligently prepares knowledge for injection into AI conversations:
   - This enables more targeted context injection
 
 - **Context Injection**:
-  - When users interact with Lovable, relevant actions are automatically included
+  - Each prompt sent to Lovable automatically includes the most recent, summarized user actions grouped by feature
   - The context is formatted for optimal AI comprehension
   - The system avoids overwhelming the AI with too much information
+  - To preview what Lovable sees, open `/__debug` and check the "Prompt Injection Preview" section
 
 ### 📓 Prompt & Response Logging
 
@@ -176,6 +177,7 @@ Multiple layers ensure knowledgebase integrity:
   - Husky pre-commit hook runs `debug:kb`
   - Prevents commits with malformed markdown
   - Ensures JSON is in sync with the source
+  - Blocks malformed markdown or stale JSON from being merged
 
 - **CI Integration**:
   - GitHub Actions workflow runs on PRs and pushes to main
