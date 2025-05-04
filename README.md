@@ -1,27 +1,20 @@
 
 # Welcome to your Lovable project
 
-## Project info
+## 📚 Project Overview
 
-**URL**: https://lovable.dev/projects/501f21b0-8079-4b5b-a945-15a0ac516389
+This application is a dynamic window actions tracking and knowledgebase system that:
 
-## How can I edit this code?
+- Converts markdown-based user action logs into structured JSON data
+- Displays real-time UI for visualizing and searching user actions
+- Auto-syncs to Lovable's Knowledge Base for context-aware AI assistance
+- Logs AI prompts and responses for auditability and improvement
 
-There are several ways of editing your application.
+At its core, this system transforms chronological user actions recorded in markdown format into an intelligent knowledgebase that enhances AI interactions by providing relevant context.
 
-**Use Lovable**
+## 🚀 Quick Start
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/501f21b0-8079-4b5b-a945-15a0ac516389) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+### Development Setup
 
 ```sh
 # Step 1: Clone the repository using the project's Git URL.
@@ -37,21 +30,49 @@ npm i
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+### Running the Markdown Server
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+For local development with live markdown syncing, run:
 
-**Use GitHub Codespaces**
+```sh
+# Start the markdown server (in a separate terminal)
+npm run dev:markdown-server
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+# Then start the normal dev server (if not already running)
+npm run dev
+```
 
-## Development Safeguards
+### Generating Production JSON
+
+Before deploying to production, generate the actions JSON file:
+
+```sh
+npm run generate-actions-json
+# or the alias
+npm run build:kb
+```
+
+### Debug Tools
+
+To verify knowledgebase integrity:
+
+```sh
+npm run debug:kb
+```
+
+Visit `http://localhost:3000/__debug` while running the dev server to access the full debug UI with live file watchers, parsing previews, and test tools.
+
+## ⚙️ Scripts
+
+| Script | Description |
+|--------|-------------|
+| `npm run debug:kb` | Validates knowledgebase integrity by checking markdown format, JSON sync status, and log file health |
+| `npm run generate-actions-json` | Builds the window actions JSON file from markdown source for production use |
+| `npm run build:kb` | Alias for `generate-actions-json` |
+| `npm run dev:markdown-server` | Runs a local server for saving markdown files with Git integration during development |
+| `npm run kb:ci` | CI-friendly wrapper for debug:kb that ensures proper exit codes for CI environments |
+
+## 🧪 Pre-Commit & CI
 
 This project includes automated validation for the knowledgebase:
 
@@ -66,6 +87,27 @@ node scripts/setup-husky.js
 ```
 
 This will ensure your knowledgebase stays reliable and properly synced.
+
+## 🧠 Lovable Sync
+
+The knowledgebase integration with Lovable works as follows:
+
+1. User actions are recorded in `public/window-tracker-prd.md` in a structured format
+2. The parser converts these entries into categorized actions with metadata
+3. Relevant actions are injected into AI conversations as context when matching the topic
+
+Example of a recorded action:
+```markdown
+# Navigation Actions
+- User clicked on dashboard link [2023-05-01 14:32:15]
+- User opened settings menu [2023-05-01 14:33:22]
+```
+
+What Lovable might inject as context:
+```
+User previously navigated to Dashboard (2023-05-01 14:32:15)
+User has shown interest in Settings features (2023-05-01 14:33:22)
+```
 
 ## What technologies are used for this project?
 
@@ -87,12 +129,6 @@ During development mode:
 1. The app will automatically watch for changes to the `public/window-tracker-prd.md` file.
 2. When changes are detected, the UI will update in real-time without reloading the page.
 3. You can also upload markdown files via the built-in uploader (development mode only).
-
-To run the development server with live syncing:
-
-```sh
-npm run dev
-```
 
 ### Development Markdown Server
 
@@ -121,12 +157,6 @@ The development server provides Git integration for tracking changes:
 - View recent commit history for the markdown file
 - Changes are tracked for auditability and rollback
 
-To use the real-time editor:
-1. Navigate to the "Actions" page
-2. Select the "Edit Markdown" tab
-3. Make changes to the markdown file
-4. Click "Save & Commit" to persist changes and create a Git record
-
 ### Building for Production
 
 Before deploying, generate the static JSON file from your markdown using:
@@ -140,42 +170,4 @@ npx tsx scripts/generate-actions-json.ts
 
 This will parse `public/window-tracker-prd.md` and output to `public/data/window-actions.json`.
 
-### Production Deployment
-
-When deploying to production:
-
-1. Run the build script to generate the actions JSON:
-```sh
-npm run generate-actions-json
-```
-
-2. Build the application:
-```sh
-npm run build
-```
-
-3. Deploy to your preferred hosting platform:
-
-**Vercel:**
-```sh
-vercel deploy
-```
-
-**Netlify:**
-```sh
-netlify deploy
-```
-
 In production, the app will load actions directly from the pre-generated JSON file.
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/501f21b0-8079-4b5b-a945-15a0ac516389) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
