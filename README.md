@@ -51,6 +51,22 @@ npm run dev
 - Click on "New codespace" to launch a new Codespace environment.
 - Edit files directly within the Codespace and commit and push your changes once you're done.
 
+## Development Safeguards
+
+This project includes automated validation for the knowledgebase:
+
+- **Pre-commit Hook**: Prevents commits if the knowledgebase is malformed, out of sync, or logging files are unwritable.
+- **CI Workflow**: Automatically validates the knowledgebase on GitHub for pushes and pull requests to main.
+- **Script Aliases**: Use `npm run kb:ci` to manually validate the knowledgebase.
+
+After installation, set up the pre-commit hooks by running:
+
+```sh
+node scripts/setup-husky.js
+```
+
+This will ensure your knowledgebase stays reliable and properly synced.
+
 ## What technologies are used for this project?
 
 This project is built with:
