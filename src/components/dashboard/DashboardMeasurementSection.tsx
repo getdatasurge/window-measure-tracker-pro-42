@@ -1,13 +1,8 @@
-
 import React from 'react';
 import MeasurementStatusBoard from '../measurements/MeasurementStatusBoard';
-
 const DashboardMeasurementSection: React.FC = () => {
-  return (
-    <div className="mb-12">
+  return <div className="">
       <MeasurementStatusBoard />
-    </div>
-  );
+    </div>;
 };
-
 export default DashboardMeasurementSection;
