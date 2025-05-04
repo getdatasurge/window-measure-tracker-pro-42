@@ -82,8 +82,8 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
         {!collapsed ? <WinTrackLogo /> : <div className="w-8 h-8 bg-[#92f877] rounded-md flex items-center justify-center text-black font-bold text-lg">
             WT
           </div>}
-        <button onClick={toggleCollapsed} className="p-1.5 h-[2rem]rounded-md bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400 hover:text-white transition-colors px-0 py-0 pl-[1rem]">
-          {collapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
+        <button onClick={toggleCollapsed} className="p-1.5 h-[2rem]rounded-md bg-zinc-800/50 hover:bg-zinc-700/50 text-zinc-400 hover:text-white transition-colors px-0 py-0 pl-[1rem] rounded-full">
+          {collapsed ? <ChevronRight size={16} className="mr-[.75rem]" /> : <ChevronLeft size={16} />}
         </button>
       </div>
       
