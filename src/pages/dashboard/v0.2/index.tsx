@@ -9,6 +9,7 @@ import RecentMeasurements from '../../../components/dashboard/RecentMeasurements
 import MeasurementOverview from '../../../components/dashboard/MeasurementOverview';
 import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
 import ActivityFeed from '../../../components/dashboard/ActivityFeed';
+
 interface DashboardPageProps {
   className?: string;
 }
@@ -87,24 +88,27 @@ const RecentSales = () => <div className="space-y-4">
         </div>
       </div>)}
   </div>;
+
 const DashboardPage: React.FC<DashboardPageProps> = ({
   className
 }) => {
   return <DashboardShell>
       <div className="grid gap-4">
         
-
-        
-
-        <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-2 ">
-          
-          <div className="col-span-1 lg:col-span-1">
+        {/* Team Activity and Active Projects Section - Side by side on lg screens, stacked on smaller screens */}
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Team Activity */}
+          <div className="w-full lg:w-1/2">
             <ActivityFeed />
           </div>
+          
+          {/* Active Projects */}
+          <div className="w-full lg:w-1/2">
+            <DashboardProjectsSection />
+          </div>
         </div>
-
-        <DashboardProjectsSection />
       </div>
     </DashboardShell>;
 };
+
 export default DashboardPage;
