@@ -42,8 +42,8 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
     path: '/projects',
     icon: FolderKanban
   }, {
-    name: 'Team Management',
-    path: '/team-management',
+    name: 'Teams',
+    path: '/teams',
     icon: Users
   }, {
     name: 'Schedule',
