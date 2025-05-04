@@ -16,6 +16,7 @@ import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug"; // Import the debug page
+import Overview from "./pages/Overview"; // Import the new Overview page
 
 const queryClient = new QueryClient();
 
@@ -36,6 +37,7 @@ const App = () => (
           <Route path="/dashboard" element={<DashboardV2 />} />
           <Route path="/actions" element={<ActionViewer />} />
           <Route path="/projects-new" element={<ProjectsNew />} />
+          <Route path="/overview" element={<Overview />} /> {/* Add the new Overview route */}
           {isDev && <Route path="/__debug" element={<DebugPage />} />} {/* Debug route - dev only */}
           <Route path="/" element={<MainLayout />}>
             <Route path="projects" element={<Projects />} />
