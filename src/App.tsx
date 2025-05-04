@@ -13,6 +13,7 @@ import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
+import PromptHistoryViewer from "./components/PromptHistoryViewer";
 
 const queryClient = new QueryClient();
 
@@ -22,6 +23,9 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
+        <div className="fixed bottom-4 right-4 z-50">
+          <PromptHistoryViewer variant="dialog" />
+        </div>
         <Routes>
           <Route path="/" element={<Navigate to="/dashboard" replace />} />
           <Route path="/dashboard" element={<DashboardV2 />} />

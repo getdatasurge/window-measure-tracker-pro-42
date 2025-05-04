@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import promptLogger from './promptLogger';
 
 // Promisify exec for cleaner async/await usage
 const execAsync = promisify(exec);
@@ -25,6 +26,9 @@ app.use(cors({
   origin: 'http://localhost:3000',
   methods: ['GET', 'POST'],
 }));
+
+// Register prompt logger routes
+app.use(promptLogger);
 
 // Helper function to run Git commands
 async function runGitCommand(command: string): Promise<string> {
@@ -125,4 +129,5 @@ app.listen(PORT, () => {
   console.log(`📄 Target file: ${TARGET_FILE_PATH}`);
   console.log('🔒 Only accepting requests from localhost:3000');
   console.log('🔄 Git integration enabled for commits');
+  console.log('📝 Prompt logging enabled at /log-prompt-response');
 });
