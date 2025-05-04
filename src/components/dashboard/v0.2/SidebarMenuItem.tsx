@@ -21,9 +21,12 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   collapsed,
   layoutId
 }) => {
+  // Update paths to use the new Projects page
+  const actualPath = path === '/projects' ? '/projects-new' : path;
+  
   return (
     <Link 
-      to={path} 
+      to={actualPath} 
       className={`flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
         isActive 
           ? 'bg-green-900/20 text-green-400' 

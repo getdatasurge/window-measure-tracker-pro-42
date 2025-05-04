@@ -2,7 +2,7 @@
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import ProjectTable from '../projects/ProjectTable';
-import { activeProjects, Project } from '../../data/projectsData';
+import { activeProjects } from '../../data/projectsData';
 
 interface DashboardProjectsSectionProps {
   className?: string;
