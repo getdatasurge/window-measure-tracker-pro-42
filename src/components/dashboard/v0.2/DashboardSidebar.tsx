@@ -5,7 +5,6 @@ import { LayoutDashboard, FolderKanban, Users, Calendar, FileText, Ruler, Settin
 import { motion } from 'framer-motion';
 import WinTrackLogo from '../../logo/WinTrackLogo';
 import SidebarMenuSection from './SidebarMenuSection';
-import SidebarSearch from './SidebarSearch';
 import SidebarUserProfile from './SidebarUserProfile';
 import SidebarMenuItem from './SidebarMenuItem';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -96,7 +95,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
       
-      <SidebarSearch collapsed={collapsed} />
+      {/* Removed SidebarSearch component */}
       
       <div className="flex-1 overflow-auto pt-4 scrollbar-none">
         <div>

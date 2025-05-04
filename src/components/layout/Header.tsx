@@ -7,6 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import WinTrackLogo from '../logo/WinTrackLogo';
 import { Input } from '@/components/ui/input';
 import ThemeToggle from '../ui/ThemeToggle';
+import GlobalSearch from '../ui/GlobalSearch';
 
 interface HeaderProps {
   toggleSidebar: () => void;
@@ -43,18 +44,12 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         </button>
         
         <WinTrackLogo />
-        
-        <div className="relative hidden md:block">
-          <Input
-            type="text"
-            placeholder="Search projects, measurements..."
-            className="pl-10 pr-4 py-2 h-10 w-80 rounded-full border border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 text-sm focus:border-gray-300 dark:focus:border-zinc-600 text-gray-900 dark:text-gray-300"
-          />
-          <Search size={16} className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 dark:text-gray-500" />
-        </div>
       </div>
       
       <div className="flex items-center gap-4">
+        {/* Added global search component here */}
+        <GlobalSearch className="hidden md:block" />
+        
         <div className="flex items-center gap-2">
           <ThemeToggle />
           
