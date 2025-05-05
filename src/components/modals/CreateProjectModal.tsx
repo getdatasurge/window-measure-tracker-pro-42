@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useForm } from 'react-hook-form';
@@ -13,7 +12,7 @@ import LocationTimelineStep from './steps/LocationTimelineStep';
 import TeamRequirementsStep from './steps/TeamRequirementsStep';
 import MetadataStep from './steps/MetadataStep';
 import ModalHeader from '../projects/ModalHeader';
-import { toast } from '@/hooks/use-toast';
+import { notify } from '@/utils/toast-utils';
 
 // Define validation schema for the form
 const projectSchema = z.object({
@@ -174,19 +173,12 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
         onCreateProject(data as unknown as ProjectFormData);
       }
       
-      toast({
-        title: "Project created successfully",
-        description: `Project ${data.name} has been created.`
-      });
+      notify.success(`Project ${data.name} has been created successfully`);
       
       onOpenChange(false);
     } catch (error) {
       console.error("Error creating project:", error);
-      toast({
-        title: "Error creating project",
-        description: "An error occurred while creating the project. Please try again.",
-        variant: "destructive"
-      });
+      notify.error("An error occurred while creating the project. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -225,6 +217,8 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     
     if (isValid && currentStep < STEP_LABELS.length - 1) {
       setCurrentStep(currentStep + 1);
+    } else if (!isValid) {
+      notify.warning("Please fix the validation errors before proceeding");
     }
   };
 

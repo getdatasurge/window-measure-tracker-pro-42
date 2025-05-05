@@ -1,7 +1,6 @@
-
 import { useState, useEffect } from 'react';
 import { ProjectFormData } from '@/types/project';
-import { toast } from '@/hooks/use-toast';
+import { notify } from '@/utils/toast-utils';
 import { defaultFormData } from './default-data';
 import { mergeDefaultValues, validateProjectForm } from './utils';
 import { UseProjectFormProps, UseProjectFormReturn } from './types';
@@ -107,17 +106,10 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     try {
       localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
       setDraftSaved(true);
-      toast({
-        title: "Draft Saved",
-        description: "Your project draft has been saved locally.",
-      });
+      notify.info("Your project draft has been saved locally.");
     } catch (e) {
       console.error('Error saving draft:', e);
-      toast({
-        title: "Error Saving Draft",
-        description: "Could not save your draft. Please try again.",
-        variant: "destructive",
-      });
+      notify.error("Could not save your draft. Please try again.");
     }
   };
   
@@ -131,17 +123,10 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       
       // Close modal and show success message
       onClose();
-      toast({
-        title: "Project Created",
-        description: `${formData.name} has been successfully created.`,
-      });
+      notify.success(`${formData.name} has been successfully created.`);
     } else {
       // Show error message for validation failures
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
+      notify.error("Please fill in all required fields.");
       
       // Navigate to the first tab with errors
       if (errors.name || errors.type) {

@@ -3,6 +3,7 @@ import React from 'react';
 import { DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Check } from "lucide-react";
+import { notify } from '@/utils/toast-utils';
 
 interface ModalFooterProps {
   onSubmit: () => void;
@@ -31,13 +32,20 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   onSaveDraft,
   draftSaved = false
 }) => {
+  const handleSaveDraft = () => {
+    if (onSaveDraft) {
+      onSaveDraft();
+      notify.info('Draft saved successfully');
+    }
+  };
+  
   return (
     <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80">
       <div className="flex items-center">
         {showSaveDraft && onSaveDraft ? (
           <Button 
             variant="ghost" 
-            onClick={onSaveDraft} 
+            onClick={handleSaveDraft} 
             className="text-xs text-zinc-500 hover:text-zinc-400"
             disabled={draftSaved}
           >

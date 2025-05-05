@@ -4,6 +4,8 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import MainLayout from "./components/layout/MainLayout";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
@@ -41,6 +43,17 @@ const App = () => (
         <AuthProvider initialState={false}> {/* Set to false to test unauthenticated flow */}
           <Toaster />
           <Sonner />
+          <ToastContainer
+            position="top-center"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop
+            closeOnClick
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
           <BrowserRouter>
             <div className="fixed bottom-4 right-4 z-50">
               <PromptHistoryViewer variant="dialog" />
