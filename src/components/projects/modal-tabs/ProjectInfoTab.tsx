@@ -39,6 +39,12 @@ const ProjectInfoTab: React.FC<ProjectInfoTabProps> = ({
   updateFormData,
   errors
 }) => {
+  // Handler to update form data with the input value
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { id, value } = e.target;
+    updateFormData(id, value);
+  };
+  
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -47,8 +53,8 @@ const ProjectInfoTab: React.FC<ProjectInfoTabProps> = ({
         </Label>
         <Input
           id="name"
-          value={formData.name}
-          onChange={(e) => updateFormData('name', e.target.value)}
+          value={formData.name || ''}
+          onChange={handleInputChange}
           className="bg-zinc-800/50 border-zinc-700 text-white"
           placeholder="Enter project name"
         />
@@ -85,7 +91,7 @@ const ProjectInfoTab: React.FC<ProjectInfoTabProps> = ({
             Project Status
           </Label>
           <Select 
-            value={formData.status} 
+            value={formData.status || ''} 
             onValueChange={(value) => updateFormData('status', value)}
           >
             <SelectTrigger id="status" className="bg-zinc-800/50 border-zinc-700 text-white">
@@ -107,7 +113,7 @@ const ProjectInfoTab: React.FC<ProjectInfoTabProps> = ({
         <Textarea
           id="description"
           value={formData.description || ''}
-          onChange={(e) => updateFormData('description', e.target.value)}
+          onChange={handleInputChange}
           className="bg-zinc-800/50 border-zinc-700 text-white min-h-[150px]"
           placeholder="Enter project description (optional)"
         />

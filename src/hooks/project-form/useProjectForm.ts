@@ -37,6 +37,8 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
   };
   
   const updateFormData = (field: string, value: any) => {
+    console.log(`Updating field: ${field} with value:`, value);
+    
     // Handle nested properties
     const fieldParts = field.split('.');
     

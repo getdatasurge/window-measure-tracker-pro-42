@@ -1,8 +1,8 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ProjectModalContent from './ProjectModalContent';
-import { useProjectForm } from '@/hooks/useProjectForm';
+import { useProjectForm } from '@/hooks/project-form/useProjectForm';
 import { ProjectFormData } from '@/types/project';
 import { motion, AnimatePresence } from 'framer-motion';
 import StepProgressIndicator from './StepProgressIndicator';
@@ -57,6 +57,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
+      console.log("Modal opened, resetting form");
       resetForm();
     }
   }, [open, resetForm]);
