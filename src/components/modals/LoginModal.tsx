@@ -48,6 +48,7 @@ const LoginModal = () => {
       if (data?.session) {
         toast.success('Logged in successfully!');
         closeAll();
+        // Navigation is now handled by SignInPage through useEffect
       }
     } catch (error: any) {
       console.error('Login failed:', error);

@@ -30,6 +30,7 @@ import TeamManagement from "./pages/TeamManagement";
 import Measurements from "./pages/Measurements"; 
 import MeasurementEntries from "./pages/MeasurementEntries";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
+import SignInPage from "./pages/SignInPage";
 
 const queryClient = new QueryClient();
 
@@ -63,22 +64,22 @@ const App = () => (
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/landing" element={<Navigate to="/" replace />} />
-                <Route path="/sign-in" element={<LandingPage />} />
+                <Route path="/sign-in" element={<SignInPage />} />
 
                 {/* Protected Routes */}
-                <Route 
-                  path="/overview" 
-                  element={
-                    <ProtectedRoute>
-                      <Overview />
-                    </ProtectedRoute>
-                  } 
-                />
                 <Route 
                   path="/dashboard" 
                   element={
                     <ProtectedRoute>
                       <DashboardV2 />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/overview" 
+                  element={
+                    <ProtectedRoute>
+                      <Overview />
                     </ProtectedRoute>
                   } 
                 />
