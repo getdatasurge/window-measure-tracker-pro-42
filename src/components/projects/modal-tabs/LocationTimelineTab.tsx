@@ -16,7 +16,7 @@ interface LocationTimelineTabProps {
 const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({ 
   formData, 
   updateFormData,
-  errors 
+  errors
 }) => {
   // Helper to handle nested location updates
   const updateLocation = (field: string, value: string) => {
@@ -30,16 +30,15 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
 
   return (
     <div className="space-y-6">
-      <FormSection title="Location Information" description="Specify where the project will take place">
+      <FormSection title="Location Information" description="Enter the location details for this project">
         <FormGrid columns={2}>
           <FormRow>
             <Label htmlFor="addressLine1" className="text-sm text-zinc-400">
               Address Line 1
-              <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id="addressLine1"
-              placeholder="Enter address"
+              placeholder="Street address"
               value={formData.location?.addressLine1 || ''}
               onChange={(e) => updateLocation('addressLine1', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
@@ -53,7 +52,7 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
             </Label>
             <Input
               id="addressLine2"
-              placeholder="Apartment, suite, etc."
+              placeholder="Apt, Suite, Building (optional)"
               value={formData.location?.addressLine2 || ''}
               onChange={(e) => updateLocation('addressLine2', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
@@ -63,7 +62,6 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
           <FormRow>
             <Label htmlFor="city" className="text-sm text-zinc-400">
               City
-              <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id="city"
@@ -78,7 +76,6 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
           <FormRow>
             <Label htmlFor="state" className="text-sm text-zinc-400">
               State
-              <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id="state"
@@ -93,11 +90,10 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
           <FormRow>
             <Label htmlFor="zip" className="text-sm text-zinc-400">
               ZIP Code
-              <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
               id="zip"
-              placeholder="ZIP Code"
+              placeholder="ZIP"
               value={formData.location?.zip || ''}
               onChange={(e) => updateLocation('zip', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
@@ -107,7 +103,7 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
         </FormGrid>
       </FormSection>
 
-      <FormSection title="Project Timeline" description="Define when the project will take place">
+      <FormSection title="Timeline" description="Schedule the project timeline">
         <FormGrid columns={2}>
           <FormRow>
             <Label htmlFor="startDate" className="text-sm text-zinc-400">
@@ -126,7 +122,7 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
 
           <FormRow>
             <Label htmlFor="endDate" className="text-sm text-zinc-400">
-              End Date
+              Estimated End Date
             </Label>
             <Input
               id="endDate"
