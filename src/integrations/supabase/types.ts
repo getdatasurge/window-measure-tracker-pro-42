@@ -321,6 +321,41 @@ export type Database = {
           },
         ]
       }
+      entry_history: {
+        Row: {
+          action_type: string
+          data_snapshot: Json
+          entry_id: string
+          id: string
+          timestamp: string | null
+          updated_by: string
+        }
+        Insert: {
+          action_type: string
+          data_snapshot: Json
+          entry_id: string
+          id?: string
+          timestamp?: string | null
+          updated_by: string
+        }
+        Update: {
+          action_type?: string
+          data_snapshot?: Json
+          entry_id?: string
+          id?: string
+          timestamp?: string | null
+          updated_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entry_history_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       measurement_history: {
         Row: {
           change_reason: string | null

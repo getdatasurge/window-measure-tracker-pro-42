@@ -65,23 +65,32 @@ export const useEntries = () => {
   const [error, setError] = useState<Error | null>(null);
   const { user } = useUser();
 
-  const getEntriesByProject = async (projectId: string) => {
+  const getEntriesByProject = async (projectId: string, includeDeleted = false) => {
     try {
       setLoading(true);
       setError(null);
       
-      const { data: entries, error: entriesError } = await supabase
+      let query = supabase
         .from('entries')
         .select('*')
         .eq('project_id', projectId)
-        .neq('status', 'deleted')
         .order('created_at', { ascending: false });
+      
+      // Only include non-deleted entries unless specifically requested
+      if (!includeDeleted) {
+        query = query.neq('status', 'deleted');
+      }
+
+      const { data: entries, error: entriesError } = await query;
 
       if (entriesError) {
         throw entriesError;
       }
 
-      return entries;
+      return entries.map(entry => ({
+        ...entry,
+        status: entry.status as EntryStatus
+      }));
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch entries');
       setError(error);
@@ -89,6 +98,26 @@ export const useEntries = () => {
       return [];
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Helper function to log entry history
+  const logEntryHistory = async (entryId: string, dataSnapshot: EntryData, actionType: 'update' | 'delete' | 'restore') => {
+    try {
+      const { error } = await supabase
+        .from('entry_history')
+        .insert({
+          entry_id: entryId,
+          data_snapshot: dataSnapshot,
+          updated_by: user?.id,
+          action_type: actionType
+        });
+      
+      if (error) {
+        console.error('Error logging entry history:', error);
+      }
+    } catch (err) {
+      console.error('Failed to log entry history:', err);
     }
   };
 
@@ -114,7 +143,10 @@ export const useEntries = () => {
       }
 
       toast.success('Entry created successfully');
-      return newEntry;
+      return {
+        ...newEntry,
+        status: newEntry.status as EntryStatus
+      };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to create entry');
       setError(error);
@@ -130,6 +162,21 @@ export const useEntries = () => {
       setLoading(true);
       setError(null);
       
+      // First get the current entry to save in history
+      const { data: currentEntry, error: fetchError } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      // Log the current state to history before updating
+      await logEntryHistory(id, currentEntry, 'update');
+      
+      // Now update the entry
       const { data: updatedEntry, error: updateError } = await supabase
         .from('entries')
         .update(entryData)
@@ -142,7 +189,10 @@ export const useEntries = () => {
       }
 
       toast.success('Entry updated successfully');
-      return updatedEntry;
+      return {
+        ...updatedEntry,
+        status: updatedEntry.status as EntryStatus
+      };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to update entry');
       setError(error);
@@ -157,6 +207,20 @@ export const useEntries = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // First get the current entry to save in history
+      const { data: currentEntry, error: fetchError } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      // Log the current state to history before soft-deleting
+      await logEntryHistory(id, currentEntry, 'delete');
       
       // Soft delete - just update the status
       const { data: deletedEntry, error: deleteError } = await supabase
@@ -182,6 +246,78 @@ export const useEntries = () => {
     }
   };
 
+  // New function to restore a deleted entry
+  const restoreEntry = async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // First check if the entry is actually deleted
+      const { data: currentEntry, error: fetchError } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      if (currentEntry.status !== 'deleted') {
+        toast.info('Entry is not deleted, no need to restore');
+        return false;
+      }
+      
+      // Find the last state before deletion in history
+      const { data: historyEntries, error: historyError } = await supabase
+        .from('entry_history')
+        .select('*')
+        .eq('entry_id', id)
+        .eq('action_type', 'delete')
+        .order('timestamp', { ascending: false })
+        .limit(1);
+      
+      if (historyError) {
+        throw historyError;
+      }
+      
+      let previousStatus: EntryStatus = 'measured'; // Default fallback status
+      
+      if (historyEntries && historyEntries.length > 0) {
+        const historyData = historyEntries[0].data_snapshot;
+        previousStatus = historyData.status;
+      }
+      
+      // Log the restoration to history
+      await logEntryHistory(id, currentEntry, 'restore');
+      
+      // Update the entry with the previous status
+      const { data: restoredEntry, error: updateError } = await supabase
+        .from('entries')
+        .update({ status: previousStatus })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (updateError) {
+        throw updateError;
+      }
+
+      toast.success('Entry restored successfully');
+      return {
+        ...restoredEntry,
+        status: restoredEntry.status as EntryStatus
+      };
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to restore entry');
+      setError(error);
+      toast.error('Failed to restore entry');
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Split an entry into two: update the original and create a new entry
   const splitEntry = async (
     id: string, 
@@ -191,6 +327,20 @@ export const useEntries = () => {
     try {
       setLoading(true);
       setError(null);
+      
+      // First get the current entry to save in history
+      const { data: currentEntry, error: fetchError } = await supabase
+        .from('entries')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (fetchError) {
+        throw fetchError;
+      }
+      
+      // Log the current state to history before updating
+      await logEntryHistory(id, currentEntry, 'update');
       
       // First update the original entry
       const { error: updateError } = await supabase
@@ -217,12 +367,45 @@ export const useEntries = () => {
       }
 
       toast.success('Entry split successfully');
-      return { updatedOriginal: true, newEntry };
+      return { 
+        updatedOriginal: true, 
+        newEntry: {
+          ...newEntry,
+          status: newEntry.status as EntryStatus
+        }
+      };
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to split entry');
       setError(error);
       toast.error('Failed to split entry');
       return { updatedOriginal: false, newEntry: null };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Get entry history for a specific entry
+  const getEntryHistory = async (entryId: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      const { data: historyEntries, error: historyError } = await supabase
+        .from('entry_history')
+        .select('*')
+        .eq('entry_id', entryId)
+        .order('timestamp', { ascending: false });
+      
+      if (historyError) {
+        throw historyError;
+      }
+
+      return historyEntries;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to fetch entry history');
+      setError(error);
+      toast.error('Failed to load entry history');
+      return [];
     } finally {
       setLoading(false);
     }
@@ -235,6 +418,8 @@ export const useEntries = () => {
     createEntry,
     updateEntry,
     deleteEntry,
-    splitEntry
+    splitEntry,
+    restoreEntry,
+    getEntryHistory
   };
 };
