@@ -60,37 +60,62 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
           <div className="space-y-4">
             <h3 className="text-md font-medium text-white">Team Assignment</h3>
             
-            <FormField
-              control={form.control}
-              name="team.projectManager"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Project Manager</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="team.projectManager"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Project Manager</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                          <SelectValue placeholder="Select a project manager" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        {PROJECT_MANAGERS.map((manager) => (
+                          <SelectItem key={manager.id} value={manager.id}>
+                            {manager.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      The person responsible for overseeing this project.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="estimatedWindows"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Estimated Windows</FormLabel>
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                        <SelectValue placeholder="Select a project manager" />
-                      </SelectTrigger>
+                      <Input 
+                        type="number"
+                        placeholder="Enter number of windows" 
+                        className="bg-zinc-800 border-zinc-700 text-white"
+                        {...field} 
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
                     </FormControl>
-                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                      {PROJECT_MANAGERS.map((manager) => (
-                        <SelectItem key={manager.id} value={manager.id}>
-                          {manager.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    The person responsible for overseeing this project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormDescription>
+                      Approximate number of windows for this project.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <FormField
               control={form.control}
@@ -98,7 +123,7 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-white">Installers</FormLabel>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 gap-2">
                     {INSTALLERS.map((installer) => (
                       <div key={installer.id} className="flex items-center space-x-2">
                         <input
@@ -136,29 +161,6 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
             
             <FormField
               control={form.control}
-              name="estimatedWindows"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Estimated Windows</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number"
-                      placeholder="Enter number of windows" 
-                      className="bg-zinc-800 border-zinc-700 text-white"
-                      {...field} 
-                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Approximate number of windows for this project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
               name="instructions"
               render={({ field }) => (
                 <FormItem>
@@ -166,7 +168,7 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
                   <FormControl>
                     <Textarea 
                       placeholder="Enter any special instructions or requirements for the team"
-                      className="bg-zinc-800 border-zinc-700 text-white min-h-[120px]"
+                      className="bg-zinc-800 border-zinc-700 text-white min-h-[100px]"
                       {...field} 
                     />
                   </FormControl>

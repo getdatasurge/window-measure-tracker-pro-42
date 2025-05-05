@@ -23,7 +23,7 @@ const LocationTimelineStep: React.FC<LocationTimelineStepProps> = ({ form }) => 
       </div>
 
       <Form {...form}>
-        <div className="space-y-8">
+        <div className="space-y-6">
           <LocationFields form={form} />
           <TimelineFields form={form} />
         </div>

@@ -58,62 +58,64 @@ const MetadataStep: React.FC<MetadataStepProps> = ({ form }) => {
       </div>
 
       <Form {...form}>
-        <div className="space-y-8">
+        <div className="space-y-6">
           <div className="space-y-4">
             <h3 className="text-md font-medium text-white">Project Metadata</h3>
             
-            <FormField
-              control={form.control}
-              name="priority"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Priority Level</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    value={field.value}
-                  >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Priority Level</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
+                          <SelectValue placeholder="Select priority level" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+                        <SelectItem value="Low">Low</SelectItem>
+                        <SelectItem value="Medium">Medium</SelectItem>
+                        <SelectItem value="High">High</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormDescription>
+                      Set the priority level for this project.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="budgetEstimate"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-white">Budget Estimate ($)</FormLabel>
                     <FormControl>
-                      <SelectTrigger className="bg-zinc-800 border-zinc-700 text-white">
-                        <SelectValue placeholder="Select priority level" />
-                      </SelectTrigger>
+                      <Input 
+                        type="number"
+                        placeholder="Enter budget estimate" 
+                        className="bg-zinc-800 border-zinc-700 text-white"
+                        {...field} 
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
                     </FormControl>
-                    <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-                      <SelectItem value="Low">Low</SelectItem>
-                      <SelectItem value="Medium">Medium</SelectItem>
-                      <SelectItem value="High">High</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Set the priority level for this project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
-            <FormField
-              control={form.control}
-              name="budgetEstimate"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-white">Budget Estimate ($)</FormLabel>
-                  <FormControl>
-                    <Input 
-                      type="number"
-                      placeholder="Enter budget estimate" 
-                      className="bg-zinc-800 border-zinc-700 text-white"
-                      {...field} 
-                      onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Approximate budget for this project.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                    <FormDescription>
+                      Approximate budget for this project.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             
             <FormItem>
               <FormLabel className="text-white">
@@ -165,7 +167,7 @@ const MetadataStep: React.FC<MetadataStepProps> = ({ form }) => {
           <div className="space-y-4">
             <h3 className="text-md font-medium text-white">Attachments</h3>
             
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <FormItem>
                 <FormLabel className="text-white">Blueprints</FormLabel>
                 <FormControl>
