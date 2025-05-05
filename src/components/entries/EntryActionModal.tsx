@@ -1,9 +1,8 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { MeasurementForm } from './MeasurementForm';
-import { EntryData } from '@/hooks/useEntries';
+import { EntryData } from '@/types/entries';
 
 interface EntryActionModalProps {
   isOpen: boolean;
