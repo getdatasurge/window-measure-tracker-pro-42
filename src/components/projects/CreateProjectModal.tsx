@@ -1,13 +1,8 @@
 
-import React, { useEffect } from 'react';
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import ProjectModalContent from './ProjectModalContent';
-import { useProjectForm } from '@/hooks/project-form/useProjectForm';
+import React from 'react';
 import { ProjectFormData } from '@/types/project';
-import { motion, AnimatePresence } from 'framer-motion';
-import StepProgressIndicator from './StepProgressIndicator';
-import ModalHeader from './ModalHeader';
-import ModalFooter from './ModalFooter';
+import { MultiStepFormModal } from '@/components/form';
+import { StepSchema } from '@/components/form/types';
 
 export interface CreateProjectModalProps {
   open: boolean;
@@ -17,172 +12,168 @@ export interface CreateProjectModalProps {
   submitButtonText?: string;
 }
 
-// Map tab names to step indices
-const tabToStepMap = {
-  'project-info': 0,
-  'location-timeline': 1,
-  'team-requirements': 2,
-  'attachments-metadata': 3,
-};
+const projectFormSteps: StepSchema[] = [
+  {
+    title: "Project Info",
+    description: "Enter the basic information about your project",
+    fields: [
+      {
+        name: "name",
+        label: "Project Name",
+        type: "text",
+        placeholder: "Enter project name",
+        validation: { required: "Project name is required" }
+      },
+      {
+        name: "type",
+        label: "Project Type",
+        type: "select",
+        placeholder: "Select a project type",
+        options: [
+          { label: "Residential", value: "residential" },
+          { label: "Commercial", value: "commercial" },
+          { label: "Industrial", value: "industrial" }
+        ],
+        validation: { required: "Project type is required" }
+      },
+      {
+        name: "description",
+        label: "Description",
+        type: "textarea",
+        placeholder: "Describe your project",
+        rows: 3
+      }
+    ],
+    columns: 1
+  },
+  {
+    title: "Location & Timeline",
+    description: "Specify where and when the project will take place",
+    fields: [
+      {
+        name: "location.addressLine1",
+        label: "Address Line 1",
+        type: "text",
+        placeholder: "Enter address",
+        validation: { required: "Address is required" }
+      },
+      {
+        name: "location.addressLine2",
+        label: "Address Line 2",
+        type: "text",
+        placeholder: "Apartment, suite, etc."
+      },
+      {
+        name: "location.city",
+        label: "City",
+        type: "text",
+        placeholder: "City",
+        validation: { required: "City is required" }
+      },
+      {
+        name: "location.state",
+        label: "State",
+        type: "text",
+        placeholder: "State",
+        validation: { required: "State is required" }
+      },
+      {
+        name: "location.zip",
+        label: "ZIP Code",
+        type: "text",
+        placeholder: "ZIP Code",
+        validation: { required: "ZIP Code is required" }
+      },
+      {
+        name: "timeline.startDate",
+        label: "Start Date",
+        type: "date",
+        validation: { required: "Start date is required" }
+      },
+      {
+        name: "timeline.endDate",
+        label: "End Date",
+        type: "date"
+      }
+    ],
+    columns: 2
+  },
+  {
+    title: "Team & Requirements",
+    description: "Define team roles and project requirements",
+    fields: [
+      {
+        name: "team.projectManager",
+        label: "Project Manager",
+        type: "text",
+        placeholder: "Select project manager",
+        validation: { required: "Project manager is required" }
+      },
+      {
+        name: "estimatedWindows",
+        label: "Estimated Number of Windows",
+        type: "number",
+        placeholder: "0",
+        validation: { min: { value: 1, message: "Must have at least 1 window" } }
+      },
+      {
+        name: "instructions",
+        label: "Special Instructions",
+        type: "textarea",
+        placeholder: "Add any special instructions here",
+        rows: 4
+      }
+    ],
+    columns: 1
+  },
+  {
+    title: "Attachments & Metadata",
+    description: "Add files and additional metadata to your project",
+    fields: [
+      {
+        name: "priority",
+        label: "Priority",
+        type: "select",
+        options: [
+          { label: "Low", value: "Low" },
+          { label: "Medium", value: "Medium" },
+          { label: "High", value: "High" }
+        ],
+        defaultValue: "Medium"
+      },
+      {
+        name: "budgetEstimate",
+        label: "Budget Estimate",
+        type: "number",
+        placeholder: "$ 0.00"
+      }
+    ],
+    columns: 2
+  }
+];
 
-const stepLabels = ['Project Info', 'Location & Timeline', 'Team & Requirements', 'Attachments & Metadata'];
-
-const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ 
-  open, 
+const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
+  open,
   onOpenChange,
   onCreateProject,
   defaultValues,
   submitButtonText = "Create Project"
 }) => {
-  const {
-    activeTab,
-    setActiveTab,
-    formData,
-    errors,
-    projectId,
-    resetForm,
-    updateFormData,
-    handleSubmit,
-    draftSaved,
-    saveDraft,
-  } = useProjectForm({ 
-    onCreateProject, 
-    onClose: () => {
-      onOpenChange(false);
-    },
-    defaultValues
-  });
-  
-  // Calculate current step
-  const currentStep = tabToStepMap[activeTab as keyof typeof tabToStepMap] || 0;
-  
-  // Convert errors to step errors format
-  const stepErrors: Record<number, boolean> = {
-    0: false,
-    1: false,
-    2: false,
-    3: false
+  const handleCreateProject = (data: any) => {
+    onCreateProject?.(data as ProjectFormData);
   };
-  
-  // Check if there are any errors in each step
-  if (Object.keys(errors).length > 0) {
-    // Project Info step
-    if (errors.name || errors.type || errors.description) {
-      stepErrors[0] = true;
-    }
-    
-    // Location & Timeline step
-    if (errors.location || errors.timeline) {
-      stepErrors[1] = true;
-    }
-    
-    // Team & Requirements step
-    if (errors.team || errors.estimatedWindows || errors.instructions) {
-      stepErrors[2] = true;
-    }
-    
-    // Metadata step
-    if (errors.tags || errors.priority || errors.budgetEstimate || errors.attachments) {
-      stepErrors[3] = true;
-    }
-  }
-  
-  // Reset form when modal opens
-  useEffect(() => {
-    if (open) {
-      console.log("Modal opened, resetting form");
-      resetForm();
-    }
-  }, [open, resetForm]);
-  
-  const handleStepClick = (stepIndex: number) => {
-    // Convert step index back to tab name
-    const tabNames = Object.keys(tabToStepMap);
-    setActiveTab(tabNames[stepIndex]);
-  };
-
-  // Add completedSteps array (initialize as empty for now)
-  // In a real implementation, you would track completed steps based on form validity
-  const completedSteps: number[] = [];
 
   return (
-    <AnimatePresence>
-      {open && (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl p-0 max-h-[90vh] bg-zinc-900 border border-zinc-800 text-white flex flex-col">
-            {/* Hidden dialog title and description for accessibility */}
-            <DialogTitle className="sr-only">Create New Project</DialogTitle>
-            <DialogDescription className="sr-only">
-              Fill in the project details to create a new project.
-            </DialogDescription>
-            
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.2, ease: "easeOut" }}
-              className="w-full flex flex-col h-full"
-            >
-              {/* Sticky Header */}
-              <div className="sticky top-0 z-10 bg-zinc-900">
-                <ModalHeader projectId={projectId} />
-                
-                {/* Step Progress Indicator */}
-                <StepProgressIndicator 
-                  currentStep={currentStep}
-                  totalSteps={Object.keys(tabToStepMap).length}
-                  stepLabels={stepLabels}
-                  onStepClick={handleStepClick}
-                  stepErrors={stepErrors}
-                  completedSteps={completedSteps}
-                />
-              </div>
-
-              {/* Scrollable Content Area */}
-              <div className="flex-1 overflow-y-auto">
-                <ProjectModalContent
-                  activeTab={activeTab}
-                  setActiveTab={setActiveTab}
-                  formData={formData}
-                  errors={errors}
-                  projectId={projectId}
-                  updateFormData={updateFormData}
-                  handleSubmit={handleSubmit}
-                />
-              </div>
-
-              {/* Sticky Footer */}
-              <div className="sticky bottom-0 z-10">
-                <ModalFooter 
-                  onSubmit={handleSubmit}
-                  submitButtonText={submitButtonText}
-                  currentStep={currentStep}
-                  totalSteps={Object.keys(tabToStepMap).length}
-                  onNextStep={() => {
-                    const tabNames = Object.keys(tabToStepMap);
-                    const nextStepIndex = currentStep + 1;
-                    if (nextStepIndex < tabNames.length) {
-                      setActiveTab(tabNames[nextStepIndex]);
-                    }
-                  }}
-                  onPrevStep={() => {
-                    const tabNames = Object.keys(tabToStepMap);
-                    const prevStepIndex = currentStep - 1;
-                    if (prevStepIndex >= 0) {
-                      setActiveTab(tabNames[prevStepIndex]);
-                    }
-                  }}
-                  isLastStep={currentStep === Object.keys(tabToStepMap).length - 1}
-                  showSaveDraft={true}
-                  onSaveDraft={saveDraft}
-                  draftSaved={draftSaved}
-                />
-              </div>
-            </motion.div>
-          </DialogContent>
-        </Dialog>
-      )}
-    </AnimatePresence>
+    <MultiStepFormModal 
+      isOpen={open}
+      onClose={() => onOpenChange(false)}
+      title="Create New Project"
+      description="Fill in the project details to create a new project"
+      steps={projectFormSteps}
+      defaultValues={defaultValues || {}}
+      onSubmit={handleCreateProject}
+      submitButtonText={submitButtonText}
+    />
   );
 };
 
