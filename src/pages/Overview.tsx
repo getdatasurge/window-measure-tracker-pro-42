@@ -2,18 +2,18 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUser } from '@/contexts/UserContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import LandingPage from './Landing';
 
 const Overview = () => {
-  const { isAuthenticated } = useAuth();
+  const { user } = useUser();
   const { openLogin } = useAuthModalStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
   // If not authenticated, show the landing page
-  if (!isAuthenticated) {
+  if (!user) {
     return <LandingPage />;
   }
 

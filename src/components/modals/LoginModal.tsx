@@ -4,14 +4,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import { Github } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { supabase } from '@/integrations/supabase/client';
+import { useUser } from '@/contexts/UserContext';
 
 const LoginModal = () => {
   const { isLoginOpen, closeAll, openSignup } = useAuthModalStore();
-  const { login, loginWithOAuth } = useAuth();
+  const { refreshProfile } = useUser();
   
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -35,21 +36,42 @@ const LoginModal = () => {
 
     try {
       setIsLoading(true);
-      await login(formData.email, formData.password);
-      closeAll();
-    } catch (error) {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      if (data?.session) {
+        toast.success('Logged in successfully!');
+        closeAll();
+      }
+    } catch (error: any) {
       console.error('Login failed:', error);
-      // Error is shown via toast in the auth context
+      toast.error(error.message || 'Failed to login. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthLogin = (provider: string) => {
+  const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
-      loginWithOAuth(provider);
-    } catch (error) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
       console.error(`${provider} login failed:`, error);
+      toast.error(error.message || `Failed to login with ${provider}`);
     }
   };
 

@@ -1,5 +1,9 @@
-
 import { Client, Account, Databases, ID, Query } from 'appwrite';
+
+/**
+ * @deprecated This module uses Appwrite and is deprecated.
+ * Please use the Supabase client from '@/integrations/supabase/client' instead.
+ */
 
 // Initialize Appwrite client
 const client = new Client();
@@ -11,6 +15,8 @@ const projectId = import.meta.env.VITE_APPWRITE_PROJECT_ID || 'windowtracker';
 client
   .setEndpoint(endpoint)
   .setProject(projectId);
+
+console.warn('The Appwrite client is deprecated and will be removed in a future version. Please use Supabase instead.');
 
 // Initialize Appwrite services
 export const account = new Account(client);

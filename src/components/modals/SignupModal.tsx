@@ -4,14 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useAuth } from '@/contexts/AuthContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import { Github } from 'lucide-react';
 import { toast } from 'react-toastify';
+import { supabase } from '@/integrations/supabase/client';
 
 const SignupModal = () => {
   const { isSignupOpen, closeAll, openLogin } = useAuthModalStore();
-  const { signup, loginWithOAuth } = useAuth();
   
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -43,21 +42,50 @@ const SignupModal = () => {
 
     try {
       setIsLoading(true);
-      await signup(formData.email, formData.password, formData.name);
-      closeAll();
-    } catch (error) {
+      
+      // Register the new user with Supabase Auth
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            full_name: formData.name,
+            birthday: formData.birthday,
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+
+      if (data) {
+        toast.success('Account created successfully!');
+        closeAll();
+      }
+    } catch (error: any) {
       console.error('Signup failed:', error);
-      // Error is shown via toast in the auth context
+      toast.error(error.message || 'Failed to create account. Please try again.');
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOAuthLogin = (provider: string) => {
+  const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
-      loginWithOAuth(provider);
-    } catch (error) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: window.location.origin,
+        },
+      });
+      
+      if (error) {
+        throw error;
+      }
+    } catch (error: any) {
       console.error(`${provider} login failed:`, error);
+      toast.error(error.message || `Failed to login with ${provider}`);
     }
   };
 

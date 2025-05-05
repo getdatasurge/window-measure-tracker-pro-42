@@ -1,9 +1,12 @@
-
 import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
 import { account } from '@/lib/appwrite';
 import { ID } from 'appwrite';
 import { toast } from 'react-toastify';
 
+/**
+ * @deprecated This context uses Appwrite and is deprecated. 
+ * Please use UserContext from '@/contexts/UserContext' which uses Supabase auth instead.
+ */
 interface AuthContextType {
   isAuthenticated: boolean;
   user: any | null;
@@ -16,6 +19,10 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+/**
+ * @deprecated This provider uses Appwrite and is deprecated. 
+ * Please use UserProvider from '@/contexts/UserContext' which uses Supabase auth instead.
+ */
 export const AuthProvider = ({ children, initialState = false }: { children: ReactNode, initialState?: boolean }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(initialState);
   const [user, setUser] = useState<any | null>(null);
@@ -103,7 +110,12 @@ export const AuthProvider = ({ children, initialState = false }: { children: Rea
   );
 };
 
+/**
+ * @deprecated This hook uses Appwrite and is deprecated. 
+ * Please use useUser from '@/contexts/UserContext' which uses Supabase auth instead.
+ */
 export const useAuth = () => {
+  console.warn('useAuth is deprecated. Please use useUser from @/contexts/UserContext instead.');
   const context = useContext(AuthContext);
   if (context === undefined) {
     throw new Error('useAuth must be used within an AuthProvider');
