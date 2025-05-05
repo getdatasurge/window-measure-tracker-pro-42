@@ -265,6 +265,62 @@ export type Database = {
           },
         ]
       }
+      entries: {
+        Row: {
+          created_at: string | null
+          created_by: string
+          film_required: boolean | null
+          floor: string | null
+          height: number
+          id: string
+          notes: string | null
+          project_id: string
+          quantity: number
+          room: string
+          status: string
+          updated_at: string | null
+          width: number
+        }
+        Insert: {
+          created_at?: string | null
+          created_by: string
+          film_required?: boolean | null
+          floor?: string | null
+          height: number
+          id?: string
+          notes?: string | null
+          project_id: string
+          quantity?: number
+          room: string
+          status?: string
+          updated_at?: string | null
+          width: number
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string
+          film_required?: boolean | null
+          floor?: string | null
+          height?: number
+          id?: string
+          notes?: string | null
+          project_id?: string
+          quantity?: number
+          room?: string
+          status?: string
+          updated_at?: string | null
+          width?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entries_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       measurement_history: {
         Row: {
           change_reason: string | null

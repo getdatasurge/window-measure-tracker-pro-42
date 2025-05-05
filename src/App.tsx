@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -27,6 +28,7 @@ import DebugPage from "./pages/__debug";
 import Overview from "./pages/Overview"; 
 import TeamManagement from "./pages/TeamManagement"; 
 import Measurements from "./pages/Measurements"; 
+import MeasurementEntries from "./pages/MeasurementEntries"; // Add new import
 
 const queryClient = new QueryClient();
 
@@ -67,6 +69,7 @@ const App = () => (
                 <Route path="/schedule" element={<SchedulePage />} /> 
                 <Route path="/reports" element={<ReportsNew />} />
                 <Route path="/measurements" element={<Measurements />} />
+                <Route path="/measurement-entries" element={<MeasurementEntries />} /> {/* Add new route */}
                 <Route path="/user/:id/settings" element={<UserSettingsPage />} />
                 {isDev && <Route path="/__debug" element={<DebugPage />} />} 
                 <Route path="/" element={<MainLayout />}>
