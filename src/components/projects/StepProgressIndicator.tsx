@@ -1,11 +1,13 @@
 
 import React from 'react';
+import { Check } from 'lucide-react';
 
 interface StepProgressIndicatorProps {
   currentStep: number;
   totalSteps: number;
   stepLabels: string[];
   stepErrors: Record<number, boolean>;
+  completedSteps: number[];
   onStepClick?: (stepIndex: number) => void;
 }
 
@@ -14,6 +16,7 @@ const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
   totalSteps,
   stepLabels,
   stepErrors,
+  completedSteps,
   onStepClick
 }) => {
   return (
@@ -29,17 +32,23 @@ const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
                 disabled={!onStepClick}
               >
                 <div className={`
-                  flex items-center justify-center h-8 w-8 rounded-full transition-colors
+                  flex items-center justify-center h-8 w-8 rounded-full transition-all
                   ${currentStep === index 
-                    ? 'bg-green-500 text-white' 
+                    ? 'bg-green-500 text-white scale-110' 
                     : stepErrors[index]
                       ? 'bg-red-500/70 text-white' 
-                      : index < currentStep
-                        ? 'bg-green-500/50 text-white'
-                        : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700'
+                      : completedSteps.includes(index)
+                        ? 'bg-green-500/70 text-white'
+                        : index < currentStep
+                          ? 'bg-green-500/50 text-white'
+                          : 'bg-zinc-800 text-zinc-400 group-hover:bg-zinc-700'
                   }
                 `}>
-                  {index + 1}
+                  {completedSteps.includes(index) ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    index + 1
+                  )}
                 </div>
                 <span className={`
                   text-xs mt-2 transition-colors
@@ -47,7 +56,9 @@ const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
                     ? 'text-white' 
                     : stepErrors[index]
                       ? 'text-red-400'
-                      : 'text-zinc-500 group-hover:text-zinc-400'
+                      : completedSteps.includes(index)
+                        ? 'text-green-400'
+                        : 'text-zinc-500 group-hover:text-zinc-400'
                   }
                 `}>
                   {stepLabels[index]}
@@ -60,7 +71,11 @@ const StepProgressIndicator: React.FC<StepProgressIndicatorProps> = ({
               {index < totalSteps - 1 && (
                 <div className={`
                   flex-1 h-0.5 mx-2
-                  ${index < currentStep ? 'bg-green-500' : 'bg-zinc-800'}
+                  ${index < currentStep 
+                    ? completedSteps.includes(index) 
+                      ? 'bg-green-500' 
+                      : 'bg-green-500/50'
+                    : 'bg-zinc-800'}
                 `}></div>
               )}
             </div>

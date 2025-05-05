@@ -27,6 +27,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     currentStep,
     projectId,
     stepErrors,
+    completedSteps,
     isSubmitting,
     handleSubmit,
     handleNextStep,
@@ -62,6 +63,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               currentStep={currentStep}
               projectId={projectId}
               stepErrors={stepErrors}
+              completedSteps={completedSteps}
               handleStepClick={handleStepClick}
             />
           </div>

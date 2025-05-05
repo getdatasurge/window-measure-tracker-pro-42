@@ -27,18 +27,20 @@ export function useProjectModalForm({
     2: false,
     3: false,
   });
+  const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
   const form = useForm<ProjectFormValues>({
     resolver: zodResolver(projectSchema),
     defaultValues,
-    mode: 'onSubmit'
+    mode: 'onChange'
   });
 
   const {
     handleSubmit,
     trigger,
     reset,
-    formState: { errors }
+    watch,
+    formState: { errors, touchedFields, isValid }
   } = form;
 
   // Reset form when modal is opened
@@ -52,6 +54,7 @@ export function useProjectModalForm({
         2: false,
         3: false
       });
+      setCompletedSteps([]);
     }
   }, [open, reset]);
 
@@ -88,26 +91,15 @@ export function useProjectModalForm({
     }
   }, [errors]);
 
-  const onSubmit = async (data: ProjectFormValues) => {
-    setIsSubmitting(true);
-    try {
-      if (onCreateProject) {
-        onCreateProject(data as unknown as ProjectFormData);
-      }
-      
-      notify.success(`Project ${data.name} has been created successfully`);
-      
-      onOpenChange(false);
-    } catch (error) {
-      console.error("Error creating project:", error);
-      notify.error("An error occurred while creating the project. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Watch form values to update completed steps
+  useEffect(() => {
+    const subscription = watch((value, { name }) => {
+      validateCurrentStep();
+    });
+    return () => subscription.unsubscribe();
+  }, [watch, currentStep]);
 
-  const handleNextStep = async () => {
-    // Use fields to validate based on current step
+  const validateCurrentStep = async () => {
     let fieldsToValidate: string[] = [];
     
     switch (currentStep) {
@@ -137,6 +129,41 @@ export function useProjectModalForm({
     
     const isValid = await trigger(fieldsToValidate as any);
     
+    if (isValid) {
+      setCompletedSteps(prev => {
+        if (!prev.includes(currentStep)) {
+          return [...prev, currentStep].sort((a, b) => a - b);
+        }
+        return prev;
+      });
+    } else {
+      setCompletedSteps(prev => prev.filter(step => step !== currentStep));
+    }
+    
+    return isValid;
+  };
+
+  const onSubmit = async (data: ProjectFormValues) => {
+    setIsSubmitting(true);
+    try {
+      if (onCreateProject) {
+        onCreateProject(data as unknown as ProjectFormData);
+      }
+      
+      notify.success(`Project ${data.name} has been created successfully`);
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      notify.error("An error occurred while creating the project. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleNextStep = async () => {
+    const isValid = await validateCurrentStep();
+    
     if (isValid && currentStep < 3) {
       setCurrentStep(currentStep + 1);
     } else if (!isValid) {
@@ -151,8 +178,8 @@ export function useProjectModalForm({
   };
   
   const handleStepClick = (step: number) => {
-    // Only allow clicking on previous steps or current step
-    if (step <= currentStep) {
+    // Only allow clicking on previous steps, current step, or completed steps
+    if (step <= currentStep || completedSteps.includes(step)) {
       setCurrentStep(step);
     }
   };
@@ -162,6 +189,7 @@ export function useProjectModalForm({
     currentStep,
     projectId,
     stepErrors,
+    completedSteps,
     isSubmitting,
     handleSubmit: handleSubmit(onSubmit),
     handleNextStep,
