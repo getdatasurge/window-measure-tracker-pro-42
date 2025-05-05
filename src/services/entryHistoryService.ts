@@ -78,7 +78,8 @@ export const findPreviousStatus = async (entryId: string): Promise<string> => {
     }
     
     if (historyEntries && historyEntries.length > 0) {
-      const previousData = historyEntries[0].data_snapshot;
+      // Type assertion to access status from the JSON data
+      const previousData = historyEntries[0].data_snapshot as unknown as EntryData;
       return previousData.status || 'measured';
     }
     

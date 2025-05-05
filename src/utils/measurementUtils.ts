@@ -36,3 +36,31 @@ export const fractionToDecimal = (input: string): number => {
   // If no patterns match, just try to convert directly
   return Number(trimmedInput) || 0;
 };
+
+/**
+ * Helper function to generate a new measurement record with default values
+ */
+export const generateNewMeasurement = (defaultValues: Partial<any> = {}): any => {
+  const now = new Date().toISOString();
+  return {
+    id: crypto.randomUUID(),
+    projectId: '',
+    projectName: '',
+    location: '',
+    width: '',
+    height: '',
+    depth: '',
+    area: '',
+    quantity: 1,
+    status: 'pending',
+    film_required: true,
+    requires_special_tools: false,
+    notes: '',
+    createdAt: now,
+    updatedAt: now,
+    updatedBy: 'current-user', // This would typically be populated from context
+    window_type: '',
+    glass_type: '',
+    ...defaultValues
+  };
+};
