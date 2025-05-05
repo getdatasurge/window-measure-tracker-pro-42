@@ -73,13 +73,23 @@ export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps
     } else {
       // Handle nested fields (e.g., 'location.addressLine1')
       const [parent, child] = fieldParts;
-      setFormData(prev => ({
-        ...prev,
-        [parent]: {
+      
+      setFormData(prev => {
+        // Fix: Create a proper copy of the nested object
+        const updatedParent = {
           ...prev[parent as keyof ProjectFormData],
-          [child]: value
+        };
+        
+        // Update the nested field
+        if (typeof updatedParent === 'object' && updatedParent !== null) {
+          (updatedParent as any)[child] = value;
         }
-      }));
+        
+        return {
+          ...prev,
+          [parent]: updatedParent
+        };
+      });
     }
     
     // Clear error when user updates a field
