@@ -116,6 +116,8 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       
       // Reset the form submission state
       setFormSubmitted(false);
+      // Always start at the first tab when opening the modal
+      setActiveTab('details');
     }
   }, [isOpen, measurement, defaultValues]);
 
