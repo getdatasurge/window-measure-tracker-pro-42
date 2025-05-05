@@ -1,18 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from '@/components/ui/dialog';
+import { Measurement } from '@/data/measurementsData';
 import MeasurementTabs from './MeasurementTabs';
 import ModalFooter from './ModalFooter';
-import { Measurement } from '@/data/measurementsData';
+import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
+import { generateNewMeasurement } from '@/utils/measurementUtils';
 
 type MeasurementEntryModalProps = {
   isOpen: boolean;
@@ -21,31 +16,6 @@ type MeasurementEntryModalProps = {
   onSave: (measurement: Measurement) => void;
   mode: 'create' | 'edit';
   defaultValues?: Partial<Measurement>;
-};
-
-const LOCAL_STORAGE_KEY = 'lastMeasurementEntry';
-const EXPIRATION_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds
-
-const generateNewMeasurement = (defaultValues?: Partial<Measurement>): Measurement => {
-  const now = new Date().toISOString();
-  return {
-    id: `WM-${new Date().getFullYear()}-${String(Math.floor(Math.random() * 1000)).padStart(3, '0')}`,
-    projectId: defaultValues?.projectId || '',
-    projectName: defaultValues?.projectName || '',
-    location: defaultValues?.location || '',
-    measurementDate: format(new Date(), 'yyyy-MM-dd'),
-    recordedBy: defaultValues?.recordedBy || '',
-    width: defaultValues?.width || '0"',
-    height: defaultValues?.height || '0"',
-    area: defaultValues?.area || '0 ft²',
-    quantity: defaultValues?.quantity || 1,
-    direction: defaultValues?.direction || 'N/A',
-    notes: defaultValues?.notes || '',
-    status: 'Pending',
-    createdAt: now,
-    updatedAt: now,
-    updatedBy: 'Current User'
-  };
 };
 
 const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
@@ -62,6 +32,9 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
   );
   const [formSubmitted, setFormSubmitted] = useState(false);
 
+  // Use our custom hook for localStorage management
+  const { initialFormData, saveFormData } = useMeasurementFormStorage(isOpen, defaultValues);
+
   // Load initial data when modal opens
   useEffect(() => {
     if (isOpen) {
@@ -71,47 +44,16 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       } else if (Object.keys(defaultValues).length > 0) {
         // If we have default values from context, use those
         setFormData(generateNewMeasurement(defaultValues));
+      } else if (initialFormData) {
+        // If we have data from localStorage, use that
+        const now = new Date().toISOString();
+        setFormData({
+          ...generateNewMeasurement(),
+          ...initialFormData
+        });
       } else {
-        // Try to load previously saved data from localStorage, but check if it's expired
-        const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
-        if (savedData) {
-          try {
-            const parsedData = JSON.parse(savedData);
-            
-            // Check if the saved data has expired
-            const isExpired = parsedData.timestamp && 
-              (Date.now() - parsedData.timestamp > EXPIRATION_TIME);
-            
-            if (!isExpired) {
-              // Use the saved data if it's not expired
-              const now = new Date().toISOString();
-              
-              // Create a new measurement but use the non-expired saved values
-              setFormData({
-                ...generateNewMeasurement(),
-                projectId: parsedData.data.projectId || '',
-                projectName: parsedData.data.projectName || '',
-                location: parsedData.data.location || '',
-                recordedBy: parsedData.data.recordedBy || '',
-                width: parsedData.data.width || '0"',
-                height: parsedData.data.height || '0"',
-                quantity: parsedData.data.quantity || 1,
-                direction: parsedData.data.direction || 'N/A',
-                notes: parsedData.data.notes || ''
-              });
-            } else {
-              // If the data is expired, remove it from localStorage
-              localStorage.removeItem(LOCAL_STORAGE_KEY);
-              setFormData(generateNewMeasurement());
-            }
-          } catch (error) {
-            console.error('Failed to parse saved measurement data:', error);
-            setFormData(generateNewMeasurement());
-          }
-        } else {
-          // No saved data, start fresh
-          setFormData(generateNewMeasurement());
-        }
+        // Start fresh
+        setFormData(generateNewMeasurement());
       }
       
       // Reset the form submission state
@@ -119,7 +61,7 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       // Always start at the first tab when opening the modal
       setActiveTab('details');
     }
-  }, [isOpen, measurement, defaultValues]);
+  }, [isOpen, measurement, defaultValues, initialFormData]);
 
   const handleSave = () => {
     // Update the timestamp 
@@ -128,24 +70,8 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       updatedAt: new Date().toISOString()
     };
     
-    // Save to localStorage for future use (excluding sensitive/unique fields)
-    // Save with timestamp for expiration checking
-    const dataToSave = {
-      data: {
-        projectId: formData.projectId,
-        projectName: formData.projectName,
-        location: formData.location,
-        recordedBy: formData.recordedBy,
-        width: formData.width,
-        height: formData.height,
-        quantity: formData.quantity,
-        direction: formData.direction,
-        notes: formData.notes
-      },
-      timestamp: Date.now() // Add current timestamp
-    };
-    
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
+    // Save to localStorage for future use
+    saveFormData(formData);
     
     // Mark as submitted
     setFormSubmitted(true);
