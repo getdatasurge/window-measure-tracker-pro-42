@@ -161,7 +161,13 @@ const LocationTimelineStep: React.FC<LocationTimelineStepProps> = ({ form }) => 
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ? date.toISOString() : "")}
+                          onSelect={(date) => {
+                            // Ensure immediate update with proper validation
+                            if (date) {
+                              field.onChange(date.toISOString());
+                              form.trigger("timeline.startDate");
+                            }
+                          }}
                           disabled={(date) => date < new Date("1900-01-01")}
                           initialFocus
                         />
@@ -201,7 +207,13 @@ const LocationTimelineStep: React.FC<LocationTimelineStepProps> = ({ form }) => 
                         <Calendar
                           mode="single"
                           selected={field.value ? new Date(field.value) : undefined}
-                          onSelect={(date) => field.onChange(date ? date.toISOString() : "")}
+                          onSelect={(date) => {
+                            // Ensure immediate update with proper validation
+                            if (date) {
+                              field.onChange(date.toISOString());
+                              form.trigger("timeline.endDate");
+                            }
+                          }}
                           disabled={(date) => 
                             date < new Date("1900-01-01") || 
                             (form.getValues().timeline.startDate && date < new Date(form.getValues().timeline.startDate))

@@ -10,6 +10,11 @@ import {
   SelectValue
 } from "@/components/ui/select";
 import { ProjectFormData } from '@/types/project';
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Button } from "@/components/ui/button";
+import { CalendarIcon } from "lucide-react";
+import { format } from "date-fns";
 
 interface LocationTimelineTabProps {
   formData: ProjectFormData;
@@ -139,13 +144,35 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
             <Label htmlFor="startDate" className="text-sm text-zinc-400 flex items-center">
               Start Date <span className="text-red-500 ml-1">*</span>
             </Label>
-            <Input
-              id="startDate"
-              type="date"
-              value={formData.timeline?.startDate || ''}
-              onChange={(e) => updateFormData('timeline.startDate', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="startDate"
+                  variant={"outline"}
+                  className={`w-full bg-zinc-800/50 border-zinc-700 text-white pl-3 text-left ${!formData.timeline?.startDate ? "text-zinc-500" : ""}`}
+                >
+                  {formData.timeline?.startDate ? (
+                    format(new Date(formData.timeline.startDate), "PPP")
+                  ) : (
+                    <span>Select start date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.timeline?.startDate ? new Date(formData.timeline.startDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      updateFormData('timeline.startDate', date.toISOString());
+                    }
+                  }}
+                  disabled={(date) => date < new Date("1900-01-01")}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
             {errors['timeline.startDate'] && (
               <p className="text-xs text-red-500 mt-1">{errors['timeline.startDate']}</p>
             )}
@@ -155,28 +182,73 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
             <Label htmlFor="endDate" className="text-sm text-zinc-400">
               Expected End Date
             </Label>
-            <Input
-              id="endDate"
-              type="date"
-              value={formData.timeline?.endDate || ''}
-              onChange={(e) => updateFormData('timeline.endDate', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-              placeholder="mm/dd/yyyy"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="endDate"
+                  variant={"outline"}
+                  className={`w-full bg-zinc-800/50 border-zinc-700 text-white pl-3 text-left ${!formData.timeline?.endDate ? "text-zinc-500" : ""}`}
+                >
+                  {formData.timeline?.endDate ? (
+                    format(new Date(formData.timeline.endDate), "PPP")
+                  ) : (
+                    <span>Select end date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.timeline?.endDate ? new Date(formData.timeline.endDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      updateFormData('timeline.endDate', date.toISOString());
+                    }
+                  }}
+                  disabled={(date) => 
+                    date < new Date("1900-01-01") || 
+                    (formData.timeline?.startDate && date < new Date(formData.timeline.startDate))
+                  }
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
           
           <div className="space-y-2">
             <Label htmlFor="completionDate" className="text-sm text-zinc-400">
               Actual Completion Date
             </Label>
-            <Input
-              id="completionDate"
-              type="date"
-              value={formData.timeline?.completionDate || ''}
-              onChange={(e) => updateFormData('timeline.completionDate', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-              placeholder="mm/dd/yyyy"
-            />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="completionDate"
+                  variant={"outline"}
+                  className={`w-full bg-zinc-800/50 border-zinc-700 text-white pl-3 text-left ${!formData.timeline?.completionDate ? "text-zinc-500" : ""}`}
+                >
+                  {formData.timeline?.completionDate ? (
+                    format(new Date(formData.timeline.completionDate), "PPP")
+                  ) : (
+                    <span>Select completion date</span>
+                  )}
+                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="start">
+                <Calendar
+                  mode="single"
+                  selected={formData.timeline?.completionDate ? new Date(formData.timeline.completionDate) : undefined}
+                  onSelect={(date) => {
+                    if (date) {
+                      updateFormData('timeline.completionDate', date.toISOString());
+                    }
+                  }}
+                  disabled={(date) => date < new Date("1900-01-01")}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
           </div>
         </div>
       </div>
