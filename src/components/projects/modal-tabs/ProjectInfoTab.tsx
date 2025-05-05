@@ -10,12 +10,12 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { ProjectFormData } from '../CreateProjectModal';
+import { ProjectFormData } from '@/types/project';
 
 interface ProjectInfoTabProps {
   formData: ProjectFormData;
-  updateFormData: (field: keyof ProjectFormData, value: any) => void;
-  errors: Partial<Record<keyof ProjectFormData, string>>;
+  updateFormData: (field: string, value: any) => void;
+  errors: Partial<Record<string, string>>;
 }
 
 const projectTypes = [
@@ -106,7 +106,7 @@ const ProjectInfoTab: React.FC<ProjectInfoTabProps> = ({
         </Label>
         <Textarea
           id="description"
-          value={formData.description}
+          value={formData.description || ''}
           onChange={(e) => updateFormData('description', e.target.value)}
           className="bg-zinc-800/50 border-zinc-700 text-white min-h-[150px]"
           placeholder="Enter project description (optional)"

@@ -9,12 +9,12 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { ProjectFormData } from '../CreateProjectModal';
+import { ProjectFormData } from '@/types/project';
 
 interface LocationTimelineTabProps {
   formData: ProjectFormData;
-  updateFormData: (field: keyof ProjectFormData, value: any) => void;
-  errors: Partial<Record<keyof ProjectFormData, string>>;
+  updateFormData: (field: string, value: any) => void;
+  errors: Partial<Record<string, string>>;
 }
 
 const states = [
@@ -47,13 +47,13 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
           </Label>
           <Input
             id="addressLine1"
-            value={formData.addressLine1}
-            onChange={(e) => updateFormData('addressLine1', e.target.value)}
+            value={formData.location?.addressLine1 || ''}
+            onChange={(e) => updateFormData('location.addressLine1', e.target.value)}
             className="bg-zinc-800/50 border-zinc-700 text-white"
             placeholder="Enter street address"
           />
-          {errors.addressLine1 && (
-            <p className="text-xs text-red-500 mt-1">{errors.addressLine1}</p>
+          {errors['location.addressLine1'] && (
+            <p className="text-xs text-red-500 mt-1">{errors['location.addressLine1']}</p>
           )}
         </div>
         
@@ -63,8 +63,8 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
           </Label>
           <Input
             id="addressLine2"
-            value={formData.addressLine2}
-            onChange={(e) => updateFormData('addressLine2', e.target.value)}
+            value={formData.location?.addressLine2 || ''}
+            onChange={(e) => updateFormData('location.addressLine2', e.target.value)}
             className="bg-zinc-800/50 border-zinc-700 text-white"
             placeholder="Apt, Suite, Building (optional)"
           />
@@ -77,13 +77,13 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
             </Label>
             <Input
               id="city"
-              value={formData.city}
-              onChange={(e) => updateFormData('city', e.target.value)}
+              value={formData.location?.city || ''}
+              onChange={(e) => updateFormData('location.city', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
               placeholder="City"
             />
-            {errors.city && (
-              <p className="text-xs text-red-500 mt-1">{errors.city}</p>
+            {errors['location.city'] && (
+              <p className="text-xs text-red-500 mt-1">{errors['location.city']}</p>
             )}
           </div>
           
@@ -92,8 +92,8 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
               State <span className="text-red-500 ml-1">*</span>
             </Label>
             <Select 
-              value={formData.state} 
-              onValueChange={(value) => updateFormData('state', value)}
+              value={formData.location?.state || ''} 
+              onValueChange={(value) => updateFormData('location.state', value)}
             >
               <SelectTrigger id="state" className="bg-zinc-800/50 border-zinc-700 text-white">
                 <SelectValue placeholder="Select state" />
@@ -104,24 +104,24 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
                 ))}
               </SelectContent>
             </Select>
-            {errors.state && (
-              <p className="text-xs text-red-500 mt-1">{errors.state}</p>
+            {errors['location.state'] && (
+              <p className="text-xs text-red-500 mt-1">{errors['location.state']}</p>
             )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="zipCode" className="text-sm text-zinc-400 flex items-center">
+            <Label htmlFor="zip" className="text-sm text-zinc-400 flex items-center">
               ZIP Code <span className="text-red-500 ml-1">*</span>
             </Label>
             <Input
-              id="zipCode"
-              value={formData.zipCode}
-              onChange={(e) => updateFormData('zipCode', e.target.value)}
+              id="zip"
+              value={formData.location?.zip || ''}
+              onChange={(e) => updateFormData('location.zip', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
               placeholder="ZIP Code"
             />
-            {errors.zipCode && (
-              <p className="text-xs text-red-500 mt-1">{errors.zipCode}</p>
+            {errors['location.zip'] && (
+              <p className="text-xs text-red-500 mt-1">{errors['location.zip']}</p>
             )}
           </div>
         </div>
@@ -142,38 +142,38 @@ const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
             <Input
               id="startDate"
               type="date"
-              value={formData.startDate}
-              onChange={(e) => updateFormData('startDate', e.target.value)}
+              value={formData.timeline?.startDate || ''}
+              onChange={(e) => updateFormData('timeline.startDate', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
             />
-            {errors.startDate && (
-              <p className="text-xs text-red-500 mt-1">{errors.startDate}</p>
+            {errors['timeline.startDate'] && (
+              <p className="text-xs text-red-500 mt-1">{errors['timeline.startDate']}</p>
             )}
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="expectedEndDate" className="text-sm text-zinc-400">
+            <Label htmlFor="endDate" className="text-sm text-zinc-400">
               Expected End Date
             </Label>
             <Input
-              id="expectedEndDate"
+              id="endDate"
               type="date"
-              value={formData.expectedEndDate}
-              onChange={(e) => updateFormData('expectedEndDate', e.target.value)}
+              value={formData.timeline?.endDate || ''}
+              onChange={(e) => updateFormData('timeline.endDate', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
               placeholder="mm/dd/yyyy"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="actualCompletionDate" className="text-sm text-zinc-400">
+            <Label htmlFor="completionDate" className="text-sm text-zinc-400">
               Actual Completion Date
             </Label>
             <Input
-              id="actualCompletionDate"
+              id="completionDate"
               type="date"
-              value={formData.actualCompletionDate}
-              onChange={(e) => updateFormData('actualCompletionDate', e.target.value)}
+              value={formData.timeline?.completionDate || ''}
+              onChange={(e) => updateFormData('timeline.completionDate', e.target.value)}
               className="bg-zinc-800/50 border-zinc-700 text-white"
               placeholder="mm/dd/yyyy"
             />

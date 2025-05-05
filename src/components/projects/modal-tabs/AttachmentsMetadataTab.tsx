@@ -10,17 +10,17 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
-import { ProjectFormData } from '../CreateProjectModal';
+import { ProjectFormData } from '@/types/project';
 import { Plus, X, Upload } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface AttachmentsMetadataTabProps {
   formData: ProjectFormData;
-  updateFormData: (field: keyof ProjectFormData, value: any) => void;
-  errors: Partial<Record<keyof ProjectFormData, string>>;
+  updateFormData: (field: string, value: any) => void;
+  errors: Partial<Record<string, string>>;
 }
 
-const priorityOptions = ['Low', 'Medium', 'High'];
+const priorityOptions: Array<'Low' | 'Medium' | 'High'> = ['Low', 'Medium', 'High'];
 
 const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({ 
   formData, 
@@ -31,19 +31,19 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
   const handleFileUpload = (field: 'blueprints' | 'photos' | 'contracts', files: FileList | null) => {
     if (files) {
       const newFiles = Array.from(files);
-      updateFormData(field, [...formData[field], ...newFiles]);
+      updateFormData(`attachments.${field}`, [...(formData.attachments?.[field] || []), ...newFiles]);
     }
   };
   
   const addTag = () => {
-    if (tagInput.trim() && !formData.tags.includes(tagInput.trim())) {
-      updateFormData('tags', [...formData.tags, tagInput.trim()]);
+    if (tagInput.trim() && !(formData.tags || []).includes(tagInput.trim())) {
+      updateFormData('tags', [...(formData.tags || []), tagInput.trim()]);
       setTagInput('');
     }
   };
   
   const removeTag = (tag: string) => {
-    updateFormData('tags', formData.tags.filter(t => t !== tag));
+    updateFormData('tags', (formData.tags || []).filter(t => t !== tag));
   };
   
   const handleTagKeyPress = (e: React.KeyboardEvent) => {
@@ -85,9 +85,9 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
                 onChange={(e) => handleFileUpload('blueprints', e.target.files)}
               />
             </div>
-            {formData.blueprints.length > 0 && (
+            {formData.attachments?.blueprints && formData.attachments.blueprints.length > 0 && (
               <div className="mt-2 space-y-2">
-                {formData.blueprints.map((file, index) => (
+                {formData.attachments.blueprints.map((file, index) => (
                   <div key={index} className="text-xs text-zinc-400">
                     • {file.name}
                   </div>
@@ -119,9 +119,9 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
                 onChange={(e) => handleFileUpload('photos', e.target.files)}
               />
             </div>
-            {formData.photos.length > 0 && (
+            {formData.attachments?.photos && formData.attachments.photos.length > 0 && (
               <div className="mt-2 space-y-2">
-                {formData.photos.map((file, index) => (
+                {formData.attachments.photos.map((file, index) => (
                   <div key={index} className="text-xs text-zinc-400">
                     • {file.name}
                   </div>
@@ -152,9 +152,9 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
                 onChange={(e) => handleFileUpload('contracts', e.target.files)}
               />
             </div>
-            {formData.contracts.length > 0 && (
+            {formData.attachments?.contracts && formData.attachments.contracts.length > 0 && (
               <div className="mt-2 space-y-2">
-                {formData.contracts.map((file, index) => (
+                {formData.attachments.contracts.map((file, index) => (
                   <div key={index} className="text-xs text-zinc-400">
                     • {file.name}
                   </div>
@@ -178,7 +178,7 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
               Tags
             </Label>
             <div className="flex flex-wrap gap-2 mb-2">
-              {formData.tags.map((tag) => (
+              {(formData.tags || []).map((tag) => (
                 <Badge key={tag} className="flex items-center gap-1 bg-green-500/20 text-green-400 hover:bg-green-500/30">
                   {tag}
                   <X 
@@ -212,8 +212,8 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
                 Priority Level
               </Label>
               <Select 
-                value={formData.priority} 
-                onValueChange={(value) => updateFormData('priority', value)}
+                value={formData.priority || 'Medium'} 
+                onValueChange={(value: 'Low' | 'Medium' | 'High') => updateFormData('priority', value)}
               >
                 <SelectTrigger id="priority" className="bg-zinc-800/50 border-zinc-700 text-white">
                   <SelectValue placeholder="Select priority" />
@@ -232,9 +232,9 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
               </Label>
               <Input
                 id="budgetEstimate"
-                type="text"
-                value={formData.budgetEstimate}
-                onChange={(e) => updateFormData('budgetEstimate', e.target.value)}
+                type="number"
+                value={formData.budgetEstimate || 0}
+                onChange={(e) => updateFormData('budgetEstimate', parseFloat(e.target.value) || 0)}
                 className="bg-zinc-800/50 border-zinc-700 text-white"
                 placeholder="Enter budget amount"
               />
@@ -255,14 +255,14 @@ const AttachmentsMetadataTab: React.FC<AttachmentsMetadataTabProps> = ({
             <Label className="text-sm text-zinc-400">
               Created By
             </Label>
-            <p className="text-sm text-zinc-300">{formData.createdBy}</p>
+            <p className="text-sm text-zinc-300">John Installer</p>
           </div>
           
           <div className="space-y-2">
             <Label className="text-sm text-zinc-400">
               Created At
             </Label>
-            <p className="text-sm text-zinc-300">{formData.createdAt}</p>
+            <p className="text-sm text-zinc-300">May 4, 2025 7:54 PM</p>
           </div>
         </div>
       </div>

@@ -9,41 +9,7 @@ import LocationTimelineTab from './modal-tabs/LocationTimelineTab';
 import TeamRequirementsTab from './modal-tabs/TeamRequirementsTab';
 import AttachmentsMetadataTab from './modal-tabs/AttachmentsMetadataTab';
 import { toast } from '@/hooks/use-toast';
-
-export interface ProjectFormData {
-  // Project Info
-  name: string;
-  type: string;
-  status: string;
-  description: string;
-  
-  // Location & Timeline
-  addressLine1: string;
-  addressLine2: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  startDate: string;
-  expectedEndDate: string;
-  actualCompletionDate: string;
-  
-  // Team & Requirements
-  projectManager: string;
-  manager: string;
-  assignedInstallers: string[];
-  totalEstimatedWindows: number;
-  specialInstructions: string;
-  
-  // Attachments & Metadata
-  blueprints: File[];
-  photos: File[];
-  contracts: File[];
-  tags: string[];
-  priority: string;
-  budgetEstimate: string;
-  createdBy: string;
-  createdAt: string;
-}
+import { ProjectFormData } from '@/types/project';
 
 export interface CreateProjectModalProps {
   open: boolean;
@@ -57,29 +23,35 @@ const defaultFormData: ProjectFormData = {
   status: 'Planned',
   description: '',
   
-  addressLine1: '',
-  addressLine2: '',
-  city: '',
-  state: '',
-  zipCode: '',
-  startDate: new Date().toISOString().split('T')[0],
-  expectedEndDate: '',
-  actualCompletionDate: '',
+  location: {
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    zip: '',
+  },
   
-  projectManager: '',
-  manager: '',
-  assignedInstallers: [],
-  totalEstimatedWindows: 0,
-  specialInstructions: '',
+  timeline: {
+    startDate: new Date().toISOString().split('T')[0],
+    endDate: '',
+    completionDate: '',
+  },
   
-  blueprints: [],
-  photos: [],
-  contracts: [],
+  team: {
+    projectManager: '',
+    installers: [],
+  },
+  estimatedWindows: 0,
+  instructions: '',
+  
+  attachments: {
+    blueprints: [],
+    photos: [],
+    contracts: [],
+  },
   tags: [],
   priority: 'Medium',
-  budgetEstimate: '',
-  createdBy: 'John Installer',
-  createdAt: `May 4, 2025 7:54 PM`,
+  budgetEstimate: 0,
 };
 
 const CreateProjectModal: React.FC<CreateProjectModalProps> = ({ 
@@ -89,7 +61,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 }) => {
   const [activeTab, setActiveTab] = useState('project-info');
   const [formData, setFormData] = useState<ProjectFormData>(defaultFormData);
-  const [errors, setErrors] = useState<Partial<Record<keyof ProjectFormData, string>>>({});
+  const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   
   // Generate a random project ID for display
   const projectId = `PRJ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
@@ -103,11 +75,26 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     }
   }, [open]);
   
-  const updateFormData = (field: keyof ProjectFormData, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+  const updateFormData = (field: string, value: any) => {
+    // Handle nested properties
+    const fieldParts = field.split('.');
+    
+    if (fieldParts.length === 1) {
+      setFormData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } else {
+      // Handle nested fields (e.g., 'location.addressLine1')
+      const [parent, child] = fieldParts;
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent as keyof ProjectFormData],
+          [child]: value
+        }
+      }));
+    }
     
     // Clear error when user updates a field
     if (errors[field]) {
@@ -119,17 +106,17 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   };
   
   const validateForm = (): boolean => {
-    const newErrors: Partial<Record<keyof ProjectFormData, string>> = {};
+    const newErrors: Partial<Record<string, string>> = {};
     
     // Required fields validation
-    if (!formData.name) newErrors.name = 'Project name is required';
-    if (!formData.type) newErrors.type = 'Project type is required';
-    if (!formData.addressLine1) newErrors.addressLine1 = 'Address is required';
-    if (!formData.city) newErrors.city = 'City is required';
-    if (!formData.state) newErrors.state = 'State is required';
-    if (!formData.zipCode) newErrors.zipCode = 'ZIP code is required';
-    if (!formData.startDate) newErrors.startDate = 'Start date is required';
-    if (!formData.projectManager) newErrors.projectManager = 'Project manager is required';
+    if (!formData.name) newErrors['name'] = 'Project name is required';
+    if (!formData.type) newErrors['type'] = 'Project type is required';
+    if (!formData.location?.addressLine1) newErrors['location.addressLine1'] = 'Address is required';
+    if (!formData.location?.city) newErrors['location.city'] = 'City is required';
+    if (!formData.location?.state) newErrors['location.state'] = 'State is required';
+    if (!formData.location?.zip) newErrors['location.zip'] = 'ZIP code is required';
+    if (!formData.timeline?.startDate) newErrors['timeline.startDate'] = 'Start date is required';
+    if (!formData.team?.projectManager) newErrors['team.projectManager'] = 'Project manager is required';
     
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -157,9 +144,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
       // Navigate to the first tab with errors
       if (errors.name || errors.type) {
         setActiveTab('project-info');
-      } else if (errors.addressLine1 || errors.city || errors.state || errors.zipCode || errors.startDate) {
+      } else if (errors['location.addressLine1'] || errors['location.city'] || 
+                errors['location.state'] || errors['location.zip'] || 
+                errors['timeline.startDate']) {
         setActiveTab('location-timeline');
-      } else if (errors.projectManager) {
+      } else if (errors['team.projectManager']) {
         setActiveTab('team-requirements');
       }
     }
