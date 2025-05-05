@@ -24,6 +24,7 @@ type MeasurementEntryModalProps = {
 };
 
 const LOCAL_STORAGE_KEY = 'lastMeasurementEntry';
+const EXPIRATION_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds
 
 const generateNewMeasurement = (defaultValues?: Partial<Measurement>): Measurement => {
   const now = new Date().toISOString();
@@ -71,26 +72,38 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
         // If we have default values from context, use those
         setFormData(generateNewMeasurement(defaultValues));
       } else {
-        // Try to load previously saved data from localStorage
+        // Try to load previously saved data from localStorage, but check if it's expired
         const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (savedData) {
           try {
             const parsedData = JSON.parse(savedData);
-            const now = new Date().toISOString();
             
-            // Create a new measurement but use the saved values where applicable
-            setFormData({
-              ...generateNewMeasurement(),
-              projectId: parsedData.projectId || '',
-              projectName: parsedData.projectName || '',
-              location: parsedData.location || '',
-              recordedBy: parsedData.recordedBy || '',
-              width: parsedData.width || '0"',
-              height: parsedData.height || '0"',
-              quantity: parsedData.quantity || 1,
-              direction: parsedData.direction || 'N/A',
-              notes: parsedData.notes || ''
-            });
+            // Check if the saved data has expired
+            const isExpired = parsedData.timestamp && 
+              (Date.now() - parsedData.timestamp > EXPIRATION_TIME);
+            
+            if (!isExpired) {
+              // Use the saved data if it's not expired
+              const now = new Date().toISOString();
+              
+              // Create a new measurement but use the non-expired saved values
+              setFormData({
+                ...generateNewMeasurement(),
+                projectId: parsedData.data.projectId || '',
+                projectName: parsedData.data.projectName || '',
+                location: parsedData.data.location || '',
+                recordedBy: parsedData.data.recordedBy || '',
+                width: parsedData.data.width || '0"',
+                height: parsedData.data.height || '0"',
+                quantity: parsedData.data.quantity || 1,
+                direction: parsedData.data.direction || 'N/A',
+                notes: parsedData.data.notes || ''
+              });
+            } else {
+              // If the data is expired, remove it from localStorage
+              localStorage.removeItem(LOCAL_STORAGE_KEY);
+              setFormData(generateNewMeasurement());
+            }
           } catch (error) {
             console.error('Failed to parse saved measurement data:', error);
             setFormData(generateNewMeasurement());
@@ -114,16 +127,20 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
     };
     
     // Save to localStorage for future use (excluding sensitive/unique fields)
+    // Save with timestamp for expiration checking
     const dataToSave = {
-      projectId: formData.projectId,
-      projectName: formData.projectName,
-      location: formData.location,
-      recordedBy: formData.recordedBy,
-      width: formData.width,
-      height: formData.height,
-      quantity: formData.quantity,
-      direction: formData.direction,
-      notes: formData.notes
+      data: {
+        projectId: formData.projectId,
+        projectName: formData.projectName,
+        location: formData.location,
+        recordedBy: formData.recordedBy,
+        width: formData.width,
+        height: formData.height,
+        quantity: formData.quantity,
+        direction: formData.direction,
+        notes: formData.notes
+      },
+      timestamp: Date.now() // Add current timestamp
     };
     
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(dataToSave));
