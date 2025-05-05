@@ -10,12 +10,14 @@ interface CreateProjectButtonProps {
   variant?: "default" | "secondary" | "outline" | "ghost" | "link";
   size?: "default" | "sm" | "lg" | "icon";
   className?: string;
+  defaultValues?: Partial<ProjectFormData>;
 }
 
 const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({ 
   variant = "default", 
   size = "default", 
-  className = "" 
+  className = "",
+  defaultValues
 }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -45,6 +47,7 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onCreateProject={handleCreateProject}
+        defaultValues={defaultValues}
       />
     </>
   );

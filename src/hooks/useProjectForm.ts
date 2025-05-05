@@ -44,11 +44,18 @@ export const defaultFormData: ProjectFormData = {
 export interface UseProjectFormProps {
   onCreateProject?: (data: ProjectFormData) => void;
   onClose: () => void;
+  defaultValues?: Partial<ProjectFormData>;
 }
 
-export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps) {
+export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseProjectFormProps) {
   const [activeTab, setActiveTab] = useState('project-info');
-  const [formData, setFormData] = useState<ProjectFormData>(defaultFormData);
+  const [formData, setFormData] = useState<ProjectFormData>(() => {
+    // Merge default form data with any provided default values
+    if (defaultValues) {
+      return mergeDefaultValues(defaultFormData, defaultValues);
+    }
+    return defaultFormData;
+  });
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   
   // Generate a random project ID for display
@@ -56,10 +63,40 @@ export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps
   
   // Reset form when modal opens
   const resetForm = () => {
-    setFormData(defaultFormData);
+    // Apply default values when resetting the form
+    if (defaultValues) {
+      setFormData(mergeDefaultValues(defaultFormData, defaultValues));
+    } else {
+      setFormData(defaultFormData);
+    }
     setErrors({});
     setActiveTab('project-info');
   };
+
+  // Helper function to merge defaultFormData with provided default values
+  function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial<ProjectFormData>): ProjectFormData {
+    const result = { ...baseData };
+    
+    // Handle top-level properties
+    Object.keys(overrides).forEach((key) => {
+      const typedKey = key as keyof ProjectFormData;
+      const value = overrides[typedKey];
+      
+      if (value !== undefined) {
+        // Handle nested objects separately
+        if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
+          result[typedKey] = {
+            ...((result[typedKey] as object) || {}),
+            ...value,
+          } as any;
+        } else {
+          result[typedKey] = value as any;
+        }
+      }
+    });
+    
+    return result;
+  }
   
   const updateFormData = (field: string, value: any) => {
     // Handle nested properties
@@ -75,7 +112,7 @@ export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps
       const [parent, child] = fieldParts;
       
       setFormData(prev => {
-        // Fix: Create a proper copy of the nested object, checking for null/undefined
+        // Create a proper copy of the nested object, checking for null/undefined
         const parentKey = parent as keyof ProjectFormData;
         const parentObj = prev[parentKey];
         
