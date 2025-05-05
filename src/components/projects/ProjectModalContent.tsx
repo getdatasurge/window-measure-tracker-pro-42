@@ -50,7 +50,7 @@ const ProjectModalContent: React.FC<ProjectModalContentProps> = ({
   };
 
   return (
-    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+    <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full h-full flex flex-col">
       <div className="border-b border-zinc-800 sticky top-0 bg-zinc-900 z-10">
         <TabsList className="bg-transparent h-auto p-0">
           <TabsTrigger 
@@ -121,7 +121,7 @@ const ProjectModalContent: React.FC<ProjectModalContentProps> = ({
         </TabsList>
       </div>
 
-      <div className="p-6 overflow-y-auto">
+      <div className="p-6 overflow-y-auto flex-1">
         {/* Using motion.div to animate tab transitions */}
         <TabsContent value="project-info" className="m-0">
           <motion.div

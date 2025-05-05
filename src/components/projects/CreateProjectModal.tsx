@@ -105,7 +105,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     <AnimatePresence>
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl p-0 max-h-[90vh] bg-zinc-900 border border-zinc-800 text-white overflow-hidden flex flex-col">
+          <DialogContent className="max-w-2xl p-0 max-h-[90vh] bg-zinc-900 border border-zinc-800 text-white flex flex-col">
             {/* Hidden dialog title and description for accessibility */}
             <DialogTitle className="sr-only">Create New Project</DialogTitle>
             <DialogDescription className="sr-only">
@@ -119,17 +119,21 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-full flex flex-col h-full"
             >
-              <ModalHeader projectId={projectId} />
-              
-              {/* Step Progress Indicator */}
-              <StepProgressIndicator 
-                currentStep={currentStep}
-                totalSteps={Object.keys(tabToStepMap).length}
-                stepLabels={stepLabels}
-                onStepClick={handleStepClick}
-                stepErrors={stepErrors}
-              />
+              {/* Sticky Header */}
+              <div className="sticky top-0 z-10 bg-zinc-900">
+                <ModalHeader projectId={projectId} />
+                
+                {/* Step Progress Indicator */}
+                <StepProgressIndicator 
+                  currentStep={currentStep}
+                  totalSteps={Object.keys(tabToStepMap).length}
+                  stepLabels={stepLabels}
+                  onStepClick={handleStepClick}
+                  stepErrors={stepErrors}
+                />
+              </div>
 
+              {/* Scrollable Content Area */}
               <div className="flex-1 overflow-y-auto">
                 <ProjectModalContent
                   activeTab={activeTab}
@@ -142,30 +146,33 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 />
               </div>
 
-              <ModalFooter 
-                onSubmit={handleSubmit}
-                submitButtonText={submitButtonText}
-                currentStep={currentStep}
-                totalSteps={Object.keys(tabToStepMap).length}
-                onNextStep={() => {
-                  const tabNames = Object.keys(tabToStepMap);
-                  const nextStepIndex = currentStep + 1;
-                  if (nextStepIndex < tabNames.length) {
-                    setActiveTab(tabNames[nextStepIndex]);
-                  }
-                }}
-                onPrevStep={() => {
-                  const tabNames = Object.keys(tabToStepMap);
-                  const prevStepIndex = currentStep - 1;
-                  if (prevStepIndex >= 0) {
-                    setActiveTab(tabNames[prevStepIndex]);
-                  }
-                }}
-                isLastStep={currentStep === Object.keys(tabToStepMap).length - 1}
-                showSaveDraft={true}
-                onSaveDraft={saveDraft}
-                draftSaved={draftSaved}
-              />
+              {/* Sticky Footer */}
+              <div className="sticky bottom-0 z-10">
+                <ModalFooter 
+                  onSubmit={handleSubmit}
+                  submitButtonText={submitButtonText}
+                  currentStep={currentStep}
+                  totalSteps={Object.keys(tabToStepMap).length}
+                  onNextStep={() => {
+                    const tabNames = Object.keys(tabToStepMap);
+                    const nextStepIndex = currentStep + 1;
+                    if (nextStepIndex < tabNames.length) {
+                      setActiveTab(tabNames[nextStepIndex]);
+                    }
+                  }}
+                  onPrevStep={() => {
+                    const tabNames = Object.keys(tabToStepMap);
+                    const prevStepIndex = currentStep - 1;
+                    if (prevStepIndex >= 0) {
+                      setActiveTab(tabNames[prevStepIndex]);
+                    }
+                  }}
+                  isLastStep={currentStep === Object.keys(tabToStepMap).length - 1}
+                  showSaveDraft={true}
+                  onSaveDraft={saveDraft}
+                  draftSaved={draftSaved}
+                />
+              </div>
             </motion.div>
           </DialogContent>
         </Dialog>
