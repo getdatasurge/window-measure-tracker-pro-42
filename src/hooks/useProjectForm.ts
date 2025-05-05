@@ -75,13 +75,15 @@ export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps
       const [parent, child] = fieldParts;
       
       setFormData(prev => {
-        // Fix: Create a proper copy of the nested object
-        const updatedParent = {
-          ...prev[parent as keyof ProjectFormData],
-        };
+        // Fix: Create a proper copy of the nested object, checking for null/undefined
+        const parentKey = parent as keyof ProjectFormData;
+        const parentObj = prev[parentKey];
+        
+        // Create a safe copy of the parent object, or an empty object if it doesn't exist
+        const updatedParent = parentObj ? { ...parentObj } : {};
         
         // Update the nested field
-        if (typeof updatedParent === 'object' && updatedParent !== null) {
+        if (typeof updatedParent === 'object') {
           (updatedParent as any)[child] = value;
         }
         
