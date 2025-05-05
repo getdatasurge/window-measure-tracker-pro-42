@@ -101,6 +101,10 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setActiveTab(tabNames[stepIndex]);
   };
 
+  // Add completedSteps array (initialize as empty for now)
+  // In a real implementation, you would track completed steps based on form validity
+  const completedSteps: number[] = [];
+
   return (
     <AnimatePresence>
       {open && (
@@ -130,6 +134,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   stepLabels={stepLabels}
                   onStepClick={handleStepClick}
                   stepErrors={stepErrors}
+                  completedSteps={completedSteps}
                 />
               </div>
 
