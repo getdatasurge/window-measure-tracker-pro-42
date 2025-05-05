@@ -20,16 +20,16 @@ export function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial
         if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
           // Handle nested object merging with proper typing
           result[typedKey] = {
-            ...(baseValue as object),
-            ...(value as object)
+            ...(baseValue as Record<string, unknown>),
+            ...(value as Record<string, unknown>)
           } as any; // Type assertion needed for the nested object
         } else {
           // If the base value is not an object, override completely
-          result[typedKey] = value as any;
+          result[typedKey] = value;
         }
       } else {
         // For non-object values, assign directly
-        result[typedKey] = value as any;
+        result[typedKey] = value;
       }
     }
   });
