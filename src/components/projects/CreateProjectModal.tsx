@@ -16,6 +16,7 @@ export interface CreateProjectModalProps {
   onOpenChange: (open: boolean) => void;
   onCreateProject?: (data: ProjectFormData) => void;
   defaultValues?: Partial<ProjectFormData>;
+  submitButtonText?: string;
 }
 
 // Map tab names to step indices
@@ -32,7 +33,8 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   open, 
   onOpenChange,
   onCreateProject,
-  defaultValues 
+  defaultValues,
+  submitButtonText = "Create Project"
 }) => {
   const [showDraftPrompt, setShowDraftPrompt] = useState(false);
   
@@ -101,6 +103,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     toast.success("Draft saved");
   };
 
+  // Using AnimatePresence to handle exit animations
   return (
     <AnimatePresence>
       {open && (
@@ -143,6 +146,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                   <ModalFooter 
                     onSubmit={handleSubmit} 
                     onSaveDraft={handleSaveDraft}
+                    submitButtonText={submitButtonText}
                   />
                 </>
               )}

@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FilePenLine, Trash2 } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
-import { CreateProjectModalProps } from '../projects/CreateProjectModal';
+import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/sonner';
 
 interface DraftProjectListProps {
@@ -54,45 +54,51 @@ const DraftProjectList: React.FC<DraftProjectListProps> = ({ openCreateProjectMo
   if (!draft) return null;
 
   return (
-    <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
-      <CardContent className="p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h3 className="font-semibold text-white text-sm">Saved Project Draft</h3>
-          <p className="text-xs text-zinc-400">
-            Last saved {formatDistanceToNow(draft.timestamp)} ago
-          </p>
-        </div>
-        
-        <div className="p-3 border border-zinc-700 rounded-md bg-zinc-900/70 mb-3">
-          <h4 className="text-sm font-medium text-white mb-1">
-            {draft.name || "Unnamed Project"}
-          </h4>
-          <p className="text-xs text-zinc-400">
-            Continue working on your draft project
-          </p>
-        </div>
-        
-        <div className="flex justify-end gap-2">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            className="text-zinc-400 hover:text-white hover:bg-zinc-700"
-            onClick={handleDiscardDraft}
-          >
-            <Trash2 className="h-4 w-4 mr-1" />
-            Discard Draft
-          </Button>
-          <Button 
-            size="sm" 
-            className="bg-green-500 text-white hover:bg-green-600"
-            onClick={handleResumeDraft}
-          >
-            <FilePenLine className="h-4 w-4 mr-1" />
-            Resume Draft
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
+    >
+      <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center mb-3">
+            <h3 className="font-semibold text-white text-sm">Saved Project Draft</h3>
+            <p className="text-xs text-zinc-400">
+              Last saved {formatDistanceToNow(draft.timestamp)} ago
+            </p>
+          </div>
+          
+          <div className="p-3 border border-zinc-700 rounded-md bg-zinc-900/70 mb-3">
+            <h4 className="text-sm font-medium text-white mb-1">
+              {draft.name || "Unnamed Project"}
+            </h4>
+            <p className="text-xs text-zinc-400">
+              Continue working on your draft project
+            </p>
+          </div>
+          
+          <div className="flex justify-end gap-2">
+            <Button 
+              variant="ghost" 
+              size="sm" 
+              className="text-zinc-400 hover:text-white hover:bg-zinc-700"
+              onClick={handleDiscardDraft}
+            >
+              <Trash2 className="h-4 w-4 mr-1" />
+              Discard Draft
+            </Button>
+            <Button 
+              size="sm" 
+              className="bg-green-500 text-white hover:bg-green-600"
+              onClick={handleResumeDraft}
+            >
+              <FilePenLine className="h-4 w-4 mr-1" />
+              Resume Draft
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 

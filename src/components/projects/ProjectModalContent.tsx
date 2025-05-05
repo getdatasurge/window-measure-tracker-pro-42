@@ -7,6 +7,7 @@ import LocationTimelineTab from './modal-tabs/LocationTimelineTab';
 import TeamRequirementsTab from './modal-tabs/TeamRequirementsTab';
 import AttachmentsMetadataTab from './modal-tabs/AttachmentsMetadataTab';
 import { ProjectFormData } from '@/types/project';
+import { motion } from 'framer-motion';
 
 export interface ProjectModalContentProps {
   activeTab: string;
@@ -68,36 +69,69 @@ const ProjectModalContent: React.FC<ProjectModalContentProps> = ({
       </div>
 
       <div className="p-6">
+        {/* Using motion.div to animate tab transitions */}
         <TabsContent value="project-info" className="m-0">
-          <ProjectInfoTab 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            errors={errors}
-          />
+          <motion.div
+            key="project-info"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ProjectInfoTab 
+              formData={formData} 
+              updateFormData={updateFormData} 
+              errors={errors}
+            />
+          </motion.div>
         </TabsContent>
         
         <TabsContent value="location-timeline" className="m-0">
-          <LocationTimelineTab 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            errors={errors}
-          />
+          <motion.div
+            key="location-timeline"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <LocationTimelineTab 
+              formData={formData} 
+              updateFormData={updateFormData} 
+              errors={errors}
+            />
+          </motion.div>
         </TabsContent>
         
         <TabsContent value="team-requirements" className="m-0">
-          <TeamRequirementsTab 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            errors={errors}
-          />
+          <motion.div
+            key="team-requirements"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <TeamRequirementsTab 
+              formData={formData} 
+              updateFormData={updateFormData} 
+              errors={errors}
+            />
+          </motion.div>
         </TabsContent>
         
         <TabsContent value="attachments-metadata" className="m-0">
-          <AttachmentsMetadataTab 
-            formData={formData} 
-            updateFormData={updateFormData} 
-            errors={errors}
-          />
+          <motion.div
+            key="attachments-metadata"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <AttachmentsMetadataTab 
+              formData={formData} 
+              updateFormData={updateFormData} 
+              errors={errors}
+            />
+          </motion.div>
         </TabsContent>
       </div>
     </Tabs>

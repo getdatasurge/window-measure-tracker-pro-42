@@ -8,9 +8,15 @@ interface ModalFooterProps {
   onSubmit: () => void;
   onSaveDraft?: () => void;
   showSaveDraft?: boolean;
+  submitButtonText?: string;
 }
 
-const ModalFooter: React.FC<ModalFooterProps> = ({ onSubmit, onSaveDraft, showSaveDraft = true }) => {
+const ModalFooter: React.FC<ModalFooterProps> = ({ 
+  onSubmit, 
+  onSaveDraft, 
+  showSaveDraft = true,
+  submitButtonText = "Create Project"
+}) => {
   return (
     <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80">
       <p className="text-xs text-zinc-500">* Required fields</p>
@@ -34,7 +40,7 @@ const ModalFooter: React.FC<ModalFooterProps> = ({ onSubmit, onSaveDraft, showSa
           onClick={onSubmit}
           className="bg-green-500 text-white hover:bg-green-600"
         >
-          Create Project
+          {submitButtonText}
         </Button>
       </div>
     </div>
