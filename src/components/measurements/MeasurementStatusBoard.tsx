@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Measurement, getMeasurementsForDay, getMeasurementsByStatus, getArchivedMeasurements } from '@/data/measurementsData';
 import MeasurementFilterBar from './MeasurementFilterBar';
@@ -6,13 +7,16 @@ import StatusColumn from './StatusColumn';
 import EditMeasurementModal from './EditMeasurementModal';
 import ArchivedMeasurementTable from './ArchivedMeasurementTable';
 import { Button } from '@/components/ui/button';
-import { Filter } from 'lucide-react';
+import { Filter, Plus } from 'lucide-react';
+import MeasurementEntryModal from './MeasurementEntryModal';
+
 const MeasurementStatusBoard: React.FC = () => {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   const [allMeasurements, setAllMeasurements] = useState<Measurement[]>([]);
   const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isNewMeasurementModalOpen, setIsNewMeasurementModalOpen] = useState(false);
 
   // Initialize with today's measurements
   useEffect(() => {
@@ -20,17 +24,27 @@ const MeasurementStatusBoard: React.FC = () => {
     setMeasurements(measurementsForToday);
     setAllMeasurements(getArchivedMeasurements());
   }, [selectedDate]);
+
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
+
   const handleEditMeasurement = (measurement: Measurement) => {
     setCurrentMeasurement(measurement);
     setIsModalOpen(true);
   };
+
   const handleSaveMeasurement = (updatedMeasurement: Measurement) => {
     // Update the measurement in the state
     setMeasurements(prevMeasurements => prevMeasurements.map(m => m.id === updatedMeasurement.id ? updatedMeasurement : m));
   };
+
+  const handleNewMeasurement = (newMeasurement: Measurement) => {
+    // Add the new measurement to the state
+    setMeasurements(prevMeasurements => [...prevMeasurements, newMeasurement]);
+    setAllMeasurements(prevMeasurements => [...prevMeasurements, newMeasurement]);
+  };
+
   const handleFilterChange = (filters: any) => {
     console.log('Filters changed:', filters);
     // In a real implementation, this would filter the measurements
@@ -38,6 +52,7 @@ const MeasurementStatusBoard: React.FC = () => {
     const measurementsForDay = getMeasurementsForDay(selectedDate);
     setMeasurements(measurementsForDay);
   };
+
   return <div className="mb-8">
       <div className="flex justify-between items-center mb-6">
         <div>
@@ -45,6 +60,13 @@ const MeasurementStatusBoard: React.FC = () => {
           <p className="text-sm text-zinc-400">View and manage window measurements by date and status</p>
         </div>
         
+        <Button 
+          onClick={() => setIsNewMeasurementModalOpen(true)} 
+          className="flex items-center gap-2"
+        >
+          <Plus size={18} />
+          New Measurement
+        </Button>
       </div>
       
       <MeasurementFilterBar onFilterChange={handleFilterChange} />
@@ -64,6 +86,14 @@ const MeasurementStatusBoard: React.FC = () => {
       <ArchivedMeasurementTable measurements={allMeasurements} />
       
       {currentMeasurement && <EditMeasurementModal measurement={currentMeasurement} open={isModalOpen} onOpenChange={setIsModalOpen} onSave={handleSaveMeasurement} />}
+      
+      {/* New Measurement Modal */}
+      <MeasurementEntryModal 
+        isOpen={isNewMeasurementModalOpen}
+        onOpenChange={setIsNewMeasurementModalOpen}
+        onSave={handleNewMeasurement}
+        mode="create"
+      />
     </div>;
 };
 export default MeasurementStatusBoard;
