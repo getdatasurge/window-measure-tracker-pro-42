@@ -123,15 +123,17 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
           // Create a type-safe copy of the nested object
           const baseValue = result[typedKey];
           if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
+            // Fix: Properly type the nested object merging
             result[typedKey] = {
               ...baseValue,
               ...(value as any)
-            };
+            } as any; // Use type assertion for nested objects
           } else {
             // If the base value is not an object, override completely
             result[typedKey] = value as any;
           }
         } else {
+          // For non-object values, assign directly
           result[typedKey] = value as any;
         }
       }
@@ -154,11 +156,16 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       const [parent, child] = fieldParts;
       
       setFormData(prev => {
-        // Create a proper copy of the nested object, checking for null/undefined
-        const updatedParent = { ...(prev[parent as keyof ProjectFormData] || {}) } as Record<string, any>;
+        // Fix: Properly type the nested object
+        const parentKey = parent as keyof ProjectFormData;
+        // Create a copy of the parent object, ensuring it's treated as an object
+        const parentObject = prev[parentKey] || {};
+        
+        // Create a new object to avoid mutation
+        const updatedParent = typeof parentObject === 'object' ? { ...parentObject } : {};
         
         // Update the specific field
-        updatedParent[child] = value;
+        (updatedParent as any)[child] = value;
         
         return {
           ...prev,
