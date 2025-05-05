@@ -34,12 +34,15 @@ const approvers = [
   'Michael Roberts'
 ];
 
-const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateFormData }) => {
+const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ 
+  formData, 
+  updateFormData 
+}) => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="status" className="text-sm text-zinc-400 mb-1 block">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="status" className="text-sm text-zinc-400">
             Status
           </Label>
           <Select 
@@ -57,8 +60,8 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
           </Select>
         </div>
         
-        <div>
-          <Label htmlFor="approvalBy" className="text-sm text-zinc-400 mb-1 block">
+        <div className="space-y-2">
+          <Label htmlFor="approvalBy" className="text-sm text-zinc-400">
             Approval By
           </Label>
           <Input
@@ -76,8 +79,8 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
         </div>
       </div>
       
-      <div>
-        <Label htmlFor="approvalDate" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="approvalDate" className="text-sm text-zinc-400">
           Approval Date
         </Label>
         <Input
@@ -89,8 +92,8 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
         />
       </div>
       
-      <div>
-        <Label htmlFor="reviewComments" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="reviewComments" className="text-sm text-zinc-400">
           Review Comments
         </Label>
         <Textarea

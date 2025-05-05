@@ -19,12 +19,15 @@ interface AttributesTabProps {
 
 const directions: Direction[] = ['North', 'South', 'East', 'West', 'N/A'];
 
-const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData }) => {
+const AttributesTab: React.FC<AttributesTabProps> = ({ 
+  formData, 
+  updateFormData 
+}) => {
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="quantity" className="text-sm text-zinc-400 mb-1 block">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="quantity" className="text-sm text-zinc-400">
             Quantity
           </Label>
           <Input
@@ -37,8 +40,8 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData 
           />
         </div>
         
-        <div>
-          <Label htmlFor="direction" className="text-sm text-zinc-400 mb-1 block">
+        <div className="space-y-2">
+          <Label htmlFor="direction" className="text-sm text-zinc-400">
             Orientation
           </Label>
           <Select 
@@ -57,8 +60,8 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData 
         </div>
       </div>
       
-      <div>
-        <Label htmlFor="notes" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-sm text-zinc-400">
           Condition Notes
         </Label>
         <Textarea

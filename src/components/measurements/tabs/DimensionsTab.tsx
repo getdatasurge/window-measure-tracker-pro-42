@@ -21,7 +21,10 @@ const fractions = [
   { display: '7/8', value: 0.875 },
 ];
 
-const DimensionsTab: React.FC<DimensionsTabProps> = ({ formData, updateFormData }) => {
+const DimensionsTab: React.FC<DimensionsTabProps> = ({ 
+  formData, 
+  updateFormData 
+}) => {
   const handleIncrementWidth = (increment: number) => {
     // Extract numeric value from the width (removing the " symbol)
     const currentWidth = parseFloat(formData.width.replace('"', '')) || 0;
@@ -55,9 +58,9 @@ const DimensionsTab: React.FC<DimensionsTabProps> = ({ formData, updateFormData 
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="width" className="text-sm text-zinc-400 mb-1 block">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="width" className="text-sm text-zinc-400">
             Width (inches)
           </Label>
           <Input
@@ -81,8 +84,8 @@ const DimensionsTab: React.FC<DimensionsTabProps> = ({ formData, updateFormData 
           </div>
         </div>
         
-        <div>
-          <Label htmlFor="height" className="text-sm text-zinc-400 mb-1 block">
+        <div className="space-y-2">
+          <Label htmlFor="height" className="text-sm text-zinc-400">
             Height (inches)
           </Label>
           <Input
@@ -107,8 +110,8 @@ const DimensionsTab: React.FC<DimensionsTabProps> = ({ formData, updateFormData 
         </div>
       </div>
       
-      <div>
-        <Label htmlFor="area" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="area" className="text-sm text-zinc-400">
           Area (sq ft)
         </Label>
         <Input

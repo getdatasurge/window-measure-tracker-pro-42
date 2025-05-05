@@ -25,11 +25,14 @@ const glassTypes = [
   'Other',
 ];
 
-const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ formData, updateFormData }) => {
+const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ 
+  formData, 
+  updateFormData 
+}) => {
   return (
-    <div className="grid grid-cols-2 gap-4">
-      <div>
-        <Label htmlFor="location" className="text-sm text-zinc-400 mb-1 block">
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-2">
+        <Label htmlFor="location" className="text-sm text-zinc-400">
           Location
         </Label>
         <Input
@@ -37,11 +40,12 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ formData,
           value={formData.location}
           onChange={(e) => updateFormData('location', e.target.value)}
           className="bg-zinc-800/50 border-zinc-700 text-white"
+          placeholder="Enter location"
         />
       </div>
       
-      <div>
-        <Label htmlFor="measurementDate" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="measurementDate" className="text-sm text-zinc-400">
           Measurement Date
         </Label>
         <Input
@@ -53,8 +57,8 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ formData,
         />
       </div>
       
-      <div>
-        <Label htmlFor="recordedBy" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="recordedBy" className="text-sm text-zinc-400">
           Recorded By
         </Label>
         <Input
@@ -62,11 +66,12 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ formData,
           value={formData.recordedBy}
           onChange={(e) => updateFormData('recordedBy', e.target.value)}
           className="bg-zinc-800/50 border-zinc-700 text-white"
+          placeholder="Enter name"
         />
       </div>
       
-      <div>
-        <Label htmlFor="glassType" className="text-sm text-zinc-400 mb-1 block">
+      <div className="space-y-2">
+        <Label htmlFor="glassType" className="text-sm text-zinc-400">
           Glass Type
         </Label>
         <Select 
