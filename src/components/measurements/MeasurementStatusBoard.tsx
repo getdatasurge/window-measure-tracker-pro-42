@@ -17,12 +17,19 @@ const MeasurementStatusBoard: React.FC = () => {
   const [currentMeasurement, setCurrentMeasurement] = useState<Measurement | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewMeasurementModalOpen, setIsNewMeasurementModalOpen] = useState(false);
+  const [contextualDefaultValues, setContextualDefaultValues] = useState<Partial<Measurement>>({});
 
   // Initialize with today's measurements
   useEffect(() => {
     const measurementsForToday = getMeasurementsForDay(selectedDate);
     setMeasurements(measurementsForToday);
     setAllMeasurements(getArchivedMeasurements());
+    
+    // Update contextual default values based on selected date
+    setContextualDefaultValues(prev => ({
+      ...prev,
+      measurementDate: selectedDate.toISOString().split('T')[0]
+    }));
   }, [selectedDate]);
 
   const handleDateSelect = (date: Date) => {
@@ -51,6 +58,25 @@ const MeasurementStatusBoard: React.FC = () => {
     // For now, we'll just update based on the selected date
     const measurementsForDay = getMeasurementsForDay(selectedDate);
     setMeasurements(measurementsForDay);
+    
+    // Update contextual default values based on filters
+    if (filters.location) {
+      setContextualDefaultValues(prev => ({
+        ...prev,
+        location: filters.location
+      }));
+    }
+    
+    if (filters.projectId) {
+      setContextualDefaultValues(prev => ({
+        ...prev,
+        projectId: filters.projectId
+      }));
+    }
+  };
+
+  const openNewMeasurementModal = () => {
+    setIsNewMeasurementModalOpen(true);
   };
 
   return <div className="mb-8">
@@ -61,7 +87,7 @@ const MeasurementStatusBoard: React.FC = () => {
         </div>
         
         <Button 
-          onClick={() => setIsNewMeasurementModalOpen(true)} 
+          onClick={openNewMeasurementModal} 
           className="flex items-center gap-2"
         >
           <Plus size={18} />
@@ -87,12 +113,13 @@ const MeasurementStatusBoard: React.FC = () => {
       
       {currentMeasurement && <EditMeasurementModal measurement={currentMeasurement} open={isModalOpen} onOpenChange={setIsModalOpen} onSave={handleSaveMeasurement} />}
       
-      {/* New Measurement Modal */}
+      {/* New Measurement Modal with contextual default values */}
       <MeasurementEntryModal 
         isOpen={isNewMeasurementModalOpen}
         onOpenChange={setIsNewMeasurementModalOpen}
         onSave={handleNewMeasurement}
         mode="create"
+        defaultValues={contextualDefaultValues}
       />
     </div>;
 };

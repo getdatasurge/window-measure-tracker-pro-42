@@ -8,6 +8,7 @@ interface EditMeasurementModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (measurement: Measurement) => void;
+  defaultValues?: Partial<Measurement>;
 }
 
 const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
@@ -15,6 +16,7 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
   open,
   onOpenChange,
   onSave,
+  defaultValues = {}
 }) => {
   return (
     <MeasurementEntryModal
@@ -23,6 +25,7 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
       measurement={measurement || undefined}
       onSave={onSave}
       mode={measurement ? 'edit' : 'create'}
+      defaultValues={defaultValues}
     />
   );
 };
