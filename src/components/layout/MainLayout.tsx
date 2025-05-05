@@ -20,7 +20,6 @@ const MainLayout: React.FC = () => {
       // Only collapse sidebar when scrolling down on mobile
       if (window.scrollY > 10) {
         setSidebarOpen(false);
-        console.log("Scroll detected, sidebar closed");
       }
     }
   }, [isMobile]);
@@ -43,7 +42,7 @@ const MainLayout: React.FC = () => {
   }, [isMobile]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden w-full">
       <div className="relative z-20">
         <div 
           className={`
@@ -70,10 +69,12 @@ const MainLayout: React.FC = () => {
         )}
       </div>
 
-      <div className={`flex flex-col w-full transition-all duration-300 ${isMobile ? '' : sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'}`}>
+      <div className={`flex flex-col w-full transition-all duration-300 ${isMobile ? '' : sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'} overflow-x-hidden`}>
         <Header toggleSidebar={toggleSidebar} />
-        <main className="flex-1 p-6 overflow-auto">
-          <Outlet />
+        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
+          <div className="w-full max-w-full overflow-x-hidden">
+            <Outlet />
+          </div>
         </main>
       </div>
     </div>

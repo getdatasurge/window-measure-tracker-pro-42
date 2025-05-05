@@ -36,41 +36,43 @@ export const RepeatableFieldGroup: React.FC<RepeatableFieldGroupProps> = ({ fiel
     <FormSection 
       title={field.label}
       description={field.description}
-      className="border border-zinc-800 rounded-md p-4"
+      className="border border-zinc-800 rounded-md p-4 overflow-hidden w-full"
     >
-      {fields.map((item, index) => (
-        <FormSection key={item.id} className="mb-4 pb-4 border-b border-zinc-800 last:border-0">
-          <div className="flex justify-between items-center mb-2">
-            <h4 className="text-sm font-medium text-white">{`${field.label} ${index + 1}`}</h4>
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={() => remove(index)}
-              className="h-8 text-red-400 hover:text-red-300"
-            >
-              <Minus className="h-4 w-4 mr-1" />
-              {field.removeButtonText || "Remove"}
-            </Button>
-          </div>
-          
-          <FormGrid columns={field.fields.length > 1 ? 2 : 1}>
-            {field.fields.map((nestedField) => (
-              <FieldRenderer
-                key={`${fullPath}.${index}.${nestedField.name}`}
-                field={nestedField}
-                fieldPath={`${fullPath}.${index}`}
-              />
-            ))}
-          </FormGrid>
-        </FormSection>
-      ))}
+      <div className="space-y-4 w-full">
+        {fields.map((item, index) => (
+          <FormSection key={item.id} className="mb-4 pb-4 border-b border-zinc-800 last:border-0 w-full">
+            <div className="flex justify-between items-center mb-2">
+              <h4 className="text-sm font-medium text-white">{`${field.label} ${index + 1}`}</h4>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => remove(index)}
+                className="h-8 text-red-400 hover:text-red-300"
+              >
+                <Minus className="h-4 w-4 mr-1" />
+                {field.removeButtonText || "Remove"}
+              </Button>
+            </div>
+            
+            <FormGrid columns={field.fields.length > 1 ? 2 : 1}>
+              {field.fields.map((nestedField) => (
+                <FieldRenderer
+                  key={`${fullPath}.${index}.${nestedField.name}`}
+                  field={nestedField}
+                  fieldPath={`${fullPath}.${index}`}
+                />
+              ))}
+            </FormGrid>
+          </FormSection>
+        ))}
+      </div>
       
       <Button
         type="button"
         variant="outline"
         onClick={handleAdd}
-        className="mt-2 border-dashed border-zinc-700 hover:border-zinc-500"
+        className="mt-2 border-dashed border-zinc-700 hover:border-zinc-500 w-full sm:w-auto"
         disabled={field.maxItems !== undefined && fields.length >= field.maxItems}
       >
         <Plus className="h-4 w-4 mr-1" />

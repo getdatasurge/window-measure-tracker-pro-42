@@ -38,15 +38,17 @@ export const SchemaForm: React.FC<SchemaFormProps> = ({
   return (
     <FormProvider {...formMethods}>
       <Form {...formMethods}>
-        <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6">
-          {schema.fields.map((field) => {
-            if (field.type === 'repeatable') {
-              return <RepeatableFieldGroup key={field.name} field={field} />;
-            }
-            return <FieldRenderer key={field.name} field={field} />;
-          })}
+        <form onSubmit={formMethods.handleSubmit(handleSubmit)} className="space-y-6 w-full">
+          <div className="space-y-4 w-full min-w-0 overflow-hidden">
+            {schema.fields.map((field) => {
+              if (field.type === 'repeatable') {
+                return <RepeatableFieldGroup key={field.name} field={field} />;
+              }
+              return <FieldRenderer key={field.name} field={field} />;
+            })}
+          </div>
 
-          <div className="flex justify-end pt-4">
+          <div className="flex justify-end pt-4 w-full">
             <Button type="submit" disabled={isSubmitting}>
               {isSubmitting ? 'Submitting...' : submitText}
             </Button>

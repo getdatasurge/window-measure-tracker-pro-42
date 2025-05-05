@@ -10,5 +10,5 @@ export const FormRow: React.FC<FormRowProps> = ({
   children, 
   className = "" 
 }) => (
-  <div className={`flex flex-col gap-2 ${className}`}>{children}</div>
+  <div className={`flex flex-col gap-2 w-full min-w-0 ${className}`}>{children}</div>
 );

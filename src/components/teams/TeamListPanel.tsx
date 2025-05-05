@@ -141,8 +141,8 @@ const TeamIndicator = ({ team }: { team: string }) => {
 
 const TeamListPanel: React.FC = () => {
   return (
-    <div className="border rounded-lg">
-      <div className="overflow-x-auto">
+    <div className="border rounded-lg overflow-hidden">
+      <div className="overflow-x-auto w-full">
         <Table>
           <TableHeader>
             <TableRow>
@@ -210,8 +210,8 @@ const TeamListPanel: React.FC = () => {
           </TableBody>
         </Table>
       </div>
-      <div className="flex items-center justify-between px-4 py-3 border-t">
-        <div className="text-sm text-gray-600">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-4 py-3 border-t">
+        <div className="text-sm text-gray-600 mb-2 sm:mb-0">
           Showing 1 to 6 of 18 results
         </div>
         <div className="flex items-center gap-2">
