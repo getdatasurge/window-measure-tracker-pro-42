@@ -79,13 +79,16 @@ export function useProjectForm({ onCreateProject, onClose }: UseProjectFormProps
         const parentKey = parent as keyof ProjectFormData;
         const parentObj = prev[parentKey];
         
-        // Create a safe copy of the parent object, or an empty object if it doesn't exist
-        const updatedParent = parentObj ? { ...parentObj } : {};
+        // Create a safe copy of the parent object
+        const updatedParent: Record<string, any> = {};
         
-        // Update the nested field
-        if (typeof updatedParent === 'object') {
-          (updatedParent as any)[child] = value;
+        // First copy existing values if the parent object exists
+        if (parentObj && typeof parentObj === 'object') {
+          Object.assign(updatedParent, parentObj);
         }
+        
+        // Then update the specific field
+        updatedParent[child] = value;
         
         return {
           ...prev,
