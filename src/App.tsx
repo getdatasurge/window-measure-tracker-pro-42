@@ -28,7 +28,8 @@ import DebugPage from "./pages/__debug";
 import Overview from "./pages/Overview"; 
 import TeamManagement from "./pages/TeamManagement"; 
 import Measurements from "./pages/Measurements"; 
-import MeasurementEntries from "./pages/MeasurementEntries"; // Add new import
+import MeasurementEntries from "./pages/MeasurementEntries";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
@@ -59,24 +60,118 @@ const App = () => (
                 <PromptHistoryViewer variant="dialog" />
               </div>
               <Routes>
+                {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/landing" element={<Navigate to="/" replace />} />
-                <Route path="/overview" element={<Overview />} />
-                <Route path="/dashboard" element={<DashboardV2 />} />
-                <Route path="/actions" element={<ActionViewer />} />
-                <Route path="/projects-new" element={<ProjectsNew />} />
-                <Route path="/teams" element={<TeamManagement />} /> 
-                <Route path="/schedule" element={<SchedulePage />} /> 
-                <Route path="/reports" element={<ReportsNew />} />
-                <Route path="/measurements" element={<Measurements />} />
-                <Route path="/measurement-entries" element={<MeasurementEntries />} /> {/* Add new route */}
-                <Route path="/user/:id/settings" element={<UserSettingsPage />} />
-                {isDev && <Route path="/__debug" element={<DebugPage />} />} 
-                <Route path="/" element={<MainLayout />}>
+                <Route path="/sign-in" element={<LandingPage />} />
+
+                {/* Protected Routes */}
+                <Route 
+                  path="/overview" 
+                  element={
+                    <ProtectedRoute>
+                      <Overview />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/dashboard" 
+                  element={
+                    <ProtectedRoute>
+                      <DashboardV2 />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/actions" 
+                  element={
+                    <ProtectedRoute>
+                      <ActionViewer />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/projects-new" 
+                  element={
+                    <ProtectedRoute>
+                      <ProjectsNew />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/teams" 
+                  element={
+                    <ProtectedRoute>
+                      <TeamManagement />
+                    </ProtectedRoute>
+                  } 
+                /> 
+                <Route 
+                  path="/schedule" 
+                  element={
+                    <ProtectedRoute>
+                      <SchedulePage />
+                    </ProtectedRoute>
+                  } 
+                /> 
+                <Route 
+                  path="/reports" 
+                  element={
+                    <ProtectedRoute>
+                      <ReportsNew />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/measurements" 
+                  element={
+                    <ProtectedRoute>
+                      <Measurements />
+                    </ProtectedRoute>
+                  } 
+                />
+                <Route 
+                  path="/measurement-entries" 
+                  element={
+                    <ProtectedRoute>
+                      <MeasurementEntries />
+                    </ProtectedRoute>
+                  } 
+                /> 
+                <Route 
+                  path="/user/:id/settings" 
+                  element={
+                    <ProtectedRoute>
+                      <UserSettingsPage />
+                    </ProtectedRoute>
+                  } 
+                />
+                {isDev && (
+                  <Route 
+                    path="/__debug" 
+                    element={
+                      <ProtectedRoute>
+                        <DebugPage />
+                      </ProtectedRoute>
+                    } 
+                  />
+                )} 
+
+                {/* Layout Routes with Protection */}
+                <Route 
+                  path="/" 
+                  element={
+                    <ProtectedRoute>
+                      <MainLayout />
+                    </ProtectedRoute>
+                  }
+                >
                   <Route path="projects" element={<Projects />} />
                   <Route path="reports-old" element={<Reports />} />
                   <Route path="settings" element={<Settings />} />
                 </Route>
+                
+                {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </BrowserRouter>
