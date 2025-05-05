@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { X } from 'lucide-react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,16 +10,14 @@ import {
   DialogTitle,
   DialogDescription,
 } from '@/components/ui/dialog';
-import MeasurementDetailsTab from './tabs/MeasurementDetailsTab';
-import DimensionsTab from './tabs/DimensionsTab';
-import AttributesTab from './tabs/AttributesTab';
-import StatusWorkflowTab from './tabs/StatusWorkflowTab';
+import MeasurementTabs from './MeasurementTabs';
+import ModalFooter from './ModalFooter';
 import { Measurement } from '@/data/measurementsData';
 
 type MeasurementEntryModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  measurement?: Measurement; // For edit mode
+  measurement?: Measurement;
   onSave: (measurement: Measurement) => void;
   mode: 'create' | 'edit';
 };
@@ -119,85 +116,18 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           )}
         </DialogHeader>
 
-        <Tabs 
-          defaultValue="details" 
-          value={activeTab} 
-          onValueChange={setActiveTab}
-          className="w-full"
-        >
-          <div className="border-b border-zinc-800 px-6">
-            <TabsList className="bg-transparent h-auto p-0 space-x-6">
-              <TabsTrigger 
-                value="details" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
-              >
-                Measurement Details
-              </TabsTrigger>
-              <TabsTrigger 
-                value="dimensions" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
-              >
-                Dimensions
-              </TabsTrigger>
-              <TabsTrigger 
-                value="attributes" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
-              >
-                Attributes
-              </TabsTrigger>
-              <TabsTrigger 
-                value="status" 
-                className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
-              >
-                Status & Workflow
-              </TabsTrigger>
-            </TabsList>
-          </div>
+        <MeasurementTabs 
+          activeTab={activeTab} 
+          setActiveTab={setActiveTab} 
+          formData={formData}
+          updateFormData={updateFormData}
+        />
 
-          <div className="p-6">
-            <TabsContent value="details" className="m-0">
-              <MeasurementDetailsTab 
-                formData={formData} 
-                updateFormData={updateFormData} 
-              />
-            </TabsContent>
-            <TabsContent value="dimensions" className="m-0">
-              <DimensionsTab 
-                formData={formData} 
-                updateFormData={updateFormData} 
-              />
-            </TabsContent>
-            <TabsContent value="attributes" className="m-0">
-              <AttributesTab 
-                formData={formData} 
-                updateFormData={updateFormData} 
-              />
-            </TabsContent>
-            <TabsContent value="status" className="m-0">
-              <StatusWorkflowTab 
-                formData={formData} 
-                updateFormData={updateFormData} 
-              />
-            </TabsContent>
-          </div>
-        </Tabs>
-
-        <div className="flex justify-between items-center border-t border-zinc-800 p-6">
-          <div className="text-xs text-zinc-500">
-            Last updated: {format(new Date(formData.updatedAt), 'MMM dd, yyyy h:mm a')} by {formData.updatedBy}
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button 
-              className="bg-green-600 hover:bg-green-700 text-white" 
-              onClick={handleSave}
-            >
-              Save Changes
-            </Button>
-          </div>
-        </div>
+        <ModalFooter 
+          measurement={formData}
+          onCancel={() => onOpenChange(false)}
+          onSave={handleSave}
+        />
       </DialogContent>
     </Dialog>
   );
