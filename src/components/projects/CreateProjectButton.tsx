@@ -2,7 +2,9 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import CreateProjectModal, { ProjectFormData } from './CreateProjectModal';
+import { useDebounce } from '@/hooks/useDebounce';
+import CreateProjectModal from './CreateProjectModal';
+import { ProjectFormData } from '@/types/project';
 import { toast } from '@/hooks/use-toast';
 
 interface CreateProjectButtonProps {

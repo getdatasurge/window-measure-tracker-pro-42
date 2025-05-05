@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 
 interface MeasurementDetailsTabProps {
   formData: Measurement;
@@ -93,4 +93,3 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({
 };
 
 export default MeasurementDetailsTab;
-
