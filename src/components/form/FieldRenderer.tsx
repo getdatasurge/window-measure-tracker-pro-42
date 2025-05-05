@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { FieldSchema } from './types';
-import { useFormContext } from 'react-hook-form';
+import { useFormContext, UseFormReturn } from 'react-hook-form';
 import { FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -11,10 +11,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 
 interface FieldRendererProps {
   field: FieldSchema;
+  form: UseFormReturn<Record<string, any>, any>;
 }
 
-const FieldRenderer: React.FC<FieldRendererProps> = ({ field }) => {
-  const { register, control, formState: { errors } } = useFormContext();
+const FieldRenderer: React.FC<FieldRendererProps> = ({ field, form }) => {
+  const { register, control, formState: { errors } } = form;
   const error = errors[field.name];
   
   switch (field.type) {

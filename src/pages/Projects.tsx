@@ -7,8 +7,9 @@ import ProjectFilters from '../components/projects/ProjectFilters';
 import ProjectTable from '../components/projects/ProjectTable';
 import ProjectWidgetsSection from '../components/projects/ProjectWidgetsSection';
 import { activeProjects } from '../data/projectsData';
+import withResponsiveLayout from '@/hoc/withResponsiveLayout';
 
-const Projects = () => {
+const ProjectsPage: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState('all');
   const [filteredProjects, setFilteredProjects] = useState(activeProjects);
   
@@ -19,7 +20,7 @@ const Projects = () => {
   };
   
   return (
-    <div className="space-y-6 p-6">
+    <div className="space-y-6">
       {/* Page Header */}
       <ProjectHeader />
       
@@ -47,4 +48,4 @@ const Projects = () => {
   );
 };
 
-export default Projects;
+export default withResponsiveLayout(ProjectsPage);

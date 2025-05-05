@@ -7,10 +7,11 @@ import DashboardActionsSection from '@/components/dashboard/DashboardActionsSect
 import DocumentationLinks from '@/components/dashboard/DocumentationLinks';
 import { Button } from '@/components/ui/button';
 import { FileText } from 'lucide-react';
+import withResponsiveLayout from '@/hoc/withResponsiveLayout';
 
-const Dashboard: React.FC = () => {
+const DashboardPage: React.FC = () => {
   return (
-    <div className="flex flex-col gap-8 px-4 py-6 md:gap-12 md:px-6 lg:px-8">
+    <div className="flex flex-col gap-8 md:gap-12">
       <DashboardHeader 
         title="Knowledge Base Dashboard" 
         actionButton={
@@ -36,4 +37,4 @@ const Dashboard: React.FC = () => {
   );
 };
 
-export default Dashboard;
+export default withResponsiveLayout(DashboardPage);

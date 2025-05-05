@@ -1,7 +1,5 @@
 import React, { useState } from 'react';
 import { Filter, Download, Plus, Search, MoreHorizontal } from 'lucide-react';
-import DashboardShell from '@/components/layout/DashboardShell';
-import PageContent from '@/components/layout/PageContent';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -23,6 +21,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import TeamFilterDropdown from '@/components/teams/TeamFilterDropdown';
+import withResponsiveLayout from '@/hoc/withResponsiveLayout';
 
 // Mock data for measurements
 const measurementsData = [
@@ -249,7 +248,7 @@ const glassTypeOptions = [
   { label: 'Other', value: 'other' },
 ];
 
-const Measurements: React.FC = () => {
+const MeasurementsPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [projectFilter, setProjectFilter] = useState('all');
   const [glassTypeFilter, setGlassTypeFilter] = useState('all');
@@ -316,269 +315,265 @@ const Measurements: React.FC = () => {
   };
 
   return (
-    <DashboardShell>
-      <PageContent>
-        <div className="flex flex-col space-y-6">
-          {/* Page header - made responsive */}
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+    <div className="flex flex-col space-y-6">
+      {/* Page header - made responsive */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h1 className="text-2xl font-bold tracking-tight">Entry Archive</h1>
+          <p className="text-sm text-zinc-400 mt-1">View and manage all window measurement entries</p>
+        </div>
+        <div className="flex flex-wrap gap-2 self-end sm:self-auto">
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2 bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50"
+          >
+            <Filter size={14} />
+            <span className="sm:inline">Advanced Filter</span>
+          </Button>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className="flex items-center gap-2 bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50"
+          >
+            <Download size={14} />
+            <span className="sm:inline">Export</span>
+          </Button>
+          <Button 
+            size="sm" 
+            className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
+          >
+            <Plus size={14} />
+            <span className="sm:inline">New Entry</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* KPI summary cards - made responsive */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="flex items-start justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Entry Archive</h1>
-              <p className="text-sm text-zinc-400 mt-1">View and manage all window measurement entries</p>
+              <p className="text-sm font-medium text-zinc-400">Total Measurements</p>
+              <h3 className="text-2xl font-bold mt-1 text-white">{totalMeasurements}</h3>
             </div>
-            <div className="flex flex-wrap gap-2 self-end sm:self-auto">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-2 bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50"
-              >
-                <Filter size={14} />
-                <span className="sm:inline">Advanced Filter</span>
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="flex items-center gap-2 bg-zinc-800/50 border-zinc-700 text-zinc-300 hover:bg-zinc-700/50"
-              >
-                <Download size={14} />
-                <span className="sm:inline">Export</span>
-              </Button>
-              <Button 
-                size="sm" 
-                className="bg-green-600 hover:bg-green-700 text-white flex items-center gap-2"
-              >
-                <Plus size={14} />
-                <span className="sm:inline">New Entry</span>
-              </Button>
-            </div>
-          </div>
-
-          {/* KPI summary cards - made responsive */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-zinc-400">Total Measurements</p>
-                  <h3 className="text-2xl font-bold mt-1 text-white">{totalMeasurements}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
-                    <path d="M2 9h20M9 20h6M3 4h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-zinc-400">In Progress</p>
-                  <h3 className="text-2xl font-bold mt-1 text-white">{inProgress}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-amber-900/30 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <polyline points="12 6 12 12 16 14"></polyline>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-zinc-400">Completed</p>
-                  <h3 className="text-2xl font-bold mt-1 text-white">{completed}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm font-medium text-zinc-400">Total Windows</p>
-                  <h3 className="text-2xl font-bold mt-1 text-white">{totalWindows}</h3>
-                </div>
-                <div className="w-10 h-10 rounded-full bg-purple-900/30 flex items-center justify-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
-                    <rect x="2" y="2" width="20" height="20" rx="2"></rect>
-                    <line x1="2" y1="12" x2="22" y2="12"></line>
-                    <line x1="12" y1="2" x2="12" y2="22"></line>
-                  </svg>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* Filters Row - made responsive */}
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-              <TeamFilterDropdown
-                label="All Statuses"
-                options={statusOptions}
-                selectedValue={statusFilter}
-                onSelect={setStatusFilter}
-              />
-              
-              <TeamFilterDropdown
-                label="All Projects"
-                options={projectOptions}
-                selectedValue={projectFilter}
-                onSelect={setProjectFilter}
-              />
-
-              <TeamFilterDropdown
-                label="All Glass Types"
-                options={glassTypeOptions}
-                selectedValue={glassTypeFilter}
-                onSelect={setGlassTypeFilter}
-              />
-            </div>
-            
-            <div className="relative w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
-              <Input 
-                placeholder="Search measurements..." 
-                className="pl-9 w-full bg-zinc-800/50 border-zinc-700 text-zinc-300"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)} 
-              />
-            </div>
-          </div>
-
-          {/* Measurements Table - with overflow handling */}
-          <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg">
-            <div className="overflow-x-auto">
-              <Table>
-                <TableHeader className="bg-zinc-800/70">
-                  <TableRow>
-                    <TableHead className="text-xs font-medium text-zinc-300">ID</TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300">Project</TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300">Location</TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300">Recorded By</TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300">Glass Type</TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={3}>
-                      Dimensions
-                      <div className="flex text-[10px] justify-around mt-1">
-                        <span>Width (in)</span>
-                        <span>Height (in)</span>
-                        <span>Area (sq ft)</span>
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={3}>
-                      Additional Attributes
-                      <div className="flex text-[10px] justify-around mt-1">
-                        <span>Qty</span>
-                        <span>Orientation</span>
-                        <span>Notes</span>
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={2}>
-                      Status & Workflow
-                      <div className="flex text-[10px] justify-around mt-1">
-                        <span>Status</span>
-                        <span>Approval</span>
-                      </div>
-                    </TableHead>
-                    <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={2}>
-                      Timestamps
-                      <div className="flex text-[10px] justify-around mt-1">
-                        <span>Created</span>
-                        <span>Updated</span>
-                      </div>
-                    </TableHead>
-                    <TableHead className="w-[40px]"></TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredData.map((measurement, index) => (
-                    <TableRow 
-                      key={measurement.id}
-                      className={index % 2 === 0 ? 'bg-zinc-900/30' : 'bg-zinc-800/30'} 
-                    >
-                      <TableCell className="text-xs font-medium text-zinc-300">
-                        {measurement.id}
-                      </TableCell>
-                      <TableCell className="text-xs">
-                        <div className="font-medium text-zinc-300">{measurement.project}</div>
-                        <div className="text-[10px] text-zinc-400">{measurement.projectId}</div>
-                      </TableCell>
-                      <TableCell className="text-xs text-zinc-300">{measurement.location}</TableCell>
-                      <TableCell className="text-xs text-zinc-300">{measurement.recordedBy}</TableCell>
-                      <TableCell className="text-xs text-zinc-300">{measurement.glassType}</TableCell>
-                      
-                      {/* Dimensions */}
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.width}</TableCell>
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.height}</TableCell>
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.area}</TableCell>
-                      
-                      {/* Additional Attributes */}
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.qty}</TableCell>
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.orientation}</TableCell>
-                      <TableCell className="text-xs text-zinc-300 px-1 max-w-[120px] truncate">{measurement.notes}</TableCell>
-                      
-                      {/* Status & Workflow */}
-                      <TableCell className="text-center px-1">
-                        {renderStatusBadge(measurement.status)}
-                      </TableCell>
-                      <TableCell className="text-xs px-1">
-                        {measurement.approval ? (
-                          <div>
-                            <div className="font-medium text-zinc-300">{measurement.approval.name}</div>
-                            <div className="text-[10px] text-zinc-400">{measurement.approval.date}</div>
-                          </div>
-                        ) : (
-                          <span className="text-zinc-500">-</span>
-                        )}
-                      </TableCell>
-                      
-                      {/* Timestamps */}
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.created}</TableCell>
-                      <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.updated}</TableCell>
-                      
-                      <TableCell className="text-right">
-                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                          <MoreHorizontal className="h-4 w-4 text-zinc-400" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-            
-            {/* Pagination - made responsive */}
-            <div className="p-4 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-3">
-              <div className="text-xs text-zinc-400">
-                Showing 1 to 10 of {filteredData.length} measurements
-              </div>
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious href="#" />
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#" isActive>1</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationLink href="#">2</PaginationLink>
-                  </PaginationItem>
-                  <PaginationItem>
-                    <PaginationNext href="#" />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
+            <div className="w-10 h-10 rounded-full bg-blue-900/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500">
+                <path d="M2 9h20M9 20h6M3 4h18a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z"></path>
+              </svg>
             </div>
           </div>
         </div>
-      </PageContent>
-    </DashboardShell>
+
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">In Progress</p>
+              <h3 className="text-2xl font-bold mt-1 text-white">{inProgress}</h3>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-amber-900/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-amber-500">
+                <circle cx="12" cy="12" r="10"></circle>
+                <polyline points="12 6 12 12 16 14"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">Completed</p>
+              <h3 className="text-2xl font-bold mt-1 text-white">{completed}</h3>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-green-900/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-green-500">
+                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+              </svg>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-4">
+          <div className="flex items-start justify-between">
+            <div>
+              <p className="text-sm font-medium text-zinc-400">Total Windows</p>
+              <h3 className="text-2xl font-bold mt-1 text-white">{totalWindows}</h3>
+            </div>
+            <div className="w-10 h-10 rounded-full bg-purple-900/30 flex items-center justify-center">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-purple-500">
+                <rect x="2" y="2" width="20" height="20" rx="2"></rect>
+                <line x1="2" y1="12" x2="22" y2="12"></line>
+                <line x1="12" y1="2" x2="12" y2="22"></line>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Filters Row - made responsive */}
+      <div className="flex flex-col sm:flex-row gap-4">
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <TeamFilterDropdown
+            label="All Statuses"
+            options={statusOptions}
+            selectedValue={statusFilter}
+            onSelect={setStatusFilter}
+          />
+          
+          <TeamFilterDropdown
+            label="All Projects"
+            options={projectOptions}
+            selectedValue={projectFilter}
+            onSelect={setProjectFilter}
+          />
+
+          <TeamFilterDropdown
+            label="All Glass Types"
+            options={glassTypeOptions}
+            selectedValue={glassTypeFilter}
+            onSelect={setGlassTypeFilter}
+          />
+        </div>
+        
+        <div className="relative w-full">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-500" />
+          <Input 
+            placeholder="Search measurements..." 
+            className="pl-9 w-full bg-zinc-800/50 border-zinc-700 text-zinc-300"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)} 
+          />
+        </div>
+      </div>
+
+      {/* Measurements Table - with overflow handling */}
+      <div className="bg-zinc-800/30 border border-zinc-700/50 rounded-lg">
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader className="bg-zinc-800/70">
+              <TableRow>
+                <TableHead className="text-xs font-medium text-zinc-300">ID</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300">Project</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300">Location</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300">Recorded By</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300">Glass Type</TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={3}>
+                  Dimensions
+                  <div className="flex text-[10px] justify-around mt-1">
+                    <span>Width (in)</span>
+                    <span>Height (in)</span>
+                    <span>Area (sq ft)</span>
+                  </div>
+                </TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={3}>
+                  Additional Attributes
+                  <div className="flex text-[10px] justify-around mt-1">
+                    <span>Qty</span>
+                    <span>Orientation</span>
+                    <span>Notes</span>
+                  </div>
+                </TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={2}>
+                  Status & Workflow
+                  <div className="flex text-[10px] justify-around mt-1">
+                    <span>Status</span>
+                    <span>Approval</span>
+                  </div>
+                </TableHead>
+                <TableHead className="text-xs font-medium text-zinc-300 text-center" colSpan={2}>
+                  Timestamps
+                  <div className="flex text-[10px] justify-around mt-1">
+                    <span>Created</span>
+                    <span>Updated</span>
+                  </div>
+                </TableHead>
+                <TableHead className="w-[40px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredData.map((measurement, index) => (
+                <TableRow 
+                  key={measurement.id}
+                  className={index % 2 === 0 ? 'bg-zinc-900/30' : 'bg-zinc-800/30'} 
+                >
+                  <TableCell className="text-xs font-medium text-zinc-300">
+                    {measurement.id}
+                  </TableCell>
+                  <TableCell className="text-xs">
+                    <div className="font-medium text-zinc-300">{measurement.project}</div>
+                    <div className="text-[10px] text-zinc-400">{measurement.projectId}</div>
+                  </TableCell>
+                  <TableCell className="text-xs text-zinc-300">{measurement.location}</TableCell>
+                  <TableCell className="text-xs text-zinc-300">{measurement.recordedBy}</TableCell>
+                  <TableCell className="text-xs text-zinc-300">{measurement.glassType}</TableCell>
+                  
+                  {/* Dimensions */}
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.width}</TableCell>
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.height}</TableCell>
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.area}</TableCell>
+                  
+                  {/* Additional Attributes */}
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.qty}</TableCell>
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.orientation}</TableCell>
+                  <TableCell className="text-xs text-zinc-300 px-1 max-w-[120px] truncate">{measurement.notes}</TableCell>
+                  
+                  {/* Status & Workflow */}
+                  <TableCell className="text-center px-1">
+                    {renderStatusBadge(measurement.status)}
+                  </TableCell>
+                  <TableCell className="text-xs px-1">
+                    {measurement.approval ? (
+                      <div>
+                        <div className="font-medium text-zinc-300">{measurement.approval.name}</div>
+                        <div className="text-[10px] text-zinc-400">{measurement.approval.date}</div>
+                      </div>
+                    ) : (
+                      <span className="text-zinc-500">-</span>
+                    )}
+                  </TableCell>
+                  
+                  {/* Timestamps */}
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.created}</TableCell>
+                  <TableCell className="text-xs text-zinc-300 text-center px-1">{measurement.updated}</TableCell>
+                  
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                      <MoreHorizontal className="h-4 w-4 text-zinc-400" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+        
+        {/* Pagination - made responsive */}
+        <div className="p-4 border-t border-zinc-800 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div className="text-xs text-zinc-400">
+            Showing 1 to 10 of {filteredData.length} measurements
+          </div>
+          <Pagination>
+            <PaginationContent>
+              <PaginationItem>
+                <PaginationPrevious href="#" />
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#" isActive>1</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationLink href="#">2</PaginationLink>
+              </PaginationItem>
+              <PaginationItem>
+                <PaginationNext href="#" />
+              </PaginationItem>
+            </PaginationContent>
+          </Pagination>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default Measurements;
+export default withResponsiveLayout(MeasurementsPage);
