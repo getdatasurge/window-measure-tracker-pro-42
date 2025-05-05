@@ -15,12 +15,12 @@ export const FormGrid: React.FC<FormGridProps> = ({
   // Create a responsive grid that stacks on mobile and shows columns on larger screens
   const gridClassMap = {
     1: 'grid-cols-1',
-    2: 'grid-cols-1 md:grid-cols-2',
+    2: 'grid-cols-1 sm:grid-cols-2',
     3: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3',
     4: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-4',
   };
 
-  const gridClass = gridClassMap[columns as keyof typeof gridClassMap] || 'grid-cols-1 md:grid-cols-2';
+  const gridClass = gridClassMap[columns as keyof typeof gridClassMap] || 'grid-cols-1 sm:grid-cols-2';
   
   return (
     <div className={`grid ${gridClass} gap-4 w-full ${className}`}>

@@ -36,7 +36,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
+      <DialogContent className="p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
         {/* Hidden dialog title and description for accessibility */}
         <DialogTitle className="sr-only">Create New Project</DialogTitle>
         <DialogDescription className="sr-only">
@@ -48,7 +48,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="w-full"
+          className="w-full flex flex-col"
         >
           <ModalHeader projectId={projectId} />
           

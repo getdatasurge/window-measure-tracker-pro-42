@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { X } from 'lucide-react';
@@ -91,10 +90,10 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       }
     }
   }, [formData.width, formData.height]);
-
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden bg-zinc-900 border border-zinc-800 text-white">
+      <DialogContent className="p-0 overflow-hidden bg-zinc-900 border border-zinc-800 text-white">
         <DialogHeader className="p-6 pb-0">
           <DialogTitle className="text-xl font-semibold flex justify-between items-center">
             <div>
