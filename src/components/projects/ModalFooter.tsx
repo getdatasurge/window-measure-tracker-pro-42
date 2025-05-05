@@ -40,7 +40,7 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   };
   
   return (
-    <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80">
+    <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80 sticky bottom-0 left-0 right-0 w-full">
       <div className="flex items-center">
         {showSaveDraft && onSaveDraft ? (
           <Button 

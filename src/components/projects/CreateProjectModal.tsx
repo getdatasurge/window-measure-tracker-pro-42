@@ -105,7 +105,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     <AnimatePresence>
       {open && (
         <Dialog open={open} onOpenChange={onOpenChange}>
-          <DialogContent className="max-w-2xl p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
+          <DialogContent className="max-w-2xl p-0 max-h-[90vh] bg-zinc-900 border border-zinc-800 text-white overflow-hidden flex flex-col">
             {/* Hidden dialog title and description for accessibility */}
             <DialogTitle className="sr-only">Create New Project</DialogTitle>
             <DialogDescription className="sr-only">
@@ -117,7 +117,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="w-full"
+              className="w-full flex flex-col h-full"
             >
               <ModalHeader projectId={projectId} />
               
@@ -130,15 +130,17 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 stepErrors={stepErrors}
               />
 
-              <ProjectModalContent
-                activeTab={activeTab}
-                setActiveTab={setActiveTab}
-                formData={formData}
-                errors={errors}
-                projectId={projectId}
-                updateFormData={updateFormData}
-                handleSubmit={handleSubmit}
-              />
+              <div className="flex-1 overflow-y-auto">
+                <ProjectModalContent
+                  activeTab={activeTab}
+                  setActiveTab={setActiveTab}
+                  formData={formData}
+                  errors={errors}
+                  projectId={projectId}
+                  updateFormData={updateFormData}
+                  handleSubmit={handleSubmit}
+                />
+              </div>
 
               <ModalFooter 
                 onSubmit={handleSubmit}
