@@ -56,6 +56,37 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   // Calculate current step
   const currentStep = tabToStepMap[activeTab as keyof typeof tabToStepMap] || 0;
   
+  // Convert errors to step errors format
+  const stepErrors: Record<number, boolean> = {
+    0: false,
+    1: false,
+    2: false,
+    3: false
+  };
+  
+  // Check if there are any errors in each step
+  if (Object.keys(errors).length > 0) {
+    // Project Info step
+    if (errors.name || errors.type || errors.description) {
+      stepErrors[0] = true;
+    }
+    
+    // Location & Timeline step
+    if (errors.location || errors.timeline) {
+      stepErrors[1] = true;
+    }
+    
+    // Team & Requirements step
+    if (errors.team || errors.estimatedWindows || errors.instructions) {
+      stepErrors[2] = true;
+    }
+    
+    // Metadata step
+    if (errors.tags || errors.priority || errors.budgetEstimate || errors.attachments) {
+      stepErrors[3] = true;
+    }
+  }
+  
   // Reset form when modal opens
   useEffect(() => {
     if (open) {
@@ -96,8 +127,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 totalSteps={Object.keys(tabToStepMap).length}
                 stepLabels={stepLabels}
                 onStepClick={handleStepClick}
-                errors={errors}
-                tabToStepMap={tabToStepMap}
+                stepErrors={stepErrors}
               />
 
               <ProjectModalContent
@@ -113,6 +143,23 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <ModalFooter 
                 onSubmit={handleSubmit}
                 submitButtonText={submitButtonText}
+                currentStep={currentStep}
+                totalSteps={Object.keys(tabToStepMap).length}
+                onNextStep={() => {
+                  const tabNames = Object.keys(tabToStepMap);
+                  const nextStepIndex = currentStep + 1;
+                  if (nextStepIndex < tabNames.length) {
+                    setActiveTab(tabNames[nextStepIndex]);
+                  }
+                }}
+                onPrevStep={() => {
+                  const tabNames = Object.keys(tabToStepMap);
+                  const prevStepIndex = currentStep - 1;
+                  if (prevStepIndex >= 0) {
+                    setActiveTab(tabNames[prevStepIndex]);
+                  }
+                }}
+                isLastStep={currentStep === Object.keys(tabToStepMap).length - 1}
                 showSaveDraft={true}
                 onSaveDraft={saveDraft}
                 draftSaved={draftSaved}

@@ -13,6 +13,9 @@ interface ModalFooterProps {
   onPrevStep: () => void;
   isLastStep: boolean;
   isSubmitting?: boolean;
+  showSaveDraft?: boolean;
+  onSaveDraft?: () => void;
+  draftSaved?: boolean;
 }
 
 const ModalFooter: React.FC<ModalFooterProps> = ({ 
@@ -23,12 +26,26 @@ const ModalFooter: React.FC<ModalFooterProps> = ({
   onNextStep,
   onPrevStep,
   isLastStep,
-  isSubmitting = false
+  isSubmitting = false,
+  showSaveDraft = false,
+  onSaveDraft,
+  draftSaved = false
 }) => {
   return (
     <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80">
       <div className="flex items-center">
-        <p className="text-xs text-zinc-500">* Required fields</p>
+        {showSaveDraft && onSaveDraft ? (
+          <Button 
+            variant="ghost" 
+            onClick={onSaveDraft} 
+            className="text-xs text-zinc-500 hover:text-zinc-400"
+            disabled={draftSaved}
+          >
+            {draftSaved ? 'Draft saved' : 'Save as draft'}
+          </Button>
+        ) : (
+          <p className="text-xs text-zinc-500">* Required fields</p>
+        )}
       </div>
       <div className="flex gap-2">
         <DialogClose asChild>
