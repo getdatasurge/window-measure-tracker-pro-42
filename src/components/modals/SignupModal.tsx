@@ -19,6 +19,7 @@ const SignupModal = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    birthday: '',
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -30,7 +31,7 @@ const SignupModal = () => {
     e.preventDefault();
     
     // Form validation
-    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword) {
+    if (!formData.name || !formData.email || !formData.password || !formData.confirmPassword || !formData.birthday) {
       toast.error('All fields are required');
       return;
     }
@@ -127,6 +128,18 @@ const SignupModal = () => {
                 name="email"
                 type="email"
                 placeholder="name@example.com"
+                className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
+                onChange={handleChange}
+                disabled={isLoading}
+              />
+            </div>
+
+            <div className="grid gap-2">
+              <Label htmlFor="birthday">Birthday</Label>
+              <Input
+                id="birthday"
+                name="birthday"
+                type="date"
                 className="bg-zinc-800 border-zinc-700 text-white placeholder:text-zinc-500"
                 onChange={handleChange}
                 disabled={isLoading}
