@@ -112,9 +112,7 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
       
       
       {/* New Entry Button */}
-      <Button className="bg-green-600 hover:bg-green-700">
-        + New Entry
-      </Button>
+      
     </div>;
 };
 export default MeasurementFilterBar;
