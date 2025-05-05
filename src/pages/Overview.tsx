@@ -9,7 +9,6 @@ import ActivityFeed from '../components/dashboard/ActivityFeed';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import MeasurementStatusBoard from '../components/measurements/MeasurementStatusBoard';
-import DraftProjectList from '../components/dashboard/DraftProjectList';
 import CreateProjectModal from '../components/projects/CreateProjectModal';
 import { ProjectFormData } from '../types/project';
 
@@ -40,8 +39,15 @@ const Overview = () => {
           {/* New Measurement Status Board Component */}
           <MeasurementStatusBoard />
           
-          {/* Project Drafts Section */}
-          <DraftProjectList openCreateProjectModal={openCreateProjectModal} />
+          {/* Project Section */}
+          <div className="flex justify-end">
+            <Button 
+              onClick={() => openCreateProjectModal()} 
+              className="bg-green-500 hover:bg-green-600 text-white"
+            >
+              Create New Project
+            </Button>
+          </div>
           
           {/* Page Header */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
