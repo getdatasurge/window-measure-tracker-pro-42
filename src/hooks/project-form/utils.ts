@@ -5,50 +5,48 @@ import { ProjectFormData } from '@/types/project';
  * Helper function to merge defaultFormData with provided default values
  */
 export function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial<ProjectFormData>): ProjectFormData {
-  // Create a deep copy of the base data to avoid mutations
-  const result = JSON.parse(JSON.stringify(baseData)) as ProjectFormData;
+  // Create a deep copy of the base data
+  const result: ProjectFormData = JSON.parse(JSON.stringify(baseData));
   
-  // Handle top-level properties
-  Object.keys(overrides).forEach((key) => {
-    const typedKey = key as keyof ProjectFormData;
-    const value = overrides[typedKey];
-    
-    if (value !== undefined) {
-      // Handle nested objects separately
-      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Handle nested object merging for specific known properties
-        if (typedKey === 'location' || typedKey === 'timeline' || typedKey === 'team' || typedKey === 'attachments') {
-          // These are known object properties that can be safely merged
-          const baseValue = result[typedKey];
-          
-          if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
-            // Type assertion for each specific property to help TypeScript
-            if (typedKey === 'location') {
-              result.location = { ...baseValue, ...value };
-            } 
-            else if (typedKey === 'timeline') {
-              result.timeline = { ...baseValue, ...value };
-            }
-            else if (typedKey === 'team') {
-              result.team = { ...baseValue, ...value };
-            }
-            else if (typedKey === 'attachments') {
-              result.attachments = { ...baseValue, ...value };
-            }
-          } else {
-            // Direct assignment for the full object
-            result[typedKey] = value;
-          }
-        } else {
-          // For other object properties, direct assignment
-          result[typedKey] = value;
-        }
-      } else {
-        // For non-object values, assign directly
-        result[typedKey] = value;
-      }
-    }
-  });
+  // Handle top-level properties with type safety
+  if (overrides.name !== undefined) result.name = overrides.name;
+  if (overrides.type !== undefined) result.type = overrides.type;
+  if (overrides.status !== undefined) result.status = overrides.status;
+  if (overrides.description !== undefined) result.description = overrides.description;
+  if (overrides.estimatedWindows !== undefined) result.estimatedWindows = overrides.estimatedWindows;
+  if (overrides.instructions !== undefined) result.instructions = overrides.instructions;
+  if (overrides.tags !== undefined) result.tags = overrides.tags;
+  if (overrides.priority !== undefined) result.priority = overrides.priority;
+  if (overrides.budgetEstimate !== undefined) result.budgetEstimate = overrides.budgetEstimate;
+  
+  // Handle nested objects with explicit type safety
+  if (overrides.location) {
+    result.location = {
+      ...result.location,
+      ...(overrides.location as NonNullable<ProjectFormData['location']>)
+    };
+  }
+  
+  if (overrides.timeline) {
+    result.timeline = {
+      ...result.timeline,
+      ...(overrides.timeline as NonNullable<ProjectFormData['timeline']>)
+    };
+  }
+  
+  if (overrides.team) {
+    result.team = {
+      ...result.team,
+      ...(overrides.team as NonNullable<ProjectFormData['team']>)
+    };
+  }
+  
+  if (overrides.attachments) {
+    result.attachments = {
+      ...result.attachments,
+      ...(overrides.attachments as NonNullable<ProjectFormData['attachments']>)
+    };
+  }
   
   return result;
 }
