@@ -10,7 +10,7 @@ import {
   FormMessage,
   Form
 } from '@/components/ui/form';
-import { ProjectFormValues } from '../CreateProjectModal';
+import { ProjectFormValues } from '../project-form/validation-schema';
 import { Input } from '@/components/ui/input';
 import { 
   Select, 

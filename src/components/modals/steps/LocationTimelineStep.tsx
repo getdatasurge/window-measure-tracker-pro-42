@@ -2,8 +2,8 @@
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
-import { ProjectFormValues } from '../CreateProjectModal';
 import { MapPin } from 'lucide-react';
+import { ProjectFormValues } from '../project-form/validation-schema';
 import LocationFields from './location-timeline/LocationFields';
 import TimelineFields from './location-timeline/TimelineFields';
 

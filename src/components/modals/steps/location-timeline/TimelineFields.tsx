@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import { ProjectFormValues } from '../../CreateProjectModal';
+import { ProjectFormValues } from '../../project-form/validation-schema';
 import DatePickerField from './DatePickerField';
 
 interface TimelineFieldsProps {
