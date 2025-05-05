@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { ProjectFormData } from '@/types/project';
 import { toast } from '@/hooks/use-toast';
+import { useDebounce } from '@/hooks/useDebounce';
 
 // Default form data for a new project
 export const defaultFormData: ProjectFormData = {
@@ -50,19 +51,53 @@ export interface UseProjectFormProps {
 export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseProjectFormProps) {
   const [activeTab, setActiveTab] = useState('project-info');
   const [formData, setFormData] = useState<ProjectFormData>(() => {
+    // Check for saved draft in localStorage
+    const savedDraft = localStorage.getItem('create-project-draft');
+    
+    if (savedDraft) {
+      try {
+        const parsedDraft = JSON.parse(savedDraft);
+        return parsedDraft;
+      } catch (e) {
+        console.error("Failed to parse saved draft:", e);
+      }
+    }
+    
     // Merge default form data with any provided default values
     if (defaultValues) {
       return mergeDefaultValues(defaultFormData, defaultValues);
     }
     return defaultFormData;
   });
+  
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
   
   // Generate a random project ID for display
   const projectId = `PRJ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   
+  // Debounce form changes for autosave
+  const debouncedFormData = useDebounce(formData, 300);
+  
+  // Autosave form data to localStorage
+  useEffect(() => {
+    localStorage.setItem('create-project-draft', JSON.stringify(debouncedFormData));
+  }, [debouncedFormData]);
+  
   // Reset form when modal opens
-  const resetForm = () => {
+  const resetForm = (useSavedDraft: boolean = false) => {
+    if (useSavedDraft) {
+      const savedDraft = localStorage.getItem('create-project-draft');
+      if (savedDraft) {
+        try {
+          const parsedDraft = JSON.parse(savedDraft);
+          setFormData(parsedDraft);
+          return;
+        } catch (e) {
+          console.error("Failed to parse saved draft:", e);
+        }
+      }
+    }
+    
     // Apply default values when resetting the form
     if (defaultValues) {
       setFormData(mergeDefaultValues(defaultFormData, defaultValues));
@@ -85,10 +120,17 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       if (value !== undefined) {
         // Handle nested objects separately
         if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          result[typedKey] = {
-            ...((result[typedKey] as object) || {}),
-            ...value,
-          } as any;
+          // Create a type-safe copy of the nested object
+          const baseValue = result[typedKey];
+          if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
+            result[typedKey] = {
+              ...baseValue,
+              ...(value as any)
+            };
+          } else {
+            // If the base value is not an object, override completely
+            result[typedKey] = value as any;
+          }
         } else {
           result[typedKey] = value as any;
         }
@@ -113,18 +155,9 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       
       setFormData(prev => {
         // Create a proper copy of the nested object, checking for null/undefined
-        const parentKey = parent as keyof ProjectFormData;
-        const parentObj = prev[parentKey];
+        const updatedParent = { ...(prev[parent as keyof ProjectFormData] || {}) } as Record<string, any>;
         
-        // Create a safe copy of the parent object
-        const updatedParent: Record<string, any> = {};
-        
-        // First copy existing values if the parent object exists
-        if (parentObj && typeof parentObj === 'object') {
-          Object.assign(updatedParent, parentObj);
-        }
-        
-        // Then update the specific field
+        // Update the specific field
         updatedParent[child] = value;
         
         return {
@@ -165,6 +198,9 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       // Call the onCreateProject callback with the form data
       onCreateProject?.(formData);
       
+      // Clear the saved draft
+      localStorage.removeItem('create-project-draft');
+      
       // Close modal and show success message
       onClose();
       toast({
@@ -191,6 +227,16 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       }
     }
   };
+  
+  // Check if there's a saved draft
+  const hasSavedDraft = (): boolean => {
+    return localStorage.getItem('create-project-draft') !== null;
+  };
+  
+  // Clear the saved draft
+  const clearSavedDraft = (): void => {
+    localStorage.removeItem('create-project-draft');
+  };
 
   return {
     activeTab,
@@ -200,6 +246,8 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     projectId,
     resetForm,
     updateFormData,
-    handleSubmit
+    handleSubmit,
+    hasSavedDraft,
+    clearSavedDraft
   };
 }
