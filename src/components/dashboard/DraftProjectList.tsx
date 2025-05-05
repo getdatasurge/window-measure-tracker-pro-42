@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { FilePenLine, Trash2 } from "lucide-react";
+import { FilePenLine, Trash2, X } from "lucide-react";
 import { formatDistanceToNow } from 'date-fns';
 import { motion } from 'framer-motion';
 import { toast } from '@/components/ui/sonner';
@@ -23,8 +23,8 @@ const DraftProjectList: React.FC<DraftProjectListProps> = ({ openCreateProjectMo
   const userId = "user-1"; 
   const draftKey = `draft-project-${userId}`;
 
-  useEffect(() => {
-    // Check for saved drafts in localStorage
+  // Refresh draft data
+  const refreshDraftData = () => {
     const savedDraft = localStorage.getItem(draftKey);
     
     if (savedDraft) {
@@ -32,11 +32,21 @@ const DraftProjectList: React.FC<DraftProjectListProps> = ({ openCreateProjectMo
         const parsedDraft = JSON.parse(savedDraft);
         if (parsedDraft.data && parsedDraft.timestamp) {
           setDraft(parsedDraft);
+        } else {
+          setDraft(null);
         }
       } catch (error) {
         console.error('Failed to parse draft:', error);
+        setDraft(null);
       }
+    } else {
+      setDraft(null);
     }
+  };
+
+  useEffect(() => {
+    // Check for saved drafts in localStorage
+    refreshDraftData();
   }, [draftKey]);
 
   const handleResumeDraft = () => {
@@ -60,8 +70,17 @@ const DraftProjectList: React.FC<DraftProjectListProps> = ({ openCreateProjectMo
       transition={{ duration: 0.3, ease: "easeOut" }}
     >
       <Card className="bg-zinc-800/50 border border-zinc-700/50 shadow-lg">
-        <CardContent className="p-4">
-          <div className="flex justify-between items-center mb-3">
+        <CardContent className="p-4 relative">
+          {/* Add Close/Delete button in the top-right corner */}
+          <button 
+            onClick={handleDiscardDraft}
+            className="absolute top-2 right-2 rounded-full p-1 bg-zinc-700/50 hover:bg-zinc-700 text-zinc-400 hover:text-white transition-colors"
+            aria-label="Discard draft"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          
+          <div className="flex justify-between items-center mb-3 pr-6">
             <h3 className="font-semibold text-white text-sm">Saved Project Draft</h3>
             <p className="text-xs text-zinc-400">
               Last saved {formatDistanceToNow(draft.timestamp)} ago

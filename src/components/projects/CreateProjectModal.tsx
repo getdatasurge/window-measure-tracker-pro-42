@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ProjectModalContent from './ProjectModalContent';
 import { useProjectForm } from '@/hooks/useProjectForm';
 import { ProjectFormData } from '@/types/project';
@@ -56,7 +55,9 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     clearSavedDraft
   } = useProjectForm({ 
     onCreateProject, 
-    onClose: () => onOpenChange(false),
+    onClose: () => {
+      onOpenChange(false);
+    },
     defaultValues
   });
   
@@ -103,12 +104,29 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     toast.success("Draft saved");
   };
 
+  // Handle modal close to ensure drafts are properly handled
+  const handleOpenChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Modal is closing
+      // We'll keep the draft in localStorage, just close the modal
+      onOpenChange(false);
+    } else {
+      onOpenChange(true);
+    }
+  };
+
   // Using AnimatePresence to handle exit animations
   return (
     <AnimatePresence>
       {open && (
-        <Dialog open={open} onOpenChange={onOpenChange}>
+        <Dialog open={open} onOpenChange={handleOpenChange}>
           <DialogContent className="max-w-2xl p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
+            {/* Hidden dialog title and description for accessibility */}
+            <DialogTitle className="sr-only">Create New Project</DialogTitle>
+            <DialogDescription className="sr-only">
+              Fill in the project details to create a new project. You can save your progress as a draft.
+            </DialogDescription>
+            
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}

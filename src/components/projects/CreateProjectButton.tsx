@@ -34,6 +34,11 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({
     });
   };
   
+  // Handle modal state changes, ensuring we properly track modal open state
+  const handleOpenChange = (open: boolean) => {
+    setIsModalOpen(open);
+  };
+  
   return (
     <>
       <Button
@@ -47,7 +52,7 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({
       
       <CreateProjectModal
         open={isModalOpen}
-        onOpenChange={setIsModalOpen}
+        onOpenChange={handleOpenChange}
         onCreateProject={handleCreateProject}
         defaultValues={defaultValues}
         submitButtonText={submitButtonText}
