@@ -77,3 +77,4 @@ const AttributesTab: React.FC<AttributesTabProps> = ({
 };
 
 export default AttributesTab;
+
