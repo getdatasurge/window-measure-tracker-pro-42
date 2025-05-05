@@ -36,7 +36,7 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
+      <DialogContent className="p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden flex flex-col max-h-[90vh]">
         {/* Hidden dialog title and description for accessibility */}
         <DialogTitle className="sr-only">Create New Project</DialogTitle>
         <DialogDescription className="sr-only">
@@ -48,28 +48,37 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="w-full flex flex-col"
+          className="w-full flex flex-col h-full"
         >
-          <ModalHeader projectId={projectId} />
+          {/* Fixed Header */}
+          <div className="sticky top-0 z-10 bg-zinc-900">
+            <ModalHeader projectId={projectId} />
+          </div>
           
-          <ProjectModalFormContent 
-            form={form}
-            currentStep={currentStep}
-            projectId={projectId}
-            stepErrors={stepErrors}
-            handleStepClick={handleStepClick}
-          />
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <ProjectModalFormContent 
+              form={form}
+              currentStep={currentStep}
+              projectId={projectId}
+              stepErrors={stepErrors}
+              handleStepClick={handleStepClick}
+            />
+          </div>
 
-          <ModalFooter 
-            onSubmit={handleSubmit}
-            submitButtonText={submitButtonText}
-            currentStep={currentStep}
-            totalSteps={STEP_LABELS.length}
-            onNextStep={handleNextStep}
-            onPrevStep={handlePrevStep}
-            isLastStep={currentStep === STEP_LABELS.length - 1}
-            isSubmitting={isSubmitting}
-          />
+          {/* Fixed Footer */}
+          <div className="sticky bottom-0 z-10 bg-zinc-900">
+            <ModalFooter 
+              onSubmit={handleSubmit}
+              submitButtonText={submitButtonText}
+              currentStep={currentStep}
+              totalSteps={STEP_LABELS.length}
+              onNextStep={handleNextStep}
+              onPrevStep={handlePrevStep}
+              isLastStep={currentStep === STEP_LABELS.length - 1}
+              isSubmitting={isSubmitting}
+            />
+          </div>
         </motion.div>
       </DialogContent>
     </Dialog>
