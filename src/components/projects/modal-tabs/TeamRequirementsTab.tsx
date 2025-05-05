@@ -4,8 +4,8 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { ProjectFormData } from '@/types/project';
-import { FormGrid } from '@/components/form/FormGrid';
-import { FormSection } from '@/components/form/FormSection';
+import FormGrid from '@/components/form/FormGrid';
+import FormSection from '@/components/form/FormSection';
 import FormRow from '@/components/form/FormRow';
 
 interface TeamRequirementsTabProps {
