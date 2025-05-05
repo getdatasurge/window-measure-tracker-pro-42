@@ -6,7 +6,7 @@ import { ProjectFormData } from '@/types/project';
  */
 export function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial<ProjectFormData>): ProjectFormData {
   // Create a deep copy of the base data to avoid mutations
-  const result = { ...baseData } as ProjectFormData;
+  const result = JSON.parse(JSON.stringify(baseData)) as ProjectFormData;
   
   // Handle top-level properties
   Object.keys(overrides).forEach((key) => {
@@ -19,18 +19,18 @@ export function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial
         // Handle nested object merging
         const baseValue = result[typedKey];
         if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
-          // Merge nested objects with type safety
+          // Merge nested objects using explicit typing
           result[typedKey] = {
             ...baseValue,
             ...value
-          } as any; // Use type assertion since we know the shape is correct
+          };
         } else {
           // If the base value is not an object, override completely
-          result[typedKey] = value as any;
+          result[typedKey] = value;
         }
       } else {
         // For non-object values, assign directly
-        result[typedKey] = value as any;
+        result[typedKey] = value;
       }
     }
   });
