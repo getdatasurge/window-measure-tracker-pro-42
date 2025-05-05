@@ -2,53 +2,70 @@
 import React from 'react';
 import { DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { Save } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check } from "lucide-react";
 
 interface ModalFooterProps {
   onSubmit: () => void;
-  showSaveDraft?: boolean;
   submitButtonText?: string;
-  onSaveDraft?: () => void;
-  draftSaved?: boolean;
+  currentStep: number;
+  totalSteps: number;
+  onNextStep: () => void;
+  onPrevStep: () => void;
+  isLastStep: boolean;
+  isSubmitting?: boolean;
 }
 
 const ModalFooter: React.FC<ModalFooterProps> = ({ 
   onSubmit, 
-  showSaveDraft = false,
   submitButtonText = "Create Project",
-  onSaveDraft,
-  draftSaved = false
+  currentStep,
+  totalSteps,
+  onNextStep,
+  onPrevStep,
+  isLastStep,
+  isSubmitting = false
 }) => {
   return (
     <div className="flex justify-between p-6 border-t border-zinc-800 bg-zinc-900/80">
-      <div className="flex items-center gap-2">
+      <div className="flex items-center">
         <p className="text-xs text-zinc-500">* Required fields</p>
-        {draftSaved && (
-          <span className="text-xs text-green-500">Draft saved</span>
-        )}
       </div>
       <div className="flex gap-2">
-        {showSaveDraft && onSaveDraft && (
-          <Button 
-            variant="outline" 
-            className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700"
-            onClick={onSaveDraft}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            Save Draft
-          </Button>
-        )}
         <DialogClose asChild>
           <Button variant="outline" className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white">
             Cancel
           </Button>
         </DialogClose>
-        <Button 
-          onClick={onSubmit}
-          className="bg-green-500 text-white hover:bg-green-600"
-        >
-          {submitButtonText}
-        </Button>
+        
+        {currentStep > 0 && (
+          <Button 
+            onClick={onPrevStep}
+            className="bg-zinc-700 text-white hover:bg-zinc-600"
+            variant="outline"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back
+          </Button>
+        )}
+        
+        {!isLastStep ? (
+          <Button 
+            onClick={onNextStep}
+            className="bg-zinc-600 text-white hover:bg-zinc-500"
+          >
+            Next
+            <ArrowRight className="h-4 w-4 ml-2" />
+          </Button>
+        ) : (
+          <Button 
+            onClick={onSubmit}
+            className="bg-green-500 text-white hover:bg-green-600"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Creating...' : submitButtonText}
+            {!isSubmitting && <Check className="h-4 w-4 ml-2" />}
+          </Button>
+        )}
       </div>
     </div>
   );

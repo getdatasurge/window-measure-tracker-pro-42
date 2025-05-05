@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import CreateProjectModal from './CreateProjectModal';
+import CreateProjectModal from '../modals/CreateProjectModal';
 import { ProjectFormData } from '@/types/project';
 import { toast } from '@/hooks/use-toast';
 
@@ -49,7 +49,6 @@ const CreateProjectButton: React.FC<CreateProjectButtonProps> = ({
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
         onCreateProject={handleCreateProject}
-        defaultValues={defaultValues}
         submitButtonText={submitButtonText}
       />
     </>
