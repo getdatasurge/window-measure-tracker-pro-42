@@ -1,12 +1,14 @@
+
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { motion } from 'framer-motion';
+import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Measurement } from '@/data/measurementsData';
 import MeasurementTabs from './MeasurementTabs';
-import ModalFooter from './ModalFooter';
 import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
+
 type MeasurementEntryModalProps = {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
@@ -15,6 +17,7 @@ type MeasurementEntryModalProps = {
   mode: 'create' | 'edit';
   defaultValues?: Partial<Measurement>;
 };
+
 const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
   isOpen,
   onOpenChange,
@@ -60,6 +63,7 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       setActiveTab('details');
     }
   }, [isOpen, measurement, defaultValues, initialFormData]);
+  
   const handleSave = () => {
     // Update the timestamp 
     const updatedMeasurement = {
@@ -77,6 +81,7 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
     onSave(updatedMeasurement);
     onOpenChange(false);
   };
+  
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -96,24 +101,68 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       }
     }
   }, [formData.width, formData.height]);
-  return <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="p-0 overflow-hidden bg-zinc-900 border border-zinc-800 text-white">
-        <DialogHeader className="p-6 pb-0">
-          <DialogTitle className="text-xl font-semibold flex justify-between items-center">
-            <div>
-              {mode === 'edit' ? 'Edit Measurement' : 'New Measurement'}
+  
+  return (
+    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+      <DialogContent className="p-0 overflow-hidden bg-zinc-900 border border-zinc-800 text-white max-w-2xl">
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.95 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
+          className="w-full flex flex-col h-full max-h-[90vh]"
+        >
+          {/* Fixed Header */}
+          <div className="sticky top-0 z-10 bg-zinc-900">
+            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
+              <div>
+                <h2 className="text-lg font-semibold">{mode === 'edit' ? 'Edit Measurement' : 'New Measurement'}</h2>
+                {mode === 'edit' && <p className="text-sm text-zinc-400">
+                  ID: {formData.id} | Project: {formData.projectName}
+                </p>}
+              </div>
+              <DialogClose className="p-1 rounded-md hover:bg-zinc-800">
+                <X className="h-4 w-4" />
+              </DialogClose>
             </div>
-            
-          </DialogTitle>
-          {mode === 'edit' && <DialogDescription className="text-zinc-400 text-sm">
-              ID: {formData.id} | Project: {formData.projectName}
-            </DialogDescription>}
-        </DialogHeader>
+          </div>
+          
+          {/* Scrollable Content Area */}
+          <div className="flex-1 overflow-y-auto">
+            <MeasurementTabs 
+              activeTab={activeTab} 
+              setActiveTab={setActiveTab} 
+              formData={formData} 
+              updateFormData={updateFormData}
+            />
+          </div>
 
-        <MeasurementTabs activeTab={activeTab} setActiveTab={setActiveTab} formData={formData} updateFormData={updateFormData} />
-
-        <ModalFooter measurement={formData} onCancel={() => onOpenChange(false)} onSave={handleSave} />
+          {/* Fixed Footer */}
+          <div className="sticky bottom-0 z-10 bg-zinc-900">
+            <div className="flex justify-between items-center border-t border-zinc-800 p-6">
+              <div className="text-xs text-zinc-500">
+                Last updated: {new Date(formData.updatedAt).toLocaleString()} by {formData.updatedBy || 'N/A'}
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => onOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  className="bg-green-600 hover:bg-green-700 text-white" 
+                  onClick={handleSave}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+  );
 };
+
 export default MeasurementEntryModal;
