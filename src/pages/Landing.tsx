@@ -1,16 +1,15 @@
-
 import React from 'react';
 import { ArrowRight, BarChart, Clock, FileCode, Users, ArrowRightCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import SignupModal from '@/components/modals/SignupModal';
 import LoginModal from '@/components/modals/LoginModal';
-
 const LandingPage = () => {
-  const { openSignup, openLogin } = useAuthModalStore();
-  
-  return (
-    <div className="min-h-screen bg-black text-white flex flex-col">
+  const {
+    openSignup,
+    openLogin
+  } = useAuthModalStore();
+  return <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header/Hero Section */}
       <header className="flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 md:pt-32 md:pb-24">
         <div className="logo-container mb-6">
@@ -29,19 +28,12 @@ const LandingPage = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
-          <Button 
-            onClick={openSignup} 
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-all transform hover:scale-105"
-          >
+          <Button onClick={openSignup} className="bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-all transform hover:scale-105">
             Get Started Free
             <ArrowRight size={18} />
           </Button>
           
-          <Button 
-            onClick={openLogin} 
-            variant="outline" 
-            className="border-gray-700 text-white hover:bg-gray-800 px-8 py-2 rounded-md font-medium transition-all"
-          >
+          <Button onClick={openLogin} variant="outline" className="border-gray-700 text-white hover:bg-gray-800 px-8 py-2 rounded-md font-medium transition-all">
             Login
           </Button>
         </div>
@@ -142,11 +134,7 @@ const LandingPage = () => {
             </div>
             
             {/* Dashboard image */}
-            <img 
-              src="/lovable-uploads/0e376979-379c-4452-92d8-5c17de05158d.png" 
-              alt="WindowTracker Dashboard Preview" 
-              className="w-full h-auto border border-zinc-800 rounded-lg shadow-2xl"
-            />
+            <img alt="WindowTracker Dashboard Preview" src="/lovable-uploads/d95530c1-2c2a-4649-97ae-8b206b3cd24d.png" className="w-full h-auto border border-zinc-800 rounded-lg shadow-2xl object-fill" />
           </div>
         </div>
       </section>
@@ -161,10 +149,7 @@ const LandingPage = () => {
             Join thousands of professionals who trust WindowTracker for their measurement and installation needs.
           </p>
           
-          <Button 
-            onClick={openSignup} 
-            className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 rounded-md font-medium flex items-center gap-2 mx-auto transition-all transform hover:scale-105"
-          >
+          <Button onClick={openSignup} className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 rounded-md font-medium flex items-center gap-2 mx-auto transition-all transform hover:scale-105">
             Get Started Today
             <ArrowRightCircle size={18} />
           </Button>
@@ -195,8 +180,6 @@ const LandingPage = () => {
       {/* Auth Modals */}
       <SignupModal />
       <LoginModal />
-    </div>
-  );
+    </div>;
 };
-
 export default LandingPage;
