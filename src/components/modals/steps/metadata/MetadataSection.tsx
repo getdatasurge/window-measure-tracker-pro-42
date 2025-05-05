@@ -18,6 +18,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { ProjectFormValues } from '../../project-form/validation-schema';
+import { FormGrid } from '../../form-layout';
 
 interface MetadataSectionProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -28,7 +29,7 @@ const MetadataSection: React.FC<MetadataSectionProps> = ({ form }) => {
     <div className="space-y-4">
       <h3 className="text-md font-medium text-white">Project Metadata</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <FormGrid>
         <FormField
           control={form.control}
           name="priority"
@@ -81,7 +82,7 @@ const MetadataSection: React.FC<MetadataSectionProps> = ({ form }) => {
             </FormItem>
           )}
         />
-      </div>
+      </FormGrid>
     </div>
   );
 };

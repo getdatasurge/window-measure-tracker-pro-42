@@ -20,6 +20,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
+import { FormGrid, FormSection } from '../form-layout';
 
 interface ProjectInfoStepProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -43,7 +44,7 @@ const ProjectInfoStep: React.FC<ProjectInfoStepProps> = ({ form }) => {
       <Form {...form}>
         <div className="space-y-4">
           {/* Two-column layout for name and type */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormGrid>
             {/* Project Name Field - Left Column */}
             <FormField
               control={form.control}
@@ -102,7 +103,7 @@ const ProjectInfoStep: React.FC<ProjectInfoStepProps> = ({ form }) => {
                 </FormItem>
               )}
             />
-          </div>
+          </FormGrid>
 
           {/* Full-width Description Field */}
           <FormField

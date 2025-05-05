@@ -21,6 +21,7 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Users } from 'lucide-react';
+import { FormGrid, FormSection } from '../form-layout';
 
 interface TeamRequirementsStepProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -57,10 +58,8 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
 
       <Form {...form}>
         <div className="space-y-6">
-          <div className="space-y-4">
-            <h3 className="text-md font-medium text-white">Team Assignment</h3>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormSection title="Team Assignment">
+            <FormGrid>
               <FormField
                 control={form.control}
                 name="team.projectManager"
@@ -115,7 +114,7 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
                   </FormItem>
                 )}
               />
-            </div>
+            </FormGrid>
             
             <FormField
               control={form.control}
@@ -154,11 +153,9 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
                 </FormItem>
               )}
             />
-          </div>
+          </FormSection>
           
-          <div className="space-y-4 pt-2">
-            <h3 className="text-md font-medium text-white">Project Requirements</h3>
-            
+          <FormSection title="Project Requirements">
             <FormField
               control={form.control}
               name="instructions"
@@ -179,7 +176,7 @@ const TeamRequirementsStep: React.FC<TeamRequirementsStepProps> = ({ form }) => 
                 </FormItem>
               )}
             />
-          </div>
+          </FormSection>
         </div>
       </Form>
     </div>

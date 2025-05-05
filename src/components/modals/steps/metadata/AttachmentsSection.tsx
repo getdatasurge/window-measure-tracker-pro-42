@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { ProjectFormValues } from '../../project-form/validation-schema';
+import { FormGrid } from '../../form-layout';
 
 interface AttachmentsSectionProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -20,7 +21,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ form }) => {
     <div className="space-y-4">
       <h3 className="text-md font-medium text-white">Attachments</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <FormGrid columns={3}>
         <FormItem>
           <FormLabel className="text-white">Blueprints</FormLabel>
           <FormControl>
@@ -78,7 +79,7 @@ const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ form }) => {
           </FormDescription>
           <FormMessage />
         </FormItem>
-      </div>
+      </FormGrid>
     </div>
   );
 };

@@ -6,6 +6,7 @@ import { MapPin } from 'lucide-react';
 import { ProjectFormValues } from '../project-form/validation-schema';
 import LocationFields from './location-timeline/LocationFields';
 import TimelineFields from './location-timeline/TimelineFields';
+import { FormSection } from '../form-layout';
 
 interface LocationTimelineStepProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -24,8 +25,13 @@ const LocationTimelineStep: React.FC<LocationTimelineStepProps> = ({ form }) => 
 
       <Form {...form}>
         <div className="space-y-6">
-          <LocationFields form={form} />
-          <TimelineFields form={form} />
+          <FormSection>
+            <LocationFields form={form} />
+          </FormSection>
+          
+          <FormSection>
+            <TimelineFields form={form} />
+          </FormSection>
         </div>
       </Form>
     </div>

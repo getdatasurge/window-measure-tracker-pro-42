@@ -7,6 +7,7 @@ import { ProjectFormValues } from '../project-form/validation-schema';
 import MetadataSection from './metadata/MetadataSection';
 import TagsInputField from './metadata/TagsInputField';
 import AttachmentsSection from './metadata/AttachmentsSection';
+import { FormSection } from '../form-layout';
 
 interface MetadataStepProps {
   form: UseFormReturn<ProjectFormValues>;
@@ -26,13 +27,19 @@ const MetadataStep: React.FC<MetadataStepProps> = ({ form }) => {
       <Form {...form}>
         <div className="space-y-6">
           {/* Metadata Section */}
-          <MetadataSection form={form} />
+          <FormSection>
+            <MetadataSection form={form} />
+          </FormSection>
           
           {/* Tags Input Field */}
-          <TagsInputField form={form} />
+          <FormSection>
+            <TagsInputField form={form} />
+          </FormSection>
           
           {/* Attachments Section */}
-          <AttachmentsSection form={form} />
+          <FormSection>
+            <AttachmentsSection form={form} />
+          </FormSection>
         </div>
       </Form>
     </div>
