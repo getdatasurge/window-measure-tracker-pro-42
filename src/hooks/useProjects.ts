@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
@@ -128,6 +127,33 @@ export const useProjects = () => {
     }
   };
 
+  const deleteProject = async (id: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Delete the project
+      const { error: deleteError } = await supabase
+        .from('projects')
+        .delete()
+        .eq('id', id);
+
+      if (deleteError) {
+        throw deleteError;
+      }
+
+      toast.success('Project deleted successfully');
+      return true;
+    } catch (err) {
+      const error = err instanceof Error ? err : new Error('Failed to delete project');
+      setError(error);
+      toast.error('Failed to delete project');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const assignUserToProject = async (assignment: ProjectAssignment) => {
     try {
       setLoading(true);
@@ -159,6 +185,7 @@ export const useProjects = () => {
     getProjects,
     createProject,
     updateProject,
+    deleteProject,
     assignUserToProject
   };
 };

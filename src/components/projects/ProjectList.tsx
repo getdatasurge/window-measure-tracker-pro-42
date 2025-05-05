@@ -5,18 +5,21 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { NewProjectModal } from '@/components/modals/NewProjectModal';
 import { UserAssignmentModal } from '@/components/modals/UserAssignmentModal';
+import { DeleteProjectModal } from '@/components/modals/DeleteProjectModal';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
-import { PlusCircle, Users, Loader2 } from 'lucide-react';
+import { PlusCircle, Users, Loader2, Trash2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 export function ProjectList() {
-  const { getProjects, loading: projectsLoading } = useProjects();
+  const { getProjects, deleteProject, loading: projectsLoading } = useProjects();
   const [projects, setProjects] = useState<ProjectData[]>([]);
   const [isNewProjectModalOpen, setIsNewProjectModalOpen] = useState(false);
   const [isAssignmentModalOpen, setIsAssignmentModalOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedProject, setSelectedProject] = useState<ProjectData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const loadProjects = async () => {
     setLoading(true);
@@ -36,6 +39,23 @@ export function ProjectList() {
   const openAssignmentModal = (project: ProjectData) => {
     setSelectedProject(project);
     setIsAssignmentModalOpen(true);
+  };
+
+  const openDeleteModal = (project: ProjectData) => {
+    setSelectedProject(project);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!selectedProject || !selectedProject.id) return;
+    
+    try {
+      setIsDeleting(true);
+      await deleteProject(selectedProject.id);
+      await loadProjects();
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   const getStatusBadge = (status: string | undefined) => {
@@ -108,13 +128,23 @@ export function ProjectList() {
                       </TableCell>
                       <TableCell>{getStatusBadge(project.status)}</TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => openAssignmentModal(project)}
-                        >
-                          <Users className="h-4 w-4 mr-1" /> Assign
-                        </Button>
+                        <div className="flex justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openAssignmentModal(project)}
+                          >
+                            <Users className="h-4 w-4 mr-1" /> Assign
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => openDeleteModal(project)}
+                            className="text-red-500 hover:bg-red-100 hover:text-red-700 dark:hover:bg-red-900/20"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -133,12 +163,22 @@ export function ProjectList() {
       />
 
       {selectedProject && (
-        <UserAssignmentModal
-          isOpen={isAssignmentModalOpen}
-          onClose={() => setIsAssignmentModalOpen(false)}
-          project={selectedProject}
-          onAssigned={() => loadProjects()}
-        />
+        <>
+          <UserAssignmentModal
+            isOpen={isAssignmentModalOpen}
+            onClose={() => setIsAssignmentModalOpen(false)}
+            project={selectedProject}
+            onAssigned={() => loadProjects()}
+          />
+          
+          <DeleteProjectModal 
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            project={selectedProject}
+            onDelete={handleDeleteProject}
+            isDeleting={isDeleting}
+          />
+        </>
       )}
     </div>
   );
