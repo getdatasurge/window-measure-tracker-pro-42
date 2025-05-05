@@ -16,16 +16,31 @@ export function mergeDefaultValues(baseData: ProjectFormData, overrides: Partial
     if (value !== undefined) {
       // Handle nested objects separately
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        // Handle nested object merging
-        const baseValue = result[typedKey];
-        if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
-          // Merge nested objects using explicit typing
-          result[typedKey] = {
-            ...baseValue,
-            ...value
-          };
+        // Handle nested object merging for specific known properties
+        if (typedKey === 'location' || typedKey === 'timeline' || typedKey === 'team' || typedKey === 'attachments') {
+          // These are known object properties that can be safely merged
+          const baseValue = result[typedKey];
+          
+          if (typeof baseValue === 'object' && baseValue !== null && !Array.isArray(baseValue)) {
+            // Type assertion for each specific property to help TypeScript
+            if (typedKey === 'location') {
+              result.location = { ...baseValue, ...value };
+            } 
+            else if (typedKey === 'timeline') {
+              result.timeline = { ...baseValue, ...value };
+            }
+            else if (typedKey === 'team') {
+              result.team = { ...baseValue, ...value };
+            }
+            else if (typedKey === 'attachments') {
+              result.attachments = { ...baseValue, ...value };
+            }
+          } else {
+            // Direct assignment for the full object
+            result[typedKey] = value;
+          }
         } else {
-          // If the base value is not an object, override completely
+          // For other object properties, direct assignment
           result[typedKey] = value;
         }
       } else {
