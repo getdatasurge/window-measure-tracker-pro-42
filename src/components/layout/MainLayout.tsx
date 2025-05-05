@@ -42,8 +42,9 @@ const MainLayout: React.FC = () => {
   }, [isMobile]);
 
   return (
-    <div className="flex min-h-screen bg-gray-50 overflow-x-hidden w-full">
-      <div className="relative z-20">
+    <div className="flex min-h-screen bg-gray-50 overflow-hidden w-full">
+      {/* Sidebar container with fixed positioning */}
+      <div className="relative z-20 shrink-0">
         <div 
           className={`
             fixed inset-y-0 left-0 z-20 
@@ -69,13 +70,17 @@ const MainLayout: React.FC = () => {
         )}
       </div>
 
-      <div className={`flex flex-col w-full transition-all duration-300 ${isMobile ? '' : sidebarOpen ? 'lg:ml-64' : 'lg:ml-16'} overflow-x-hidden`}>
-        <Header toggleSidebar={toggleSidebar} />
-        <main className="flex-1 p-4 sm:p-6 overflow-x-hidden">
-          <div className="w-full max-w-full overflow-x-hidden">
-            <Outlet />
-          </div>
-        </main>
+      {/* Main content that fills remaining space */}
+      <div className="flex flex-col flex-1 transition-all duration-300 ease-in-out overflow-hidden">
+        {/* Apply left margin on desktop only */}
+        <div className={`flex-1 flex flex-col w-full ${isMobile ? '' : sidebarOpen ? 'ml-64' : 'ml-16'}`}>
+          <Header toggleSidebar={toggleSidebar} />
+          <main className="flex-1 p-4 sm:p-6">
+            <div className="w-full max-w-full">
+              <Outlet />
+            </div>
+          </main>
+        </div>
       </div>
     </div>
   );
