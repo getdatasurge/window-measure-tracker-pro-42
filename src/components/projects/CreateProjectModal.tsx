@@ -9,6 +9,7 @@ import DraftPrompt from './DraftPrompt';
 import StepProgressIndicator from './StepProgressIndicator';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
+import { toast } from '@/components/ui/sonner';
 
 export interface CreateProjectModalProps {
   open: boolean;
@@ -34,6 +35,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   defaultValues 
 }) => {
   const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+  
+  // For simplicity, we're using a fixed user ID
+  // In a real app, this would come from authentication context
+  const userId = "user-1";
+  const draftKey = `draft-project-${userId}`;
   
   const {
     activeTab,
@@ -83,6 +89,18 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setActiveTab(tabNames[stepIndex]);
   };
 
+  const handleSaveDraft = () => {
+    // Save the current form state as a draft with additional metadata
+    const draftData = {
+      data: formData,
+      timestamp: Date.now(),
+      name: formData.name || "Unnamed Project"
+    };
+    
+    localStorage.setItem(draftKey, JSON.stringify(draftData));
+    toast.success("Draft saved");
+  };
+
   return (
     <AnimatePresence>
       {open && (
@@ -120,6 +138,11 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                     projectId={projectId}
                     updateFormData={updateFormData}
                     handleSubmit={handleSubmit}
+                  />
+
+                  <ModalFooter 
+                    onSubmit={handleSubmit} 
+                    onSaveDraft={handleSaveDraft}
                   />
                 </>
               )}
