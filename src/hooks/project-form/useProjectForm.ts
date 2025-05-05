@@ -1,10 +1,12 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ProjectFormData } from '@/types/project';
 import { toast } from '@/hooks/use-toast';
 import { defaultFormData } from './default-data';
 import { mergeDefaultValues, validateProjectForm } from './utils';
 import { UseProjectFormProps, UseProjectFormReturn } from './types';
+
+const DRAFT_STORAGE_KEY = 'project_form_draft';
 
 /**
  * Custom hook for managing project form state and interactions
@@ -12,7 +14,17 @@ import { UseProjectFormProps, UseProjectFormReturn } from './types';
 export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseProjectFormProps): UseProjectFormReturn {
   const [activeTab, setActiveTab] = useState('project-info');
   const [formData, setFormData] = useState<ProjectFormData>(() => {
-    // Merge default form data with any provided default values
+    // Try to load saved draft from localStorage
+    const savedDraft = localStorage.getItem(DRAFT_STORAGE_KEY);
+    if (savedDraft) {
+      try {
+        return JSON.parse(savedDraft) as ProjectFormData;
+      } catch (e) {
+        console.error('Error parsing saved draft:', e);
+      }
+    }
+    
+    // Fall back to default form data with any provided default values
     if (defaultValues) {
       return mergeDefaultValues(defaultFormData, defaultValues);
     }
@@ -20,12 +32,16 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
   });
   
   const [errors, setErrors] = useState<Partial<Record<string, string>>>({});
+  const [draftSaved, setDraftSaved] = useState(false);
   
   // Generate a random project ID for display
   const projectId = `PRJ-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
   
   // Reset form when modal opens
   const resetForm = () => {
+    // Remove any saved draft
+    localStorage.removeItem(DRAFT_STORAGE_KEY);
+    
     // Apply default values when resetting the form
     if (defaultValues) {
       setFormData(mergeDefaultValues(defaultFormData, defaultValues));
@@ -34,10 +50,12 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     }
     setErrors({});
     setActiveTab('project-info');
+    setDraftSaved(false);
   };
   
   const updateFormData = (field: string, value: any) => {
     console.log(`Updating field: ${field} with value:`, value);
+    setDraftSaved(false);
     
     // Handle nested properties
     const fieldParts = field.split('.');
@@ -85,10 +103,31 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     return Object.keys(newErrors).length === 0;
   };
   
+  const saveDraft = () => {
+    try {
+      localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(formData));
+      setDraftSaved(true);
+      toast({
+        title: "Draft Saved",
+        description: "Your project draft has been saved locally.",
+      });
+    } catch (e) {
+      console.error('Error saving draft:', e);
+      toast({
+        title: "Error Saving Draft",
+        description: "Could not save your draft. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+  
   const handleSubmit = () => {
     if (validateForm()) {
       // Call the onCreateProject callback with the form data
       onCreateProject?.(formData);
+      
+      // Remove draft on successful submission
+      localStorage.removeItem(DRAFT_STORAGE_KEY);
       
       // Close modal and show success message
       onClose();
@@ -125,6 +164,8 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     projectId,
     resetForm,
     updateFormData,
-    handleSubmit
+    handleSubmit,
+    draftSaved,
+    saveDraft,
   };
 }

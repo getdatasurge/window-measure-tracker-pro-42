@@ -16,4 +16,6 @@ export interface UseProjectFormReturn {
   resetForm: () => void;
   updateFormData: (field: string, value: any) => void;
   handleSubmit: () => void;
+  draftSaved?: boolean;
+  saveDraft?: () => void;
 }

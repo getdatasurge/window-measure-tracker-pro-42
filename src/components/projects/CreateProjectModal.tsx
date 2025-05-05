@@ -43,6 +43,8 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     resetForm,
     updateFormData,
     handleSubmit,
+    draftSaved,
+    saveDraft,
   } = useProjectForm({ 
     onCreateProject, 
     onClose: () => {
@@ -94,6 +96,8 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
                 totalSteps={Object.keys(tabToStepMap).length}
                 stepLabels={stepLabels}
                 onStepClick={handleStepClick}
+                errors={errors}
+                tabToStepMap={tabToStepMap}
               />
 
               <ProjectModalContent
@@ -109,7 +113,9 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               <ModalFooter 
                 onSubmit={handleSubmit}
                 submitButtonText={submitButtonText}
-                showSaveDraft={false}
+                showSaveDraft={true}
+                onSaveDraft={saveDraft}
+                draftSaved={draftSaved}
               />
             </motion.div>
           </DialogContent>

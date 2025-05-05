@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { MapPin, Users, File } from "lucide-react";
+import { MapPin, Users, File, AlertCircle } from "lucide-react";
 import ProjectInfoTab from './modal-tabs/ProjectInfoTab';
 import LocationTimelineTab from './modal-tabs/LocationTimelineTab';
 import TeamRequirementsTab from './modal-tabs/TeamRequirementsTab';
@@ -28,41 +28,94 @@ const ProjectModalContent: React.FC<ProjectModalContentProps> = ({
   updateFormData,
   handleSubmit
 }) => {
+  // Check if tab has errors
+  const hasTabErrors = (tabName: string): boolean => {
+    if (tabName === 'project-info') {
+      return Object.keys(errors).some(key => ['name', 'type'].includes(key));
+    } else if (tabName === 'location-timeline') {
+      return Object.keys(errors).some(key => 
+        key.startsWith('location.') || key.startsWith('timeline.')
+      );
+    } else if (tabName === 'team-requirements') {
+      return Object.keys(errors).some(key => 
+        key.startsWith('team.') || ['estimatedWindows', 'instructions'].includes(key)
+      );
+    } else if (tabName === 'attachments-metadata') {
+      return Object.keys(errors).some(key => 
+        key.startsWith('attachments.') || ['tags', 'priority', 'budgetEstimate'].includes(key)
+      );
+    }
+    
+    return false;
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
       <div className="border-b border-zinc-800">
         <TabsList className="bg-transparent h-auto p-0">
           <TabsTrigger 
             value="project-info" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
+            className={`
+              data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white 
+              px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 
+              data-[state=active]:shadow-none relative
+              ${hasTabErrors('project-info') && activeTab !== 'project-info' ? 'text-red-400' : ''}
+            `}
           >
             Project Info
+            {hasTabErrors('project-info') && activeTab !== 'project-info' && (
+              <AlertCircle className="h-3 w-3 text-red-400 ml-1 absolute -top-1 -right-1" />
+            )}
           </TabsTrigger>
           <TabsTrigger 
             value="location-timeline" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
+            className={`
+              data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white 
+              px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 
+              data-[state=active]:shadow-none relative
+              ${hasTabErrors('location-timeline') && activeTab !== 'location-timeline' ? 'text-red-400' : ''}
+            `}
           >
             <div className="flex items-center gap-1">
               <MapPin className="h-4 w-4" />
               <span>Location & Timeline</span>
+              {hasTabErrors('location-timeline') && activeTab !== 'location-timeline' && (
+                <AlertCircle className="h-3 w-3 text-red-400 ml-1 absolute -top-1 -right-1" />
+              )}
             </div>
           </TabsTrigger>
           <TabsTrigger 
             value="team-requirements" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
+            className={`
+              data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white 
+              px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 
+              data-[state=active]:shadow-none relative
+              ${hasTabErrors('team-requirements') && activeTab !== 'team-requirements' ? 'text-red-400' : ''}
+            `}
           >
             <div className="flex items-center gap-1">
               <Users className="h-4 w-4" />
               <span>Team & Requirements</span>
+              {hasTabErrors('team-requirements') && activeTab !== 'team-requirements' && (
+                <AlertCircle className="h-3 w-3 text-red-400 ml-1 absolute -top-1 -right-1" />
+              )}
             </div>
           </TabsTrigger>
           <TabsTrigger 
             value="attachments-metadata" 
-            className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
+            className={`
+              data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white 
+              px-6 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 
+              data-[state=active]:shadow-none relative
+              ${hasTabErrors('attachments-metadata') && activeTab !== 'attachments-metadata' ? 'text-red-400' : ''}
+            `}
           >
             <div className="flex items-center gap-1">
               <File className="h-4 w-4" />
               <span>Attachments & Metadata</span>
+              {hasTabErrors('attachments-metadata') && activeTab !== 'attachments-metadata' && (
+                <AlertCircle className="h-3 w-3 text-red-400 ml-1 absolute -top-1 -right-1" />
+              )}
             </div>
           </TabsTrigger>
         </TabsList>
