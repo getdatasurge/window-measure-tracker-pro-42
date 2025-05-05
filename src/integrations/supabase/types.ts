@@ -536,21 +536,77 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      project_assignments: {
         Row: {
-          Eemail: string | null
+          assigned_at: string | null
           id: string
-          name: string
+          project_id: string
+          role: string | null
+          user_id: string
         }
         Insert: {
-          Eemail?: string | null
+          assigned_at?: string | null
           id?: string
-          name: string
+          project_id: string
+          role?: string | null
+          user_id: string
         }
         Update: {
+          assigned_at?: string | null
+          id?: string
+          project_id?: string
+          role?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_assignments_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          client_name: string | null
+          created_at: string | null
+          created_by: string | null
+          deadline: string | null
+          description: string | null
+          Eemail: string | null
+          id: string
+          location: string | null
+          name: string
+          status: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          client_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
           Eemail?: string | null
           id?: string
+          location?: string | null
+          name: string
+          status?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          client_name?: string | null
+          created_at?: string | null
+          created_by?: string | null
+          deadline?: string | null
+          description?: string | null
+          Eemail?: string | null
+          id?: string
+          location?: string | null
           name?: string
+          status?: string | null
+          updated_at?: string | null
         }
         Relationships: []
       }
