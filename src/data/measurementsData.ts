@@ -23,6 +23,7 @@ export interface Measurement {
   updatedAt: string;
   updatedBy: string;
   changeMade?: string;
+  glassType?: string;
 }
 
 // Mock data for measurements
@@ -43,7 +44,8 @@ export const mockMeasurements: Measurement[] = [
     status: 'Pending',
     createdAt: '2024-06-16T08:00:00Z',
     updatedAt: '2024-06-17T08:05:00Z',
-    updatedBy: 'James Rodriguez'
+    updatedBy: 'James Rodriguez',
+    glassType: 'Tempered'
   },
   {
     id: 'WM-2024-002',
@@ -61,7 +63,8 @@ export const mockMeasurements: Measurement[] = [
     status: 'Film Cut',
     createdAt: '2024-06-14T10:00:00Z',
     updatedAt: '2024-06-17T09:30:00Z',
-    updatedBy: 'Michael Thompson'
+    updatedBy: 'Michael Thompson',
+    glassType: 'Reflective'
   },
   {
     id: 'WM-2024-003',
@@ -81,7 +84,8 @@ export const mockMeasurements: Measurement[] = [
     approvalDate: '2024-06-20T14:00:00Z',
     createdAt: '2024-06-15T11:00:00Z',
     updatedAt: '2024-06-20T12:45:00Z',
-    updatedBy: 'Lisa Kim'
+    updatedBy: 'Lisa Kim',
+    glassType: 'Clear'
   },
   {
     id: 'WM-2024-007',
@@ -99,7 +103,8 @@ export const mockMeasurements: Measurement[] = [
     status: 'Film Cut',
     createdAt: '2024-06-17T14:00:00Z',
     updatedAt: '2024-06-21T08:20:00Z',
-    updatedBy: 'Michael Thompson'
+    updatedBy: 'Michael Thompson',
+    glassType: 'Reflective'
   },
   {
     id: 'WM-2024-006',
@@ -117,7 +122,8 @@ export const mockMeasurements: Measurement[] = [
     status: 'Pending',
     createdAt: '2024-06-16T09:15:00Z',
     updatedAt: '2024-06-17T08:30:00Z',
-    updatedBy: 'James Rodriguez'
+    updatedBy: 'James Rodriguez',
+    glassType: 'Tempered'
   }
 ];
 
@@ -146,6 +152,17 @@ export const statuses = [
   { value: 'Installed', label: 'Installed', color: 'green' },
   { value: 'Under Review', label: 'Under Review', color: 'purple' },
   { value: 'Completed', label: 'Completed', color: 'green' }
+];
+
+// Glass types
+export const glassTypes = [
+  { value: 'all', label: 'All Glass Types' },
+  { value: 'Clear', label: 'Clear' },
+  { value: 'Tinted', label: 'Tinted' },
+  { value: 'Reflective', label: 'Reflective' },
+  { value: 'Frosted', label: 'Frosted' },
+  { value: 'Tempered', label: 'Tempered' },
+  { value: 'Other', label: 'Other' }
 ];
 
 // Helper function to get measurements for a specific day
@@ -183,7 +200,8 @@ export const getArchivedMeasurements = (): Measurement[] => {
       createdAt: '2024-06-10T10:30:00Z',
       updatedAt: '2024-06-11T16:30:00Z',
       updatedBy: 'James Rodriguez',
-      changeMade: 'Archived'
+      changeMade: 'Archived',
+      glassType: 'Tinted'
     },
   ];
 };

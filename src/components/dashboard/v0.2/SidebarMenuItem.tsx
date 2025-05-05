@@ -33,7 +33,7 @@ const SidebarMenuItem: React.FC<SidebarMenuItemProps> = ({
   return (
     <Link 
       to={actualPath} 
-      className={`flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
+      className={`relative flex items-center px-4 py-2.5 my-1 mx-2 rounded-md transition-colors ${
         isActive 
           ? 'bg-green-900/20 text-green-400' 
           : 'text-zinc-400 hover:bg-zinc-800/50 hover:text-zinc-200'
