@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import MainLayout from "./components/layout/MainLayout";
+import LandingPage from "./pages/Landing";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
@@ -31,9 +32,9 @@ const queryClient = new QueryClient();
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
 
-// Home route component that redirects to Overview page
+// Home route component that redirects to LandingPage
 const HomeRoute = () => {
-  return <Navigate to="/overview" replace />;
+  return <Navigate to="/landing" replace />;
 };
 
 const App = () => (
@@ -60,6 +61,7 @@ const App = () => (
             </div>
             <Routes>
               <Route path="/" element={<HomeRoute />} />
+              <Route path="/landing" element={<LandingPage />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/dashboard" element={<DashboardV2 />} />
               <Route path="/actions" element={<ActionViewer />} />
