@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useForm } from 'react-hook-form';
@@ -20,6 +20,7 @@ interface MultiStepFormModalProps {
   steps: StepSchema[];
   defaultValues?: Record<string, any>;
   onSubmit: (data: Record<string, any>) => void;
+  submitButtonText?: string; // Added this prop to fix the error
 }
 
 const MultiStepFormModal: React.FC<MultiStepFormModalProps> = ({
@@ -29,7 +30,8 @@ const MultiStepFormModal: React.FC<MultiStepFormModalProps> = ({
   description,
   steps,
   defaultValues = {},
-  onSubmit
+  onSubmit,
+  submitButtonText = "Submit" // Default value
 }) => {
   const [currentStep, setCurrentStep] = useState(0);
   const [completedSteps, setCompletedSteps] = useState<number[]>([]);
@@ -114,6 +116,7 @@ const MultiStepFormModal: React.FC<MultiStepFormModalProps> = ({
                   {steps[currentStep].fields.map(field => (
                     <FormRow key={field.name}>
                       <Label>{field.label}</Label>
+                      {/* This line needed to be fixed - FieldRenderer expects field and form */}
                       <FieldRenderer field={field} form={form} />
                     </FormRow>
                   ))}
@@ -140,7 +143,7 @@ const MultiStepFormModal: React.FC<MultiStepFormModalProps> = ({
             </Button>
           ) : (
             <Button onClick={handleSubmit(processSubmit)} type="submit">
-              Submit
+              {submitButtonText}
             </Button>
           )}
         </DialogFooter>

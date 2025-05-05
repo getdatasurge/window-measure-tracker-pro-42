@@ -71,11 +71,11 @@ const MainLayout: React.FC = () => {
       </div>
 
       {/* Main content that fills remaining space */}
-      <div className="flex flex-col flex-1 transition-all duration-300 ease-in-out overflow-hidden">
+      <div className="flex flex-col flex-1 transition-all duration-300 ease-in-out">
         {/* Apply left margin on desktop only */}
         <div className={`flex-1 flex flex-col w-full ${isMobile ? '' : sidebarOpen ? 'ml-64' : 'ml-16'}`}>
           <Header toggleSidebar={toggleSidebar} />
-          <main className="flex-1 p-4 sm:p-6">
+          <main className="flex-1 overflow-hidden">
             <div className="w-full max-w-full">
               <Outlet />
             </div>
