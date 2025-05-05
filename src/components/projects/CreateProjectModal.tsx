@@ -1,14 +1,13 @@
+
 import React, { useEffect, useState } from 'react';
 import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import ProjectModalContent from './ProjectModalContent';
 import { useProjectForm } from '@/hooks/useProjectForm';
 import { ProjectFormData } from '@/types/project';
 import { motion, AnimatePresence } from 'framer-motion';
-import DraftPrompt from './DraftPrompt';
 import StepProgressIndicator from './StepProgressIndicator';
 import ModalHeader from './ModalHeader';
 import ModalFooter from './ModalFooter';
-import { toast } from '@/components/ui/sonner';
 
 export interface CreateProjectModalProps {
   open: boolean;
@@ -35,13 +34,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   defaultValues,
   submitButtonText = "Create Project"
 }) => {
-  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
-  
-  // For simplicity, we're using a fixed user ID
-  // In a real app, this would come from authentication context
-  const userId = "user-1";
-  const draftKey = `draft-project-${userId}`;
-  
   const {
     activeTab,
     setActiveTab,
@@ -51,8 +43,6 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     resetForm,
     updateFormData,
     handleSubmit,
-    hasSavedDraft,
-    clearSavedDraft
   } = useProjectForm({ 
     onCreateProject, 
     onClose: () => {
@@ -64,27 +54,12 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
   // Calculate current step
   const currentStep = tabToStepMap[activeTab as keyof typeof tabToStepMap] || 0;
   
-  // Check for draft when modal opens
+  // Reset form when modal opens
   useEffect(() => {
     if (open) {
-      if (hasSavedDraft()) {
-        setShowDraftPrompt(true);
-      } else {
-        resetForm();
-      }
+      resetForm();
     }
-  }, [open, hasSavedDraft]);
-
-  const handleResumeDraft = () => {
-    resetForm(true); // Pass true to use the saved draft
-    setShowDraftPrompt(false);
-  };
-
-  const handleDiscardDraft = () => {
-    clearSavedDraft();
-    resetForm();
-    setShowDraftPrompt(false);
-  };
+  }, [open, resetForm]);
   
   const handleStepClick = (stepIndex: number) => {
     // Convert step index back to tab name
@@ -92,39 +67,15 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
     setActiveTab(tabNames[stepIndex]);
   };
 
-  const handleSaveDraft = () => {
-    // Save the current form state as a draft with additional metadata
-    const draftData = {
-      data: formData,
-      timestamp: Date.now(),
-      name: formData.name || "Unnamed Project"
-    };
-    
-    localStorage.setItem(draftKey, JSON.stringify(draftData));
-    toast.success("Draft saved");
-  };
-
-  // Handle modal close to ensure drafts are properly handled
-  const handleOpenChange = (isOpen: boolean) => {
-    if (!isOpen) {
-      // Modal is closing
-      // We'll keep the draft in localStorage, just close the modal
-      onOpenChange(false);
-    } else {
-      onOpenChange(true);
-    }
-  };
-
-  // Using AnimatePresence to handle exit animations
   return (
     <AnimatePresence>
       {open && (
-        <Dialog open={open} onOpenChange={handleOpenChange}>
+        <Dialog open={open} onOpenChange={onOpenChange}>
           <DialogContent className="max-w-2xl p-0 bg-zinc-900 border border-zinc-800 text-white overflow-hidden">
             {/* Hidden dialog title and description for accessibility */}
             <DialogTitle className="sr-only">Create New Project</DialogTitle>
             <DialogDescription className="sr-only">
-              Fill in the project details to create a new project. You can save your progress as a draft.
+              Fill in the project details to create a new project.
             </DialogDescription>
             
             <motion.div
@@ -134,40 +85,31 @@ const CreateProjectModal: React.FC<CreateProjectModalProps> = ({
               transition={{ duration: 0.2, ease: "easeOut" }}
               className="w-full"
             >
-              {showDraftPrompt ? (
-                <DraftPrompt 
-                  onResume={handleResumeDraft} 
-                  onDiscard={handleDiscardDraft}
-                />
-              ) : (
-                <>
-                  <ModalHeader projectId={projectId} />
-                  
-                  {/* Step Progress Indicator */}
-                  <StepProgressIndicator 
-                    currentStep={currentStep}
-                    totalSteps={Object.keys(tabToStepMap).length}
-                    stepLabels={stepLabels}
-                    onStepClick={handleStepClick}
-                  />
+              <ModalHeader projectId={projectId} />
+              
+              {/* Step Progress Indicator */}
+              <StepProgressIndicator 
+                currentStep={currentStep}
+                totalSteps={Object.keys(tabToStepMap).length}
+                stepLabels={stepLabels}
+                onStepClick={handleStepClick}
+              />
 
-                  <ProjectModalContent
-                    activeTab={activeTab}
-                    setActiveTab={setActiveTab}
-                    formData={formData}
-                    errors={errors}
-                    projectId={projectId}
-                    updateFormData={updateFormData}
-                    handleSubmit={handleSubmit}
-                  />
+              <ProjectModalContent
+                activeTab={activeTab}
+                setActiveTab={setActiveTab}
+                formData={formData}
+                errors={errors}
+                projectId={projectId}
+                updateFormData={updateFormData}
+                handleSubmit={handleSubmit}
+              />
 
-                  <ModalFooter 
-                    onSubmit={handleSubmit} 
-                    onSaveDraft={handleSaveDraft}
-                    submitButtonText={submitButtonText}
-                  />
-                </>
-              )}
+              <ModalFooter 
+                onSubmit={handleSubmit}
+                submitButtonText={submitButtonText}
+                showSaveDraft={false}
+              />
             </motion.div>
           </DialogContent>
         </Dialog>

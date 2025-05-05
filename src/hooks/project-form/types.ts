@@ -13,9 +13,7 @@ export interface UseProjectFormReturn {
   formData: ProjectFormData;
   errors: Partial<Record<string, string>>;
   projectId: string;
-  resetForm: (useSavedDraft?: boolean) => void;
+  resetForm: () => void;
   updateFormData: (field: string, value: any) => void;
   handleSubmit: () => void;
-  hasSavedDraft: () => boolean;
-  clearSavedDraft: () => void;
 }
