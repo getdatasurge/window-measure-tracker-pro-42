@@ -32,11 +32,6 @@ const queryClient = new QueryClient();
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
 
-// Home route component that redirects to LandingPage
-const HomeRoute = () => {
-  return <Navigate to="/landing" replace />;
-};
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
@@ -60,8 +55,8 @@ const App = () => (
               <PromptHistoryViewer variant="dialog" />
             </div>
             <Routes>
-              <Route path="/" element={<HomeRoute />} />
-              <Route path="/landing" element={<LandingPage />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/landing" element={<Navigate to="/" replace />} />
               <Route path="/overview" element={<Overview />} />
               <Route path="/dashboard" element={<DashboardV2 />} />
               <Route path="/actions" element={<ActionViewer />} />

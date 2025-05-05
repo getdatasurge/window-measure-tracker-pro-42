@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
-import { Google, Github } from 'lucide-react';
+import { Github } from 'lucide-react';
 import { toast } from 'react-toastify';
 
 const LoginModal = () => {
@@ -74,7 +74,11 @@ const LoginModal = () => {
               className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 flex items-center justify-center gap-2"
               onClick={() => handleOAuthLogin('google')}
             >
-              <Google size={18} /> Google
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <path d="M8 12 h8"></path>
+                <path d="M12 8 v8"></path>
+              </svg> Google
             </Button>
             <Button 
               variant="outline" 
