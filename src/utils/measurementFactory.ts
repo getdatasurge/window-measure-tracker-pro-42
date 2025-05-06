@@ -19,6 +19,7 @@ export const generateNewMeasurement = (defaultValues: Partial<Measurement> = {})
     quantity: defaultValues.quantity || 1,
     recordedBy: defaultValues.recordedBy || '',
     direction: (defaultValues.direction as any) || 'N/A',
+    glassType: defaultValues.glassType || '',
     notes: defaultValues.notes || '',
     status: defaultValues.status || 'Pending',
     measurementDate: defaultValues.measurementDate || datePart,

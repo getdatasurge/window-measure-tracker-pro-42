@@ -457,13 +457,13 @@ export type Database = {
           film_required: boolean | null
           frame_type: string | null
           glass_thickness: string | null
+          glass_type: string | null
           height: number | null
           id: string
           installation_date: string | null
           location: string
           measurement_date: string | null
           notes: string | null
-          photos: string[] | null
           project_id: string
           quantity: number | null
           recorded_by: string | null
@@ -486,13 +486,13 @@ export type Database = {
           film_required?: boolean | null
           frame_type?: string | null
           glass_thickness?: string | null
+          glass_type?: string | null
           height?: number | null
           id?: string
           installation_date?: string | null
           location: string
           measurement_date?: string | null
           notes?: string | null
-          photos?: string[] | null
           project_id: string
           quantity?: number | null
           recorded_by?: string | null
@@ -515,13 +515,13 @@ export type Database = {
           film_required?: boolean | null
           frame_type?: string | null
           glass_thickness?: string | null
+          glass_type?: string | null
           height?: number | null
           id?: string
           installation_date?: string | null
           location?: string
           measurement_date?: string | null
           notes?: string | null
-          photos?: string[] | null
           project_id?: string
           quantity?: number | null
           recorded_by?: string | null
