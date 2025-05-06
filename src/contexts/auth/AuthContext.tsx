@@ -10,6 +10,7 @@ const AuthContext = createContext<AuthContextType>({
   loading: true,
   isAuthenticated: false,
   profileNotFound: false,
+  error: null,  // Added error property with default value
   refreshProfile: async () => {},
   signOut: async () => {},
 });

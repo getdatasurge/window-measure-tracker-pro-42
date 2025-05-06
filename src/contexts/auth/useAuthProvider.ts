@@ -10,6 +10,7 @@ export const useAuthProvider = (): AuthContextType => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [profileNotFound, setProfileNotFound] = useState(false);
+  const [error, setError] = useState<Error | null>(null);  // Added error state
   
   // Cache fetched profile IDs to avoid redundant fetches
   const fetchedIds = new Set<string>();
@@ -35,6 +36,7 @@ export const useAuthProvider = (): AuthContextType => {
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfileNotFound(true);
+      setError(error instanceof Error ? error : new Error('Failed to fetch profile'));  // Set error state
       handleError(error, { 
         title: 'Profile Error',
         message: 'Failed to load your profile. Some features may be limited.',
@@ -58,8 +60,10 @@ export const useAuthProvider = (): AuthContextType => {
       setSession(null);
       setProfile(null);
       fetchedIds.clear();
+      setError(null);  // Clear any errors on sign out
     } catch (error) {
       console.error('Error signing out:', error);
+      setError(error instanceof Error ? error : new Error('Failed to sign out'));  // Set error state
       handleError(error, {
         title: 'Sign Out Error',
         message: 'There was a problem signing you out.',
@@ -112,6 +116,7 @@ export const useAuthProvider = (): AuthContextType => {
         console.error('Auth initialization error:', err);
         if (isMounted) {
           setLoading(false);
+          setError(err instanceof Error ? err : new Error('Authentication error'));  // Set error state
           handleError(err, {
             title: 'Authentication Error',
             message: 'There was a problem setting up your session.',
@@ -147,6 +152,7 @@ export const useAuthProvider = (): AuthContextType => {
       
       // Ensure loading completes even during auth changes
       setLoading(false);
+      setError(null);  // Clear errors on successful auth state change
     });
     
     // Start the session check
@@ -177,6 +183,7 @@ export const useAuthProvider = (): AuthContextType => {
     loading,
     isAuthenticated: !!user,
     profileNotFound,
+    error,  // Added error to return value
     refreshProfile,
     signOut
   };
