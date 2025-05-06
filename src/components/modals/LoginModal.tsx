@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -69,28 +69,20 @@ const LoginModal = () => {
     }
   };
 
-  const handleOAuthLogin = async (provider: 'google' | 'github') => {
-    try {
-      setIsLoading(true);
-      setErrorMessage(null);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth-callback?redirect=${encodeURIComponent(from)}`,
-        },
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      // No need to navigate manually, the redirect URL will be handled by Supabase OAuth flow
-    } catch (error: any) {
-      console.error(`${provider} login failed:`, error);
-      setErrorMessage(error.message || `Failed to login with ${provider}`);
-      setIsLoading(false);
-    }
+  const handleOAuthLogin = (provider: 'google' | 'github') => {
+    // First, close the modal to prevent DOM context issues
+    closeAll();
+    
+    // Store the redirect path in localStorage so we can access it when returning
+    localStorage.setItem('authRedirectTo', from);
+    
+    // Construct the redirect URL for the OAuth callback
+    const redirectTo = `${window.location.origin}/auth-callback`;
+    
+    // Use direct window location for OAuth redirect to avoid iframe/modal restrictions
+    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
+    
+    // No need to handle errors here as we're redirecting away from the page
   };
 
   const handleSignupClick = () => {

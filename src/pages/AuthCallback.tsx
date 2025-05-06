@@ -1,27 +1,31 @@
 
 import { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Spinner } from '@/components/ui/spinner';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
-  const [searchParams] = useSearchParams();
   const [error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     const handleAuthCallback = async () => {
       try {
+        // Check if we're in a callback context after OAuth redirect
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const queryParams = new URLSearchParams(window.location.search);
+        
         // Check for error in URL - Supabase redirects with error param on OAuth errors
-        const errorParam = searchParams.get('error');
-        const errorDescription = searchParams.get('error_description');
+        const errorParam = queryParams.get('error') || hashParams.get('error');
+        const errorDescription = queryParams.get('error_description') || hashParams.get('error_description');
         
         if (errorParam) {
           throw new Error(errorDescription || 'Error during authentication');
         }
         
-        // Get redirect path
-        const redirectTo = searchParams.get('redirect') || '/dashboard';
+        // Get redirect path from localStorage or default to dashboard
+        const redirectTo = localStorage.getItem('authRedirectTo') || '/dashboard';
+        localStorage.removeItem('authRedirectTo'); // Clean up after use
         
         // Get session to verify authentication was successful
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -48,7 +52,7 @@ const AuthCallback = () => {
     };
     
     handleAuthCallback();
-  }, [navigate, searchParams]);
+  }, [navigate]);
   
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-zinc-900 text-white">
