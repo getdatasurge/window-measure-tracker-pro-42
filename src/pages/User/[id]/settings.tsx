@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import DashboardShell from '@/components/layout/DashboardShell';
 import UserProfileForm from '@/components/settings/UserProfileForm';
 import ApplicationSettingsCard from '@/components/settings/ApplicationSettingsCard';
 import NotificationPreferences from '@/components/settings/NotificationPreferences';
 import DefaultProjectSettings from '@/components/settings/DefaultProjectSettings';
+import { useUser } from '@/contexts/UserContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
 const SettingsTabs = [
   { id: 'account', label: 'Account' },
@@ -19,6 +23,72 @@ const SettingsTabs = [
 const UserSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('account');
   const { id } = useParams<{ id: string }>();
+  const { user, profile } = useUser();
+  const [isLoading, setIsLoading] = useState(true);
+  const [profileData, setProfileData] = useState(null);
+  
+  // Only fetch data if viewing another user's profile
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      if (!id || (user && id === user.id)) {
+        // Using current user's profile
+        setProfileData(profile);
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) throw error;
+        setProfileData(data);
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+        toast({
+          title: "Error",
+          description: "Could not load user profile",
+          variant: "destructive"
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    fetchUserProfile();
+  }, [id, user, profile]);
+  
+  const handleProfileUpdate = async (formData: any) => {
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
+          phone: formData.phone || null,
+          role: formData.jobTitle || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', id);
+        
+      if (error) throw error;
+      
+      toast({
+        title: "Profile updated",
+        description: "Profile has been successfully updated",
+      });
+      
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Update failed",
+        description: "There was a problem updating the profile",
+        variant: "destructive"
+      });
+    }
+  };
   
   return (
     <DashboardShell>
@@ -53,7 +123,12 @@ const UserSettingsPage = () => {
         {activeTab === 'account' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <UserProfileForm userId={id} />
+              <UserProfileForm 
+                userId={id} 
+                initialData={profileData}
+                isLoading={isLoading}
+                onSave={handleProfileUpdate}
+              />
             </div>
             <div className="space-y-6">
               <ApplicationSettingsCard />

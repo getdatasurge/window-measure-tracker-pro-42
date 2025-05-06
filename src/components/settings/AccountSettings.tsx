@@ -1,7 +1,33 @@
 
 import React from 'react';
+import { Spinner } from '@/components/ui/spinner';
 
-const AccountSettings: React.FC = () => {
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  avatarUrl: string;
+}
+
+interface AccountSettingsProps {
+  formData: FormData;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void;
+  isLoading: boolean;
+}
+
+const AccountSettings: React.FC<AccountSettingsProps> = ({ 
+  formData,
+  handleInputChange,
+  isLoading
+}) => {
+  if (isLoading) {
+    return <div className="flex justify-center py-8">
+      <Spinner className="w-8 h-8 text-wintrack-green" />
+    </div>;
+  }
+  
   return (
     <div>
       <div>
@@ -16,8 +42,8 @@ const AccountSettings: React.FC = () => {
         <div className="flex items-center mb-6">
           <div className="relative">
             <img 
-              src="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" 
-              alt="Alex Morgan" 
+              src={formData.avatarUrl || "/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png"} 
+              alt="Profile" 
               className="w-24 h-24 rounded-full object-cover"
             />
             <button className="absolute bottom-0 right-0 bg-wintrack-dark-blue text-white p-1.5 rounded-full">
@@ -37,9 +63,11 @@ const AccountSettings: React.FC = () => {
             <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
             <input 
               type="text" 
-              id="firstName" 
+              id="firstName"
+              name="firstName"
               className="search-input" 
-              defaultValue="Alex"
+              value={formData.firstName}
+              onChange={handleInputChange}
             />
           </div>
           
@@ -47,9 +75,11 @@ const AccountSettings: React.FC = () => {
             <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
             <input 
               type="text" 
-              id="lastName" 
+              id="lastName"
+              name="lastName" 
               className="search-input" 
-              defaultValue="Morgan"
+              value={formData.lastName}
+              onChange={handleInputChange}
             />
           </div>
           
@@ -57,19 +87,26 @@ const AccountSettings: React.FC = () => {
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
             <input 
               type="email" 
-              id="email" 
-              className="search-input" 
-              defaultValue="alex.morgan@example.com"
+              id="email"
+              name="email"
+              className="search-input bg-gray-100" 
+              value={formData.email}
+              onChange={handleInputChange}
+              readOnly
+              disabled
             />
+            <p className="text-xs text-gray-500 mt-1">Email address cannot be changed</p>
           </div>
           
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
             <input 
               type="tel" 
-              id="phone" 
+              id="phone"
+              name="phone" 
               className="search-input" 
-              defaultValue="(206) 555-0123"
+              value={formData.phone}
+              onChange={handleInputChange}
             />
           </div>
           
@@ -77,9 +114,11 @@ const AccountSettings: React.FC = () => {
             <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-1">Job Title</label>
             <input 
               type="text" 
-              id="jobTitle" 
+              id="jobTitle"
+              name="jobTitle" 
               className="search-input" 
-              defaultValue="Project Manager"
+              value={formData.jobTitle}
+              onChange={handleInputChange}
             />
           </div>
           

@@ -1,32 +1,78 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Spinner } from '@/components/ui/spinner';
 
 interface UserProfileFormProps {
   userId?: string;
+  initialData?: any;
+  isLoading?: boolean;
+  onSave?: (formData: FormData) => void;
 }
 
-const UserProfileForm = ({ userId }: UserProfileFormProps) => {
-  const [formData, setFormData] = useState({
-    firstName: 'John',
-    lastName: 'Installer',
-    email: 'john.smith@example.com',
-    phone: '(555) 123-4567',
-    jobTitle: 'Team Lead - Commercial'
+interface FormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  jobTitle: string;
+  avatarUrl?: string;
+}
+
+const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: UserProfileFormProps) => {
+  const [formData, setFormData] = useState<FormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    jobTitle: ''
   });
+  const [isSaving, setIsSaving] = useState(false);
+  
+  useEffect(() => {
+    if (initialData) {
+      // Parse full name into first and last name
+      const nameParts = (initialData.full_name || '').split(' ');
+      const firstName = nameParts[0] || '';
+      const lastName = nameParts.slice(1).join(' ') || '';
+      
+      setFormData({
+        firstName,
+        lastName,
+        email: initialData.email || '',
+        phone: initialData.phone_number || '',
+        jobTitle: initialData.role || '',
+        avatarUrl: initialData.avatar_url
+      });
+    }
+  }, [initialData]);
   
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
   
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
-    console.log('Profile form submitted:', formData);
-    // Show success toast or feedback
+    setIsSaving(true);
+    
+    try {
+      if (onSave) {
+        await onSave(formData);
+      }
+    } finally {
+      setIsSaving(false);
+    }
   };
+  
+  if (isLoading) {
+    return (
+      <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6 flex items-center justify-center h-64">
+        <Spinner className="w-8 h-8 text-green-500" />
+      </div>
+    );
+  }
   
   return (
     <div className="bg-zinc-800/50 border border-zinc-700/50 rounded-lg p-6">
@@ -86,8 +132,9 @@ const UserProfileForm = ({ userId }: UserProfileFormProps) => {
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              className="bg-zinc-900/50 border-zinc-700 text-white"
+              readOnly
+              disabled
+              className="bg-zinc-900/50 border-zinc-700 text-white opacity-70"
             />
           </div>
           
@@ -119,8 +166,12 @@ const UserProfileForm = ({ userId }: UserProfileFormProps) => {
         </div>
         
         <div className="flex justify-end">
-          <Button className="bg-green-600 hover:bg-green-700 text-white">
-            Save Changes
+          <Button 
+            type="submit"
+            className="bg-green-600 hover:bg-green-700 text-white"
+            disabled={isSaving}
+          >
+            {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>
         </div>
       </form>
