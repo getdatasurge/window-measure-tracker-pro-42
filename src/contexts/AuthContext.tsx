@@ -39,6 +39,69 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
 
+  // Function to create a new profile for a user if one doesn't exist
+  const ensureProfileExists = useCallback(async (userData: User) => {
+    try {
+      // First check if profile already exists
+      const { data: existingProfile, error: fetchError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userData.id)
+        .maybeSingle();
+      
+      if (fetchError) {
+        console.error('Error checking for existing profile:', fetchError);
+        return;
+      }
+      
+      // If profile doesn't exist, create one
+      if (!existingProfile) {
+        console.log('No profile found for user, creating new profile');
+        
+        // Get the best available name from user metadata
+        const userFullName = userData.user_metadata?.full_name || 
+                            userData.user_metadata?.name ||
+                            userData.user_metadata?.preferred_username ||
+                            userData.email?.split('@')[0] ||
+                            'User';
+        
+        // Insert the new profile
+        const { error: insertError } = await supabase
+          .from('profiles')
+          .insert({
+            id: userData.id,
+            email: userData.email,
+            full_name: userFullName,
+            // Use avatar_url from metadata if available
+            ...(userData.user_metadata?.avatar_url && { avatar_url: userData.user_metadata.avatar_url })
+          });
+        
+        if (insertError) {
+          console.error('Error creating profile:', insertError);
+          return;
+        }
+        
+        console.log('Profile created successfully');
+        
+        // Fetch the newly created profile
+        const { data: newProfile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userData.id)
+          .maybeSingle();
+        
+        if (newProfile) {
+          setProfile(newProfile);
+        }
+      } else {
+        // Profile exists, update it if necessary
+        await syncProfileData(userData.id, userData);
+      }
+    } catch (error) {
+      console.error('Unexpected error ensuring profile exists:', error);
+    }
+  }, []);
+
   // Function to sync user display_name to profile.full_name if needed
   const syncProfileData = useCallback(async (userId: string, userData: User) => {
     try {
@@ -102,13 +165,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         await syncProfileData(userId, userData);
       } else {
         console.warn('Profile not found for user', userId);
+        // If no profile exists, create one
+        await ensureProfileExists(userData);
       }
     } catch (err) {
       console.error('Error fetching user profile:', err);
     } finally {
       setLoading(false);
     }
-  }, [syncProfileData]);
+  }, [syncProfileData, ensureProfileExists]);
 
   // Function to refresh user's profile data
   const refreshProfile = useCallback(async () => {
@@ -162,7 +227,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           // Using setTimeout to avoid potential auth deadlocks
           if (newSession?.user) {
             setTimeout(() => {
-              fetchProfile(newSession.user.id, newSession.user);
+              ensureProfileExists(newSession.user).then(() => {
+                fetchProfile(newSession.user.id, newSession.user);
+              });
             }, 0);
           }
         }
@@ -178,7 +245,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       // Fetch profile if user is authenticated
       if (sessionUser) {
-        fetchProfile(sessionUser.id, sessionUser);
+        // First ensure profile exists, then fetch it
+        ensureProfileExists(sessionUser).then(() => {
+          fetchProfile(sessionUser.id, sessionUser);
+        });
       }
       
       setLoading(false);
@@ -187,7 +257,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     return () => {
       subscription.unsubscribe();
     };
-  }, [fetchProfile]);
+  }, [fetchProfile, ensureProfileExists]);
 
   return (
     <AuthContext.Provider value={{ 
