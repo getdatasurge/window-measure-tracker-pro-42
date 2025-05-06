@@ -1,7 +1,40 @@
 
+
 import { Measurement } from '@/types/measurement';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
+
+/**
+ * Convert a fraction string (like '1/2' or '3 1/4') to decimal
+ */
+export const fractionToDecimal = (value: string): number => {
+  // Handle empty values
+  if (!value || value === '') return 0;
+
+  // If it's already a number, just return it
+  if (!isNaN(Number(value))) return Number(value);
+
+  // Check for mixed number format (e.g., "3 1/2")
+  const mixedMatch = value.match(/^(\d+)\s+(\d+)\/(\d+)$/);
+  if (mixedMatch) {
+    const whole = parseInt(mixedMatch[1], 10);
+    const numerator = parseInt(mixedMatch[2], 10);
+    const denominator = parseInt(mixedMatch[3], 10);
+    return whole + (numerator / denominator);
+  }
+
+  // Check for simple fraction format (e.g., "1/2")
+  const fractionMatch = value.match(/^(\d+)\/(\d+)$/);
+  if (fractionMatch) {
+    const numerator = parseInt(fractionMatch[1], 10);
+    const denominator = parseInt(fractionMatch[2], 10);
+    return numerator / denominator;
+  }
+
+  // If no patterns match, try to parse as number
+  const parsed = parseFloat(value);
+  return isNaN(parsed) ? 0 : parsed;
+};
 
 /**
  * Generate a new measurement with default values
@@ -81,10 +114,10 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction as Direction || 'N/A',
+      direction: item.direction || 'N/A',
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status as MeasurementStatus || 'Pending',
+      status: item.status || 'Pending',
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
@@ -138,10 +171,10 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction as Direction || 'N/A',
+      direction: item.direction || 'N/A',
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status as MeasurementStatus || 'Pending',
+      status: item.status || 'Pending',
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
@@ -194,10 +227,10 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction as Direction || 'N/A',
+      direction: item.direction || 'N/A',
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status as MeasurementStatus || 'Pending',
+      status: item.status || 'Pending',
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,

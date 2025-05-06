@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Search, Download, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -17,20 +18,6 @@ import { TeamMember } from '@/types/team';
 interface FilterOption {
   label: string;
   value: string;
-}
-
-// Define team member interface
-interface TeamMember {
-  id: string;
-  name: string;
-  role: string;
-  team: string;
-  avatar?: string;
-  status: string;
-  projects: number;
-  email: string;
-  phone: string;
-  lastActive: string;
 }
 
 const TeamManagementPage: React.FC = () => {
@@ -89,7 +76,7 @@ const TeamManagementPage: React.FC = () => {
           role: profile.role || 'Team Member',
           team: 'Residential', // Default team if not available
           avatar: profile.avatar_url || '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png',
-          status: 'active' as 'active' | 'on-leave' | 'training', // Cast to the allowed values
+          status: 'active', // Cast to the allowed values
           projects: 0, // Default project count 
           email: profile.email || '',
           phone: profile.phone_number || '',
@@ -256,7 +243,7 @@ const TeamManagementPage: React.FC = () => {
       </div>
 
       {/* Team Member List */}
-      <TeamMemberList members={filteredMembers} />
+      <TeamMemberList members={filteredMembers as any} />
 
       {/* Role Definitions and Team Structure */}
       <DashboardGridRow>

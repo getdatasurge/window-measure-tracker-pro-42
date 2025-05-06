@@ -1,123 +1,180 @@
 
-import React, { useRef, useState } from 'react';
-import { UploadCloud, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import React, { useState, useCallback } from 'react';
+import { useDropzone } from 'react-dropzone';
+import { Upload, Check, X, Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
+import { toast } from 'react-toastify';
 
 interface FileUploaderProps {
-  onFilesAdded: (files: FileList) => void;
-  accept?: string;
+  onUploadComplete?: (files: File[]) => void;
+  maxFiles?: number;
   maxSize?: number; // in bytes
-  multiple?: boolean;
-  className?: string;
+  accept?: Record<string, string[]>;
+  projectId?: string;
 }
 
-export const FileUploader: React.FC<FileUploaderProps> = ({
-  onFilesAdded,
-  accept = 'image/*',
+interface UploadingFile {
+  file: File;
+  progress: number;
+  uploading: boolean;
+  error: boolean;
+  success: boolean;
+}
+
+const FileUploader: React.FC<FileUploaderProps> = ({
+  onUploadComplete,
+  maxFiles = 10,
   maxSize = 5 * 1024 * 1024, // 5MB default
-  multiple = true,
-  className
+  accept = {
+    'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
+    'application/pdf': ['.pdf'],
+    'application/msword': ['.doc'],
+    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+  },
+  projectId
 }) => {
+  const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
   const [isDragActive, setIsDragActive] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(true);
-  };
+  const onDrop = useCallback((acceptedFiles: File[], rejectedFiles: any[]) => {
+    // Handle rejected files (too large, wrong format, etc.)
+    if (rejectedFiles.length > 0) {
+      rejectedFiles.forEach((rejection) => {
+        const { file, errors } = rejection;
+        const errorMessages = errors.map((error: any) => error.message).join(', ');
+        toast.error(`Error with ${file.name}: ${errorMessages}`);
+      });
+    }
+    
+    // Handle accepted files
+    if (acceptedFiles.length > 0) {
+      // Check if we're exceeding the max number of files
+      if (uploadingFiles.length + acceptedFiles.length > maxFiles) {
+        toast.error(`You can only upload a maximum of ${maxFiles} files`);
+        return;
+      }
 
-  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(false);
-  };
+      // Add the new files to our state with initial progress
+      const newFiles = acceptedFiles.map(file => ({
+        file,
+        progress: 0,
+        uploading: true,
+        error: false,
+        success: false
+      }));
+      
+      setUploadingFiles(prev => [...prev, ...newFiles]);
 
-  const validateFiles = (files: FileList): boolean => {
-    // Check for file size
-    for (let i = 0; i < files.length; i++) {
-      if (files[i].size > maxSize) {
-        setError(`File "${files[i].name}" exceeds the maximum size limit (${formatFileSize(maxSize)})`);
-        return false;
+      // Simulate upload process (In a real app, you would use Supabase Storage or another service)
+      simulateUpload(newFiles);
+      
+      // If you have an onUploadComplete callback, call it with the accepted files
+      if (onUploadComplete) {
+        onUploadComplete(acceptedFiles);
       }
     }
+  }, [uploadingFiles, maxFiles, onUploadComplete]);
 
-    // Clear any previous errors
-    setError(null);
-    return true;
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    maxFiles,
+    maxSize,
+    accept,
+    onDragEnter: () => setIsDragActive(true),
+    onDragLeave: () => setIsDragActive(false),
+    onDropAccepted: () => setIsDragActive(false),
+    onDropRejected: () => setIsDragActive(false)
+  });
+
+  // Function to simulate file upload
+  const simulateUpload = (files: UploadingFile[]) => {
+    files.forEach((fileObj, index) => {
+      const intervalId = setInterval(() => {
+        setUploadingFiles(currentFiles => 
+          currentFiles.map((f, i) => {
+            if (f.file === fileObj.file) {
+              // Increase progress by 10% each time
+              const newProgress = Math.min(f.progress + 10, 100);
+              const isComplete = newProgress === 100;
+              
+              if (isComplete) {
+                clearInterval(intervalId);
+                toast.success(`${f.file.name} uploaded successfully!`);
+              }
+              
+              return {
+                ...f,
+                progress: newProgress,
+                uploading: !isComplete,
+                success: isComplete
+              };
+            }
+            return f;
+          })
+        );
+      }, 500);
+    });
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragActive(false);
-
-    if (e.dataTransfer.files.length > 0) {
-      if (validateFiles(e.dataTransfer.files)) {
-        onFilesAdded(e.dataTransfer.files);
-      }
-    }
-  };
-
-  const handleFileInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      if (validateFiles(e.target.files)) {
-        onFilesAdded(e.target.files);
-      }
-    }
-  };
-
-  const handleBrowseClick = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
-  };
-
-  const formatFileSize = (bytes: number): string => {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  const removeFile = (fileToRemove: File) => {
+    setUploadingFiles(files => files.filter(f => f.file !== fileToRemove));
   };
 
   return (
-    <div className="space-y-2">
-      <div
-        className={cn(
-          "border-2 border-dashed rounded-md p-4 text-center cursor-pointer transition-colors",
-          isDragActive ? "border-blue-500 bg-blue-500/10" : "border-zinc-700 hover:border-zinc-500",
-          error ? "border-red-500 bg-red-500/10" : "",
-          className
-        )}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onDrop={handleDrop}
-        onClick={handleBrowseClick}
+    <div className="space-y-4">
+      <div 
+        {...getRootProps()} 
+        className={`border-2 border-dashed p-8 rounded-lg text-center cursor-pointer transition-all
+          ${isDragActive ? 'border-blue-500 bg-blue-50/5' : 'border-zinc-700 hover:border-zinc-500'}`}
       >
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={accept}
-          multiple={multiple}
-          onChange={handleFileInputChange}
-          className="hidden"
-        />
-        <div className="flex flex-col items-center justify-center py-4">
-          <UploadCloud className="h-8 w-8 mb-2 text-zinc-400" />
-          <p className="text-sm text-zinc-400">
-            <span className="font-medium">Click to upload</span> or drag and drop
-          </p>
-          <p className="text-xs text-zinc-500 mt-1">
-            {accept.replace('*', '').replace('.', '')} files up to {formatFileSize(maxSize)}
-          </p>
-        </div>
+        <input {...getInputProps()} />
+        <Upload className="mx-auto h-12 w-12 text-zinc-500" />
+        <p className="mt-2 text-sm text-zinc-400">
+          Drag & drop files here, or <span className="text-blue-500">click to browse</span>
+        </p>
+        <p className="mt-1 text-xs text-zinc-500">
+          Max {maxFiles} files, up to {Math.round(maxSize / (1024 * 1024))}MB each
+        </p>
       </div>
-      {error && (
-        <div className="flex items-center text-xs text-red-500">
-          <X className="h-3 w-3 mr-1" />
-          {error}
+
+      {/* File list */}
+      {uploadingFiles.length > 0 && (
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium">Files</h4>
+          <div className="space-y-2">
+            {uploadingFiles.map((fileObj) => (
+              <div key={fileObj.file.name + fileObj.file.size} className="flex items-center gap-3 bg-zinc-800/50 p-2 rounded border border-zinc-700">
+                <div className="min-w-[24px] flex justify-center">
+                  {fileObj.uploading && <Loader2 className="h-5 w-5 text-zinc-400 animate-spin" />}
+                  {fileObj.success && <Check className="h-5 w-5 text-green-500" />}
+                  {fileObj.error && <X className="h-5 w-5 text-red-500" />}
+                </div>
+                
+                <div className="flex-1 min-w-0">
+                  <div className="flex justify-between text-sm">
+                    <p className="truncate text-zinc-200">{fileObj.file.name}</p>
+                    <p className="text-zinc-400 pl-2">
+                      {(fileObj.file.size / (1024 * 1024)).toFixed(2)} MB
+                    </p>
+                  </div>
+                  <Progress value={fileObj.progress} className="h-1 mt-2" />
+                </div>
+                
+                <Button 
+                  variant="ghost" 
+                  size="icon"
+                  className="h-6 w-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeFile(fileObj.file);
+                  }}
+                >
+                  <X className="h-4 w-4 text-zinc-400" />
+                </Button>
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>
