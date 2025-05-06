@@ -1,124 +1,48 @@
-import { createContext, useContext, ReactNode, useState, useEffect } from 'react';
-import { account } from '@/lib/appwrite';
-import { ID } from 'appwrite';
-import { toast } from 'react-toastify';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
-/**
- * @deprecated This context uses Appwrite and is deprecated. 
- * Please use UserContext from '@/contexts/UserContext' which uses Supabase auth instead.
- */
-interface AuthContextType {
-  isAuthenticated: boolean;
-  user: any | null;
-  login: (email: string, password: string) => Promise<void>;
-  loginWithOAuth: (provider: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
-  logout: () => Promise<void>;
-  loading: boolean;
-}
+const UserContext = createContext<any>(undefined);
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-/**
- * @deprecated This provider uses Appwrite and is deprecated. 
- * Please use UserProvider from '@/contexts/UserContext' which uses Supabase auth instead.
- */
-export const AuthProvider = ({ children, initialState = false }: { children: ReactNode, initialState?: boolean }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState(initialState);
-  const [user, setUser] = useState<any | null>(null);
+export const UserProvider = ({ children }: { children: ReactNode }) => {
+  const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if the user is authenticated on initial load
   useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        setLoading(true);
-        const currentUser = await account.get();
-        setUser(currentUser);
-        setIsAuthenticated(true);
-      } catch (error) {
-        setUser(null);
-        setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
-      }
+    const session = supabase.auth.getSession().then(({ data }) => {
+      setUser(data?.session?.user || null);
+      setLoading(false);
+    });
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => {
+      listener.subscription.unsubscribe();
     };
-    
-    checkAuth();
   }, []);
 
-  // Login with email and password
-  const login = async (email: string, password: string) => {
-    try {
-      setLoading(true);
-      await account.createEmailSession(email, password);
-      const currentUser = await account.get();
-      setUser(currentUser);
-      setIsAuthenticated(true);
-      toast.success('Logged in successfully!');
-    } catch (error) {
-      toast.error('Failed to login. Please check your credentials.');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
+  const signInWithProvider = async (provider: 'google' | 'github') => {
+    const { error } = await supabase.auth.signInWithOAuth({ provider });
+    if (error) console.error(`OAuth error with ${provider}:`, error);
   };
 
-  // Login with OAuth provider
-  const loginWithOAuth = async (provider: string) => {
-    try {
-      // Redirect to OAuth provider
-      account.createOAuth2Session(provider);
-    } catch (error) {
-      toast.error(`Failed to login with ${provider}`);
-      throw error;
-    }
-  };
-
-  // Sign up with email and password
-  const signup = async (email: string, password: string, name: string) => {
-    try {
-      setLoading(true);
-      await account.create(ID.unique(), email, password, name);
-      await login(email, password);
-      toast.success('Account created successfully!');
-    } catch (error) {
-      toast.error('Failed to create account. Please try again.');
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Logout
   const logout = async () => {
-    try {
-      await account.deleteSession('current');
-      setUser(null);
-      setIsAuthenticated(false);
-      toast.success('Logged out successfully!');
-    } catch (error) {
-      toast.error('Failed to logout.');
-      throw error;
-    }
+    await supabase.auth.signOut();
+    setUser(null);
   };
 
   return (
-    <AuthContext.Provider value={{ isAuthenticated, user, login, loginWithOAuth, signup, logout, loading }}>
+    <UserContext.Provider value={{ user, loading, signInWithProvider, logout }}>
       {children}
-    </AuthContext.Provider>
+    </UserContext.Provider>
   );
 };
 
-/**
- * @deprecated This hook uses Appwrite and is deprecated. 
- * Please use useUser from '@/contexts/UserContext' which uses Supabase auth instead.
- */
-export const useAuth = () => {
-  console.warn('useAuth is deprecated. Please use useUser from @/contexts/UserContext instead.');
-  const context = useContext(AuthContext);
+export const useUser = () => {
+  const context = useContext(UserContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error('useUser must be used within a UserProvider');
   }
   return context;
 };
