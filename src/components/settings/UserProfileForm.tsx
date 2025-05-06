@@ -3,6 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface UserProfileFormProps {
   userId?: string;
@@ -29,6 +32,7 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
     jobTitle: ''
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
   
   useEffect(() => {
     if (initialData) {
@@ -65,6 +69,93 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
       setIsSaving(false);
     }
   };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    
+    // Validate file is an image
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Invalid file type",
+        description: "Only image files are allowed.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Validate file size (max 10MB)
+    if (file.size > 10 * 1024 * 1024) {
+      toast({
+        title: "File too large",
+        description: "Image must be less than 10MB.",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    setIsUploading(true);
+    
+    try {
+      // Get the current authenticated user
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      
+      if (userError || !user) {
+        throw new Error("You must be logged in to upload an avatar.");
+      }
+      
+      // Get file extension
+      const fileExt = file.name.split('.').pop();
+      // Create a file path using userId or the current user's ID
+      const filePath = `${userId || user.id}/avatar.${fileExt}`;
+      
+      // Upload to Supabase Storage
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+      
+      if (uploadError) throw uploadError;
+      
+      // Get the public URL for the uploaded file
+      const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
+      const publicUrl = data.publicUrl;
+      
+      // Update local state with the new avatar URL
+      setFormData(prev => ({
+        ...prev,
+        avatarUrl: publicUrl
+      }));
+      
+      // If this is the current user's profile, update it immediately in the database
+      if (!onSave && userId === user.id) {
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ avatar_url: publicUrl })
+          .eq('id', user.id);
+          
+        if (updateError) throw updateError;
+        
+        toast({
+          title: "Avatar updated",
+          description: "Your profile picture has been successfully updated.",
+        });
+      }
+    } catch (error) {
+      console.error('Error uploading avatar:', error);
+      toast({
+        title: "Upload failed",
+        description: error instanceof Error ? error.message : "Failed to upload avatar.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+      
+      // Reset the file input
+      if (e.target) {
+        e.target.value = '';
+      }
+    }
+  };
   
   if (isLoading) {
     return (
@@ -80,19 +171,34 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
       
       <div className="mb-6 flex items-center">
         <div className="relative">
-          <div className="w-20 h-20 rounded-full bg-zinc-700 flex items-center justify-center text-xl">
-            {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
-          </div>
-          <button className="absolute right-0 bottom-0 bg-green-600 rounded-full p-1.5 text-white">
+          <Avatar className="w-20 h-20">
+            {formData.avatarUrl ? (
+              <AvatarImage src={formData.avatarUrl} alt="Profile" />
+            ) : (
+              <AvatarFallback className="text-xl bg-zinc-700">
+                {formData.firstName.charAt(0)}{formData.lastName.charAt(0)}
+              </AvatarFallback>
+            )}
+          </Avatar>
+          
+          <label htmlFor="avatar-upload" className="absolute right-0 bottom-0 bg-green-600 rounded-full p-1.5 text-white cursor-pointer hover:bg-green-700 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
               <path d="m15 5 4 4"/>
             </svg>
-          </button>
+            <input 
+              id="avatar-upload" 
+              type="file" 
+              className="hidden" 
+              accept="image/*"
+              onChange={handleAvatarUpload}
+              disabled={isUploading}
+            />
+          </label>
         </div>
-        <button className="ml-4 text-sm text-green-400 hover:text-green-300">
-          Change Photo
-        </button>
+        <label htmlFor="avatar-upload" className="ml-4 text-sm text-green-400 hover:text-green-300 cursor-pointer">
+          {isUploading ? "Uploading..." : "Change Photo"}
+        </label>
       </div>
       
       <form onSubmit={handleSubmit}>
@@ -169,7 +275,7 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
           <Button 
             type="submit"
             className="bg-green-600 hover:bg-green-700 text-white"
-            disabled={isSaving}
+            disabled={isSaving || isUploading}
           >
             {isSaving ? 'Saving...' : 'Save Changes'}
           </Button>

@@ -111,6 +111,7 @@ const Settings = () => {
             formData={formData}
             handleInputChange={handleInputChange}
             isLoading={isLoading}
+            setFormData={setFormData}
           />
           <ApplicationPreferences />
           <DisplaySettings 
