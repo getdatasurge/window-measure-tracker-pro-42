@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuthModalStore from '@/stores/useAuthModalStore';
-import { Github, Mail } from 'lucide-react';
+import { Github, Mail, Google } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -111,11 +111,7 @@ const LoginModal = () => {
               onClick={() => handleOAuthLogin('google')}
               disabled={isLoading}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M8 12 h8"></path>
-                <path d="M12 8 v8"></path>
-              </svg> Google
+              <Google size={18} /> Google
             </Button>
             <Button 
               variant="outline" 

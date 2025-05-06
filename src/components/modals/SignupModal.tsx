@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuthModalStore from '@/stores/useAuthModalStore';
-import { Github } from 'lucide-react';
+import { Github, Google } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -14,6 +14,7 @@ import { z } from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { Separator } from '@/components/ui/separator';
 
 // Form validation schema
 const signupSchema = z.object({
@@ -35,6 +36,7 @@ const SignupModal = () => {
   const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
+  const [oauthError, setOauthError] = useState<string | null>(null);
 
   // Initialize form with react-hook-form and zod validation
   const form = useForm<SignupFormValues>({
@@ -91,12 +93,36 @@ const SignupModal = () => {
     }
   };
 
+  const handleOAuthSignup = async (provider: 'google' | 'github') => {
+    try {
+      setIsLoading(true);
+      setOauthError(null);
+      
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: `${window.location.origin}/dashboard`,
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // No need to navigate manually, the redirect URL will be handled by Supabase OAuth flow
+    } catch (error: any) {
+      console.error(`${provider} signup failed:`, error);
+      setOauthError(error.message || `Failed to signup with ${provider}`);
+      setIsLoading(false);
+    }
+  };
+
   const handleLoginClick = () => {
     openLogin();
   };
 
   return (
-    <Dialog open={isSignupOpen} onOpenChange={closeAll}>
+    <Dialog open={isSignupOpen} onOpenChange={(open) => !open && closeAll()}>
       <DialogContent className="sm:max-w-md bg-zinc-900 text-white border border-zinc-800">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
@@ -106,25 +132,36 @@ const SignupModal = () => {
         
         <div className="grid gap-6 py-4">
           {/* OAuth Buttons */}
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <Button 
               variant="outline" 
               className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 flex items-center justify-center gap-2"
-              onClick={() => toast.info('Third-party auth methods coming soon!')}
+              onClick={() => handleOAuthSignup('google')}
               disabled={isLoading}
             >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <circle cx="12" cy="12" r="10"></circle>
-                <path d="M8 12 h8"></path>
-                <path d="M12 8 v8"></path>
-              </svg> Continue with Google
+              <Google size={18} /> Google
+            </Button>
+            <Button 
+              variant="outline" 
+              className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 flex items-center justify-center gap-2"
+              onClick={() => handleOAuthSignup('github')}
+              disabled={isLoading}
+            >
+              <Github size={18} /> GitHub
             </Button>
           </div>
+
+          {/* Display OAuth Error if any */}
+          {oauthError && (
+            <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-2 rounded text-sm">
+              {oauthError}
+            </div>
+          )}
 
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-700"></div>
+              <Separator className="w-full border-zinc-700" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-zinc-900 px-2 text-zinc-400">or continue with email</span>
@@ -258,6 +295,7 @@ const SignupModal = () => {
             <button 
               onClick={handleLoginClick}
               className="text-sm text-green-500 hover:text-green-400 cursor-pointer"
+              disabled={isLoading}
             >
               Log in
             </button>
