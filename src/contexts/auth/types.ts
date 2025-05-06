@@ -10,9 +10,10 @@ export type AuthContextType = {
   session: Session | null;
   profile: Profile | null;
   loading: boolean;
+  isLoading: boolean; // Added isLoading property
   isAuthenticated: boolean;
   profileNotFound: boolean;
-  error: Error | null;  // Added error property
+  error: Error | null;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };

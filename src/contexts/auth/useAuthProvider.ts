@@ -9,8 +9,9 @@ export const useAuthProvider = (): AuthContextType => {
   const [session, setSession] = useState(null);
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true); // Added isLoading state
   const [profileNotFound, setProfileNotFound] = useState(false);
-  const [error, setError] = useState<Error | null>(null);  // Added error state
+  const [error, setError] = useState<Error | null>(null);
   
   // Cache fetched profile IDs to avoid redundant fetches
   const fetchedIds = new Set<string>();
@@ -36,7 +37,7 @@ export const useAuthProvider = (): AuthContextType => {
     } catch (error) {
       console.error('Error fetching profile:', error);
       setProfileNotFound(true);
-      setError(error instanceof Error ? error : new Error('Failed to fetch profile'));  // Set error state
+      setError(error instanceof Error ? error : new Error('Failed to fetch profile'));
       handleError(error, { 
         title: 'Profile Error',
         message: 'Failed to load your profile. Some features may be limited.',
@@ -60,10 +61,10 @@ export const useAuthProvider = (): AuthContextType => {
       setSession(null);
       setProfile(null);
       fetchedIds.clear();
-      setError(null);  // Clear any errors on sign out
+      setError(null);
     } catch (error) {
       console.error('Error signing out:', error);
-      setError(error instanceof Error ? error : new Error('Failed to sign out'));  // Set error state
+      setError(error instanceof Error ? error : new Error('Failed to sign out'));
       handleError(error, {
         title: 'Sign Out Error',
         message: 'There was a problem signing you out.',
@@ -82,6 +83,9 @@ export const useAuthProvider = (): AuthContextType => {
     // Check for session with retries for eventual consistency
     const checkSession = async () => {
       try {
+        // Set isLoading true when starting session check
+        setIsLoading(true);
+        
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         
         if (error) throw error;
@@ -99,6 +103,7 @@ export const useAuthProvider = (): AuthContextType => {
             }
             
             setLoading(false);
+            setIsLoading(false); // Set isLoading to false after session check
           }
         } else if (retryCount < MAX_RETRIES) {
           // Retry for eventual consistency after auth redirects
@@ -110,13 +115,15 @@ export const useAuthProvider = (): AuthContextType => {
             setSession(null);
             setUser(null);
             setLoading(false);
+            setIsLoading(false); // Set isLoading to false after max retries
           }
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
         if (isMounted) {
           setLoading(false);
-          setError(err instanceof Error ? err : new Error('Authentication error'));  // Set error state
+          setIsLoading(false); // Set isLoading to false on error
+          setError(err instanceof Error ? err : new Error('Authentication error'));
           handleError(err, {
             title: 'Authentication Error',
             message: 'There was a problem setting up your session.',
@@ -152,7 +159,8 @@ export const useAuthProvider = (): AuthContextType => {
       
       // Ensure loading completes even during auth changes
       setLoading(false);
-      setError(null);  // Clear errors on successful auth state change
+      setIsLoading(false); // Set isLoading to false on auth state change
+      setError(null);
     });
     
     // Start the session check
@@ -167,23 +175,25 @@ export const useAuthProvider = (): AuthContextType => {
   // Force loading to complete after 5 seconds as a safety mechanism
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (loading) {
+      if (loading || isLoading) {
         console.warn('[Auth] Force completing loading state due to timeout');
         setLoading(false);
+        setIsLoading(false);
       }
     }, 5000);
     
     return () => clearTimeout(timeoutId);
-  }, [loading]);
+  }, [loading, isLoading]);
   
   return {
     user,
     session,
     profile,
     loading,
+    isLoading, // Added isLoading to return value
     isAuthenticated: !!user,
     profileNotFound,
-    error,  // Added error to return value
+    error,
     refreshProfile,
     signOut
   };
