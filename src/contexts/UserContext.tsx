@@ -1,15 +1,12 @@
-
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 
-// Define the Profile type based on your Supabase schema
 type Profile = Tables<'profiles'> & {
   role?: string | null;
 };
 
-// Define what our context will contain
 interface UserContextValue {
   session: Session | null;
   user: User | null;
@@ -20,10 +17,8 @@ interface UserContextValue {
   refreshProfile: () => Promise<void>;
 }
 
-// Create the context with a default value
 const UserContext = createContext<UserContextValue | undefined>(undefined);
 
-// Props for the UserProvider component
 interface UserProviderProps {
   children: ReactNode;
 }
@@ -36,8 +31,13 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
 
-  // Function to fetch the user's profile data
+  // Cache of fetched user IDs to prevent redundant queries
+  const fetchedUserIds = new Set<string>();
+
   const fetchProfile = async (userId: string) => {
+    if (fetchedUserIds.has(userId)) return;
+    fetchedUserIds.add(userId);
+
     try {
       const { data, error: profileError } = await supabase
         .from('profiles')
@@ -59,25 +59,25 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   };
 
-  // Function to refresh the user's profile data
   const refreshProfile = async () => {
     if (user?.id) {
+      fetchedUserIds.delete(user.id); // Clear cached fetch to allow refresh
       await fetchProfile(user.id);
     }
   };
 
-  // Effect to get the initial session
   useEffect(() => {
     const setupUser = async () => {
       setIsLoading(true);
       try {
-        // Get the initial session
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         setSession(initialSession);
-        
-        if (initialSession?.user) {
-          setUser(initialSession.user);
-          await fetchProfile(initialSession.user.id);
+
+        const initialUser = initialSession?.user || null;
+        setUser(initialUser);
+
+        if (initialUser?.id) {
+          await fetchProfile(initialUser.id);
         }
       } catch (err) {
         console.error('Error setting up user:', err);
@@ -86,34 +86,34 @@ export const UserProvider = ({ children }: UserProviderProps) => {
         setIsLoading(false);
       }
     };
-    
+
     setupUser();
   }, []);
 
-  // Set up the auth state change listener
   useEffect(() => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_, newSession) => {
+      async (_event, newSession) => {
+        const newUser = newSession?.user || null;
+
+        // Only update if the user has changed
+        const userChanged = newUser?.id !== user?.id;
+
         setSession(newSession);
-        setUser(newSession?.user || null);
-        
-        if (newSession?.user) {
-          // Use setTimeout to avoid potential auth deadlocks
-          setTimeout(() => {
-            fetchProfile(newSession.user!.id);
-          }, 0);
-        } else {
+        setUser(newUser);
+
+        if (userChanged && newUser?.id) {
+          await fetchProfile(newUser.id);
+        }
+
+        if (!newUser) {
           setProfile(null);
           setRole(null);
         }
       }
     );
 
-    // Clean up subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, []);
+    return () => subscription.unsubscribe();
+  }, [user?.id]);
 
   const contextValue: UserContextValue = {
     session,
@@ -122,7 +122,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     role,
     isLoading,
     error,
-    refreshProfile
+    refreshProfile,
   };
 
   return (
@@ -132,14 +132,11 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   );
 };
 
-// Custom hook to use the UserContext
 export const useUser = () => {
   const context = useContext(UserContext);
-  
   if (context === undefined) {
     throw new Error('useUser must be used within a UserProvider');
   }
-  
   return context;
 };
 
