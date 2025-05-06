@@ -5,24 +5,29 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuthModalStore from '@/stores/useAuthModalStore';
-import { Github } from 'lucide-react';
+import { Github, Mail } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
-import { useUser } from '@/contexts/UserContext';
+import { useNavigate } from 'react-router-dom';
+import { Separator } from '@/components/ui/separator';
+import { Spinner } from '@/components/ui/spinner';
 
 const LoginModal = () => {
   const { isLoginOpen, closeAll, openSignup } = useAuthModalStore();
-  const { refreshProfile } = useUser();
+  const navigate = useNavigate();
   
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
   });
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+    // Clear error message when user starts typing
+    if (errorMessage) setErrorMessage(null);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -30,12 +35,14 @@ const LoginModal = () => {
     
     // Form validation
     if (!formData.email || !formData.password) {
-      toast.error('Email and password are required');
+      setErrorMessage('Email and password are required');
       return;
     }
 
     try {
       setIsLoading(true);
+      setErrorMessage(null);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -48,11 +55,11 @@ const LoginModal = () => {
       if (data?.session) {
         toast.success('Logged in successfully!');
         closeAll();
-        // Navigation is now handled by SignInPage through useEffect
+        navigate('/dashboard');
       }
     } catch (error: any) {
       console.error('Login failed:', error);
-      toast.error(error.message || 'Failed to login. Please check your credentials.');
+      setErrorMessage(error.message || 'Failed to login. Please check your credentials.');
     } finally {
       setIsLoading(false);
     }
@@ -60,19 +67,25 @@ const LoginModal = () => {
 
   const handleOAuthLogin = async (provider: 'google' | 'github') => {
     try {
+      setIsLoading(true);
+      setErrorMessage(null);
+      
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: window.location.origin,
+          redirectTo: `${window.location.origin}/dashboard`,
         },
       });
       
       if (error) {
         throw error;
       }
+      
+      // No need to navigate manually, the redirect URL will be handled by Supabase OAuth flow
     } catch (error: any) {
       console.error(`${provider} login failed:`, error);
-      toast.error(error.message || `Failed to login with ${provider}`);
+      setErrorMessage(error.message || `Failed to login with ${provider}`);
+      setIsLoading(false);
     }
   };
 
@@ -81,11 +94,11 @@ const LoginModal = () => {
   };
 
   return (
-    <Dialog open={isLoginOpen} onOpenChange={closeAll}>
+    <Dialog open={isLoginOpen} onOpenChange={(open) => !open && closeAll()}>
       <DialogContent className="sm:max-w-md bg-zinc-900 text-white border border-zinc-800">
         <DialogHeader>
           <DialogTitle className="text-center text-2xl font-semibold">
-            Login Form
+            Sign In
           </DialogTitle>
         </DialogHeader>
         
@@ -96,6 +109,7 @@ const LoginModal = () => {
               variant="outline" 
               className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 flex items-center justify-center gap-2"
               onClick={() => handleOAuthLogin('google')}
+              disabled={isLoading}
             >
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10"></circle>
@@ -107,6 +121,7 @@ const LoginModal = () => {
               variant="outline" 
               className="bg-zinc-800 border-zinc-700 text-white hover:bg-zinc-700 flex items-center justify-center gap-2"
               onClick={() => handleOAuthLogin('github')}
+              disabled={isLoading}
             >
               <Github size={18} /> GitHub
             </Button>
@@ -115,12 +130,19 @@ const LoginModal = () => {
           {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-zinc-700"></div>
+              <Separator className="w-full border-zinc-700" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-zinc-900 px-2 text-zinc-400">or continue with</span>
+              <span className="bg-zinc-900 px-2 text-zinc-400">or continue with email</span>
             </div>
           </div>
+
+          {/* Error Message */}
+          {errorMessage && (
+            <div className="bg-red-900/30 border border-red-800 text-red-200 px-4 py-2 rounded text-sm">
+              {errorMessage}
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleLogin} className="space-y-4">
@@ -160,24 +182,30 @@ const LoginModal = () => {
               className="w-full bg-green-500 hover:bg-green-600 text-white"
               disabled={isLoading}
             >
-              {isLoading ? 'Logging in...' : 'Login'}
+              {isLoading ? (
+                <div className="flex items-center justify-center gap-2">
+                  <Spinner className="h-4 w-4 text-white" />
+                  <span>Signing in...</span>
+                </div>
+              ) : (
+                <div className="flex items-center justify-center gap-2">
+                  <Mail size={16} />
+                  <span>Sign in with Email</span>
+                </div>
+              )}
             </Button>
           </form>
 
           {/* Signup Link */}
           <div className="flex items-center justify-between mt-4">
-            <div className="text-sm text-zinc-500">OR</div>
-            <div>
-              <span className="text-sm text-zinc-400">
-                Don't have an account?
-              </span>
-              <button 
-                onClick={handleSignupClick}
-                className="ml-2 text-sm text-green-500 hover:text-green-400 cursor-pointer"
-              >
-                Sign up
-              </button>
-            </div>
+            <div className="text-sm text-zinc-500">Don't have an account?</div>
+            <button 
+              onClick={handleSignupClick}
+              className="text-sm text-green-500 hover:text-green-400 cursor-pointer"
+              disabled={isLoading}
+            >
+              Sign up
+            </button>
           </div>
         </div>
       </DialogContent>
