@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { 
@@ -12,7 +11,7 @@ import {
   Cell
 } from 'recharts';
 import RecentMeasurements from '../dashboard/RecentMeasurements';
-import TeamActivityFeed from '../dashboard/TeamActivityFeed';
+import TeamActivityFeed from '../dashboard/activity-feed';
 
 interface WidgetCardProps {
   title: string;

@@ -1,3 +1,3 @@
 
-import TeamActivityFeed from './TeamActivityFeed';
-export default TeamActivityFeed;
+import ActivityFeedCard from './ActivityFeedCard';
+export default ActivityFeedCard;
