@@ -1,4 +1,4 @@
 
-import PromptHistoryViewer from './PromptHistoryViewer';
-export { PromptHistoryViewer };
-export default PromptHistoryViewer;
+// Re-export for backward compatibility during transition
+export { PromptHistoryViewer } from "@/features/activity/prompt-history";
+export default from "@/features/activity/prompt-history";
