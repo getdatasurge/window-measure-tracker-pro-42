@@ -1,5 +1,4 @@
 
-
 import { Measurement } from '@/types/measurement';
 import { supabase } from '@/integrations/supabase/client';
 import { formatDistanceToNow } from 'date-fns';
@@ -53,7 +52,7 @@ export const generateNewMeasurement = (defaultValues: Partial<Measurement> = {})
     area: defaultValues.area || '0 ft²',
     quantity: defaultValues.quantity || 1,
     recordedBy: defaultValues.recordedBy || '',
-    direction: defaultValues.direction || 'N/A',
+    direction: (defaultValues.direction as any) || 'N/A',
     glassType: defaultValues.glassType || '',
     notes: defaultValues.notes || '',
     status: defaultValues.status || 'Pending',
@@ -103,7 +102,7 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
     if (error) throw error;
     
     // Transform the data to match our Measurement type
-    return (data || []).map(item => ({
+    return data.map(item => ({
       id: item.id,
       projectId: item.project_id,
       projectName: item.projects?.name || 'Unknown Project',
@@ -114,10 +113,10 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction || 'N/A',
+      direction: (item.direction || 'N/A') as any,
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status || 'Pending',
+      status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
@@ -160,7 +159,7 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
     if (error) throw error;
     
     // Transform the data to match our Measurement type
-    return (data || []).map(item => ({
+    return data.map(item => ({
       id: item.id,
       projectId: item.project_id,
       projectName: item.projects?.name || 'Unknown Project',
@@ -171,10 +170,10 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction || 'N/A',
+      direction: (item.direction || 'N/A') as any, 
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status || 'Pending',
+      status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
@@ -216,7 +215,7 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
     if (error) throw error;
     
     // Transform the data to match our Measurement type
-    return (data || []).map(item => ({
+    return data.map(item => ({
       id: item.id,
       projectId: item.project_id,
       projectName: item.projects?.name || 'Unknown Project',
@@ -227,10 +226,10 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: item.direction || 'N/A',
+      direction: (item.direction || 'N/A') as any,
       glassType: item.glass_type,
       notes: item.notes,
-      status: item.status || 'Pending',
+      status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,

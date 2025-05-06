@@ -7,10 +7,10 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'react-toastify';
 
 interface FileUploaderProps {
-  onUploadComplete?: (files: File[]) => void;
+  onFilesAdded?: (files: File[]) => void;
   maxFiles?: number;
   maxSize?: number; // in bytes
-  accept?: Record<string, string[]>;
+  accept?: string;
   projectId?: string;
 }
 
@@ -23,15 +23,10 @@ interface UploadingFile {
 }
 
 const FileUploader: React.FC<FileUploaderProps> = ({
-  onUploadComplete,
+  onFilesAdded,
   maxFiles = 10,
   maxSize = 5 * 1024 * 1024, // 5MB default
-  accept = {
-    'image/*': ['.jpeg', '.jpg', '.png', '.gif'],
-    'application/pdf': ['.pdf'],
-    'application/msword': ['.doc'],
-    'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
-  },
+  accept,
   projectId
 }) => {
   const [uploadingFiles, setUploadingFiles] = useState<UploadingFile[]>([]);
@@ -69,18 +64,18 @@ const FileUploader: React.FC<FileUploaderProps> = ({
       // Simulate upload process (In a real app, you would use Supabase Storage or another service)
       simulateUpload(newFiles);
       
-      // If you have an onUploadComplete callback, call it with the accepted files
-      if (onUploadComplete) {
-        onUploadComplete(acceptedFiles);
+      // If you have an onFilesAdded callback, call it with the accepted files
+      if (onFilesAdded) {
+        onFilesAdded(acceptedFiles);
       }
     }
-  }, [uploadingFiles, maxFiles, onUploadComplete]);
+  }, [uploadingFiles, maxFiles, onFilesAdded]);
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop,
     maxFiles,
     maxSize,
-    accept,
+    accept: accept ? { [accept]: [] } : undefined,
     onDragEnter: () => setIsDragActive(true),
     onDragLeave: () => setIsDragActive(false),
     onDropAccepted: () => setIsDragActive(false),

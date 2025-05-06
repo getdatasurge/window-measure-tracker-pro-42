@@ -2,7 +2,7 @@
 // I need to fix the attachment handling by ensuring we properly access nested properties
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { FileUploader } from './FileUploader';
+import FileUploader from './FileUploader';
 import { ProjectFormData } from '@/types/project';
 import { Upload, X } from 'lucide-react';
 
