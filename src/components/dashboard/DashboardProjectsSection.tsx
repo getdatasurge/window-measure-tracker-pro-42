@@ -15,7 +15,6 @@ interface Project {
   name: string;
   client_name?: string;
   location?: string;
-  deadline?: string;
   status?: string;
   entries_count?: number;
 }
@@ -33,9 +32,8 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
         // Fetch active projects
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
-          .select('id, name, client_name, location, deadline, status')
-          .eq('is_active', true)
-          .order('deadline', { ascending: true });
+          .select('id, name, client_name, location, status')
+          .eq('is_active', true);
           
         if (projectError) {
           throw projectError;
@@ -88,7 +86,6 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
     name: project.name || 'Untitled Project',
     client: project.client_name || 'No Client',
     location: project.location || 'No Location',
-    deadline: project.deadline ? format(new Date(project.deadline), 'MMM d, yyyy') : 'No Deadline',
     status: project.status || 'active',
     entries_count: project.entries_count || 0
   }));
