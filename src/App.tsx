@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -5,16 +6,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
-import { UserProvider } from "./contexts/user";
-import { AuthProvider } from "./contexts/auth/AuthContext";
-import { SessionProfileProvider } from "./contexts/session-profile"; // Import the new provider
+import { AuthProvider } from "./contexts/auth/AuthProvider"; // Use our consolidated AuthProvider
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useEffect } from "react";
 import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
 
 import MainLayout from "./components/layout/MainLayout";
-import AppLayout from "./components/layout/AppLayout"; // Add the new AppLayout component
+import AppLayout from "./components/layout/AppLayout"; 
 import LandingPage from "./pages/Landing";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
@@ -66,67 +65,62 @@ const App = () => {
       <TooltipProvider>
         <ThemeProvider>
           <BrowserRouter>
-            {/* Use the new SessionProfileProvider as the primary auth provider */}
-            <SessionProfileProvider>
-              {/* Keep AuthProvider for backward compatibility */}
-              <AuthProvider>
-                <UserProvider>
-                  <Toaster />
-                  <Sonner />
-                  <ToastContainer
-                    position="top-center"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme="dark"
-                  />
-                  <div className="fixed bottom-4 right-4 z-50">
-                    <PromptHistoryViewer variant="dialog" />
-                  </div>
-                  
-                  {/* Global modals */}
-                  <LoginModal />
-                  <SignupModal />
-                  
-                  <Routes>
-                    {/* Public Routes */}
-                    <Route path="/" element={<LandingPage />} />
-                    <Route path="/landing" element={<Navigate to="/" replace />} />
-                    <Route path="/sign-in" element={<SignInPage />} />
-                    <Route path="/auth-callback" element={<AuthCallback />} />
+            {/* Use our consolidated AuthProvider */}
+            <AuthProvider>
+              <Toaster />
+              <Sonner />
+              <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+              />
+              <div className="fixed bottom-4 right-4 z-50">
+                <PromptHistoryViewer variant="dialog" />
+              </div>
+              
+              {/* Global modals */}
+              <LoginModal />
+              <SignupModal />
+              
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/landing" element={<Navigate to="/" replace />} />
+                <Route path="/sign-in" element={<SignInPage />} />
+                <Route path="/auth-callback" element={<AuthCallback />} />
 
-                    {/* Protected Routes Using AppLayout */}
-                    <Route path="/" element={<AppLayout />}>
-                      <Route path="dashboard" element={<DashboardV2 />} />
-                      <Route path="overview" element={<Overview />} />
-                      <Route path="actions" element={<ActionViewer />} />
-                      <Route path="projects-new" element={<ProjectsNew />} />
-                      <Route path="teams" element={<TeamManagement />} />
-                      <Route path="schedule" element={<SchedulePage />} />
-                      <Route path="reports" element={<ReportsNew />} />
-                      <Route path="measurements" element={<Measurements />} />
-                      <Route path="measurement-entries" element={<MeasurementEntries />} />
-                      <Route path="user/:id/settings" element={<UserSettingsPage />} />
-                      {isDev && <Route path="__debug" element={<DebugPage />} />}
-                      
-                      {/* Nested Layout Route - Only for components that need the sidebar */}
-                      <Route path="/" element={<MainLayout />}>
-                        <Route path="projects" element={<Projects />} />
-                        <Route path="reports-old" element={<Reports />} />
-                        <Route path="settings" element={<Settings />} />
-                      </Route>
-                    </Route>
-                    
-                    {/* 404 Route */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </UserProvider>
-              </AuthProvider>
-            </SessionProfileProvider>
+                {/* Protected Routes Using AppLayout */}
+                <Route path="/" element={<AppLayout />}>
+                  <Route path="dashboard" element={<DashboardV2 />} />
+                  <Route path="overview" element={<Overview />} />
+                  <Route path="actions" element={<ActionViewer />} />
+                  <Route path="projects-new" element={<ProjectsNew />} />
+                  <Route path="teams" element={<TeamManagement />} />
+                  <Route path="schedule" element={<SchedulePage />} />
+                  <Route path="reports" element={<ReportsNew />} />
+                  <Route path="measurements" element={<Measurements />} />
+                  <Route path="measurement-entries" element={<MeasurementEntries />} />
+                  <Route path="user/:id/settings" element={<UserSettingsPage />} />
+                  {isDev && <Route path="__debug" element={<DebugPage />} />}
+                  
+                  {/* Nested Layout Route - Only for components that need the sidebar */}
+                  <Route path="/" element={<MainLayout />}>
+                    <Route path="projects" element={<Projects />} />
+                    <Route path="reports-old" element={<Reports />} />
+                    <Route path="settings" element={<Settings />} />
+                  </Route>
+                </Route>
+                
+                {/* 404 Route */}
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+            </AuthProvider>
           </BrowserRouter>
         </ThemeProvider>
       </TooltipProvider>

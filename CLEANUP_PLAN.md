@@ -1,0 +1,41 @@
+
+# Codebase Cleanup Plan
+
+This document outlines files and components that can be safely removed or refactored as part of our code cleanup initiative.
+
+## Phase 1: Deprecated and Redundant Files
+
+The following files can be safely removed:
+
+- [x] ~~`src/lib/appwrite.ts`~~ - Replaced by Supabase integration
+
+## Phase 2: Auth Context Consolidation
+
+The following files have been consolidated into `src/contexts/auth/AuthProvider.tsx`:
+
+- [ ] `src/contexts/auth/AuthContext.tsx`
+- [ ] `src/contexts/session-profile/SessionProfileContext.tsx` 
+- [ ] `src/contexts/user/UserContext.tsx`
+- [ ] `src/contexts/user/UserProvider.tsx`
+- [ ] `src/contexts/auth/useAuthProvider.ts`
+- [ ] `src/contexts/session-profile/useSessionProfileProvider.ts`
+
+**Note:** These files should only be removed after thoroughly testing the new AuthProvider implementation.
+
+## Phase 3: Component and Helper Consolidation
+
+- [ ] Consolidate dashboard metric components
+- [ ] Consolidate activity feed implementations
+
+## Phase 4: Type Definitions Cleanup
+
+- [ ] Remove unused type definitions
+- [ ] Consolidate similar interfaces
+
+## Phase 5: Legacy Imports Cleanup
+
+After completing the above phases, we should:
+
+- [ ] Remove any remaining references to old contexts
+- [ ] Update import statements project-wide
+- [ ] Remove unused files from the index exports

@@ -2,9 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import ProjectTable from '../projects/ProjectTable';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { format } from 'date-fns';
+import { fetchProjects } from '@/services/projectService';
 
 interface DashboardProjectsSectionProps {
   className?: string;
@@ -17,7 +16,7 @@ interface Project {
   location?: string;
   status?: string;
   entries_count?: number;
-  deadline?: string; // Added deadline property to match the ProjectTable component's expectations
+  deadline?: string;
 }
 
 const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ className }) => {
@@ -26,23 +25,14 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchProjects = async () => {
+    const getProjects = async () => {
       try {
         setLoading(true);
+        console.log('Fetching active projects...');
         
-        console.log('Fetching projects from Supabase...');
+        // Fetch projects using our service
+        const projectData = await fetchProjects(true);
         
-        // Fetch active projects
-        const { data: projectData, error: projectError } = await supabase
-          .from('projects')
-          .select('id, name, client_name, location, status, deadline')
-          .eq('is_active', true);
-          
-        if (projectError) {
-          console.error('Error fetching projects:', projectError);
-          throw projectError;
-        }
-
         console.log('Projects data received:', projectData);
         
         if (!projectData || projectData.length === 0) {
@@ -53,7 +43,7 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
         }
         
         // For each project, fetch the count of related entries with proper error handling
-        const projectsWithEntryCounts = await Promise.all((projectData || []).map(async (project) => {
+        const projectsWithEntryCounts = await Promise.all(projectData.map(async (project) => {
           if (!project || !project.id) {
             // Handle potentially malformed project data
             return { ...project, entries_count: 0 };
@@ -90,7 +80,7 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
       }
     };
     
-    fetchProjects();
+    getProjects();
   }, [toast]);
   
   // Transform the projects data with safe handling of optional properties
@@ -101,7 +91,7 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
     location: project.location || 'No Location',
     status: project.status || 'active',
     entries_count: project.entries_count || 0,
-    deadline: project.deadline || 'Not set' // Added deadline property with a default value
+    deadline: project.deadline || 'Not set'
   }));
 
   return (
