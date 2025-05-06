@@ -97,16 +97,14 @@ const SignupModal = () => {
     // First, close the modal to prevent DOM context issues
     closeAll();
     
+    // Define the redirect URL - using the production URL in production or origin in development
+    const redirectUrl = 'https://app.getdatasurge.com/auth-callback';
+    
     // Store the redirect path in localStorage for when the user returns
     localStorage.setItem('authRedirectTo', '/dashboard');
     
-    // Construct the redirect URL for the OAuth callback
-    const redirectTo = `${window.location.origin}/auth-callback`;
-    
     // Use direct window location for OAuth redirect to avoid iframe/modal restrictions
-    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
-    
-    // No need to handle errors here as we're redirecting away from the page
+    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
   };
 
   const handleLoginClick = () => {

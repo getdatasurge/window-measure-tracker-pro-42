@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -73,16 +72,14 @@ const LoginModal = () => {
     // First, close the modal to prevent DOM context issues
     closeAll();
     
-    // Store the redirect path in localStorage so we can access it when returning
+    // Define the redirect URL - using the production URL in production or origin in development
+    const redirectUrl = 'https://app.getdatasurge.com/auth-callback';
+    
+    // Store the redirect path in localStorage for when the user returns
     localStorage.setItem('authRedirectTo', from);
     
-    // Construct the redirect URL for the OAuth callback
-    const redirectTo = `${window.location.origin}/auth-callback`;
-    
     // Use direct window location for OAuth redirect to avoid iframe/modal restrictions
-    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
-    
-    // No need to handle errors here as we're redirecting away from the page
+    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectUrl)}`;
   };
 
   const handleSignupClick = () => {
