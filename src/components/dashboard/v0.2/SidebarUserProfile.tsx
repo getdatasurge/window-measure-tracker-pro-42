@@ -2,7 +2,6 @@
 import React from 'react';
 import { LogOut } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'react-toastify';
 import {
   Tooltip,
@@ -11,22 +10,30 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useAuth } from '@/contexts/AuthContext';
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface SidebarUserProfileProps {
   collapsed: boolean;
-  avatarUrl: string;
-  name: string;
-  role: string;
 }
 
 const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
-  collapsed,
-  avatarUrl,
-  name,
-  role
+  collapsed
 }) => {
   const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { signOut, profile, loading } = useAuth();
+  
+  // Generate initials from full name
+  const getInitials = (name: string) => {
+    return name
+      .split(' ')
+      .map(word => word[0])
+      .join('')
+      .toUpperCase()
+      .substring(0, 2);
+  };
+
+  // Default avatar placeholder if no custom avatar is provided
+  const avatarUrl = "/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png";
   
   const handleLogout = async () => {
     try {
@@ -41,7 +48,10 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
     return (
       <div className="p-4 border-t border-zinc-800/70 flex flex-col items-center gap-2">
         <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
-          <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+          <Avatar>
+            <AvatarImage src={avatarUrl} alt={profile?.full_name || 'User'} />
+            <AvatarFallback>{profile?.full_name ? getInitials(profile.full_name) : 'U'}</AvatarFallback>
+          </Avatar>
         </div>
         
         <TooltipProvider>
@@ -69,11 +79,14 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       <div className="flex items-center justify-between">
         <div className="flex items-center">
           <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
-            <img src={avatarUrl} alt={name} className="w-full h-full object-cover" />
+            <Avatar>
+              <AvatarImage src={avatarUrl} alt={profile?.full_name || 'User'} />
+              <AvatarFallback>{profile?.full_name ? getInitials(profile.full_name) : 'U'}</AvatarFallback>
+            </Avatar>
           </div>
           <div className="ml-3">
-            <div className="text-sm font-medium text-white">{name}</div>
-            <div className="text-xs text-zinc-400">{role}</div>
+            <div className="text-sm font-medium text-white">{profile?.full_name || 'Loading...'}</div>
+            <div className="text-xs text-zinc-400">{profile?.role || 'User'}</div>
           </div>
         </div>
         

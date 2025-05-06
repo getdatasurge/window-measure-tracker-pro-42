@@ -95,8 +95,6 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
         </button>
       </div>
       
-      {/* Removed SidebarSearch component */}
-      
       <div className="flex-1 overflow-auto pt-4 scrollbar-none">
         <div>
           <div className={`px-4 py-1.5 text-xs uppercase tracking-wider text-zinc-500 ${collapsed ? 'text-center' : ''}`}>
@@ -116,12 +114,7 @@ const DashboardSidebar: React.FC<SidebarProps> = ({
         </div>
       </div>
       
-      <SidebarUserProfile 
-        collapsed={collapsed} 
-        avatarUrl="/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png" 
-        name="Alex Morgan" 
-        role="Project Manager" 
-      />
+      <SidebarUserProfile collapsed={collapsed} />
 
       {/* Settings and Theme Toggle Footer */}
       <div className={`px-2 py-3 border-t border-zinc-800/70 flex ${collapsed ? 'justify-center' : 'justify-between'} items-center`}>
