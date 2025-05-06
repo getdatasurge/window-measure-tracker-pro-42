@@ -12,6 +12,7 @@ interface FormData {
   phone: string; // This is mapped to phone_number in the database
   jobTitle: string;
   avatarUrl: string;
+  role?: string; // Added optional role field
 }
 
 interface AccountSettingsProps {
@@ -227,6 +228,21 @@ const AccountSettings: React.FC<AccountSettingsProps> = ({
               value={formData.jobTitle}
               onChange={handleInputChange}
             />
+          </div>
+          
+          {/* New read-only Role field */}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+            <input 
+              type="text" 
+              id="role"
+              name="role" 
+              className="search-input bg-gray-100 text-gray-500" 
+              value={formData.role || 'None'}
+              readOnly
+              disabled
+            />
+            <p className="text-xs text-gray-500 mt-1">Your system role cannot be changed</p>
           </div>
           
           <div>

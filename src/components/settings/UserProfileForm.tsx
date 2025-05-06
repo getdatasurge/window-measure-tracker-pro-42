@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -21,6 +22,7 @@ interface FormData {
   phone: string; // This is mapped to phone_number in the database
   jobTitle: string;
   avatarUrl?: string;
+  role?: string; // Added optional role field
 }
 
 const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: UserProfileFormProps) => {
@@ -29,7 +31,8 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
     lastName: '',
     email: '',
     phone: '',
-    jobTitle: ''
+    jobTitle: '',
+    role: '' // Initialize role field
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -48,7 +51,8 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
         email: initialData.email || '',
         phone: initialData.phone_number || '', // Map from phone_number in database to phone in form
         jobTitle: initialData.role || '',
-        avatarUrl: initialData.avatar_url
+        avatarUrl: initialData.avatar_url,
+        role: initialData.role || '' // Set role from initialData
       });
     }
   }, [initialData]);
@@ -260,7 +264,7 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
             />
           </div>
           
-          <div className="md:col-span-2">
+          <div>
             <label htmlFor="jobTitle" className="block text-sm font-medium text-zinc-400 mb-1">
               Job Title
             </label>
@@ -271,6 +275,22 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
               onChange={handleChange}
               className="bg-zinc-900/50 border-zinc-700 text-white"
             />
+          </div>
+          
+          {/* New read-only Role field */}
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-zinc-400 mb-1">
+              Role
+            </label>
+            <Input
+              id="role"
+              name="role"
+              value={formData.role || 'None'}
+              readOnly
+              disabled
+              className="bg-zinc-900/50 border-zinc-700 text-zinc-500 opacity-70"
+            />
+            <p className="text-xs text-zinc-500 mt-1">System role cannot be changed</p>
           </div>
         </div>
         

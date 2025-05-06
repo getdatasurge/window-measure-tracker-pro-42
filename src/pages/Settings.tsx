@@ -27,7 +27,8 @@ const Settings = () => {
     email: '',
     phone: '', // We'll map this to phone_number in the database
     jobTitle: '',
-    avatarUrl: ''
+    avatarUrl: '',
+    role: '' // Added role field to store the user's role
   });
   
   const { user, profile, refreshProfile } = useAuth();
@@ -46,7 +47,8 @@ const Settings = () => {
         email: user.email || '',
         phone: profile.phone_number || '', // Map from phone_number in the database to phone in the form
         jobTitle: profile.role || '',
-        avatarUrl: profile.avatar_url || ''
+        avatarUrl: profile.avatar_url || '',
+        role: profile.role || '' // Store the user's role
       });
       
       setIsLoading(false);
