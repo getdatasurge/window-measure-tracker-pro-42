@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
@@ -233,7 +234,7 @@ const MeasurementStatusBoard: React.FC = () => {
         <MeasurementFilterBar onFilterChange={handleFilterChange} />
         <WeeklyNavBar
           selectedDate={selectedDate}
-          onDateChange={handleDateChange}
+          onChange={(date) => handleDateChange(date)}
         />
       </div>
       
@@ -241,7 +242,7 @@ const MeasurementStatusBoard: React.FC = () => {
         {['Pending', 'Film Cut', 'Installed', 'Completed'].map(status => (
           <StatusColumn
             key={status}
-            status={status}
+            status={status as MeasurementStatus}
             measurements={filteredMeasurements.filter(m => 
               m.status.toLowerCase() === status.toLowerCase().replace(' ', '_')
             )}

@@ -27,13 +27,13 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
         updated_at,
         updated_by,
-        projects (name)
+        projects (name),
+        photos
       `)
       .gte('measurement_date', startDate.toISOString())
       .lt('measurement_date', endDate.toISOString())
@@ -54,12 +54,12 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
       direction: (item.direction || 'N/A') as any,
-      glassType: item.glass_type,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
+      photos: item.photos || [],
     }));
   } catch (error) {
     console.error('Error fetching measurements for day:', error);
@@ -85,13 +85,13 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
         updated_at,
         updated_by,
-        projects (name)
+        projects (name),
+        photos
       `)
       .eq('status', status.toLowerCase())
       .order('updated_at', { ascending: false });
@@ -110,13 +110,13 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: (item.direction || 'N/A') as any, 
-      glassType: item.glass_type,
+      direction: (item.direction || 'N/A') as any,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
+      photos: item.photos || [],
     }));
   } catch (error) {
     console.error('Error fetching measurements by status:', error);
@@ -142,13 +142,13 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
         updated_at,
         updated_by,
-        projects (name)
+        projects (name),
+        photos
       `)
       .order('updated_at', { ascending: false });
       
@@ -167,12 +167,12 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
       direction: (item.direction || 'N/A') as any,
-      glassType: item.glass_type,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
       updatedAt: item.updated_at || new Date().toISOString(),
       updatedBy: item.updated_by,
+      photos: item.photos || [],
     }));
   } catch (error) {
     console.error('Error fetching all measurements:', error);
