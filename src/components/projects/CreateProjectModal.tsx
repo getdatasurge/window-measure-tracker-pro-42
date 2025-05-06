@@ -4,13 +4,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { motion } from 'framer-motion';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ProjectFormData } from '@/types/project';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { useProjectForm } from '@/hooks/project-form/useProjectForm';
 import ProjectInfoTab from './modal-tabs/ProjectInfoTab';
 import LocationTimelineTab from './modal-tabs/LocationTimelineTab';
 import TeamRequirementsTab from './modal-tabs/TeamRequirementsTab';
 import AttachmentsMetadataTab from './modal-tabs/AttachmentsMetadataTab';
+import { ProjectFormData } from '@/hooks/project-form/types';
 
 export interface CreateProjectModalProps {
   open: boolean;

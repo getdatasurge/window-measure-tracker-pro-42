@@ -53,5 +53,5 @@ export * from "./drawer";
 
 // Export custom UI components
 export { default as GlobalSearch } from "./GlobalSearch";
-export { default as SidebarToggle } from "./SidebarToggle";
+export { SidebarToggle } from "./SidebarToggle"; // Changed from default export to named export
 export { default as ThemeToggle } from "./ThemeToggle";

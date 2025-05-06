@@ -1,42 +1,23 @@
 
 import React from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Button } from './button';
+import { PanelLeft } from 'lucide-react';
 
 interface SidebarToggleProps {
-  isOpen: boolean;
-  toggle: () => void;
-  className?: string;
+  onClick?: () => void;
+  collapsed?: boolean;
 }
 
-export const SidebarToggle: React.FC<SidebarToggleProps> = ({
-  isOpen,
-  toggle,
-  className
-}) => {
+export function SidebarToggle({ onClick, collapsed = false }: SidebarToggleProps) {
   return (
-    <button
-      onClick={() => {
-        toggle();
-        console.log("Sidebar toggled");
-      }}
-      aria-expanded={isOpen}
-      aria-controls="sidebar"
-      aria-label="Toggle Sidebar"
-      className={cn(
-        "absolute top-1/2 -translate-y-1/2 z-50",
-        "bg-muted rounded-full shadow hover:ring-2 ring-accent",
-        "size-6 flex items-center justify-center",
-        "transition-all duration-300 ease-in-out",
-        isOpen ? "right-[-12px]" : "right-[-12px]",
-        className
-      )}
+    <Button 
+      variant="ghost" 
+      size="icon" 
+      onClick={onClick}
+      className="h-9 w-9"
+      aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
     >
-      {isOpen ? (
-        <ChevronLeft size={14} />
-      ) : (
-        <ChevronRight size={14} />
-      )}
-    </button>
+      <PanelLeft className={`h-4 w-4 transition-transform ${collapsed ? 'rotate-180' : ''}`} />
+    </Button>
   );
-};
+}

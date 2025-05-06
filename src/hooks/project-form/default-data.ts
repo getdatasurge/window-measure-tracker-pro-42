@@ -32,3 +32,6 @@ export const defaultProjectFormData: ProjectFormData = {
   instructions: "",
   attachments: []
 };
+
+// Export as defaultFormData for backward compatibility
+export const defaultFormData = defaultProjectFormData;

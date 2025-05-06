@@ -1,66 +1,9 @@
 
 import { Project } from "@/types/project";
+import { ProjectFormData as BaseProjectFormData } from "@/types/project";
 
-export interface ProjectFormData {
-  id?: string;
-  name: string;
-  description: string;
-  status: string;
-  client: string;
-  dueDate: string | Date | null;
-  
-  // Location details
-  location: string | {
-    addressLine1: string;
-    addressLine2: string;
-    city: string;
-    state: string;
-    zip: string;
-  };
-  
-  // Project metadata
-  type: string;
-  tags: string[];
-  priority: 'low' | 'medium' | 'high';
-  budgetEstimate: number | null;
-  
-  // Timeline information
-  timeline: {
-    startDate: string | Date | null;
-    endDate: string | Date | null;
-    phases?: {
-      name: string;
-      startDate: string | Date | null;
-      endDate: string | Date | null;
-    }[];
-  };
-  
-  // Team requirements
-  team: {
-    members: {
-      id: string;
-      role: string;
-    }[];
-    requiredRoles: string[];
-  };
-  estimatedWindows: number | null;
-  instructions: string;
-  
-  // File attachments
-  attachments: {
-    id: string;
-    name: string;
-    size: number;
-    type: string;
-    url: string;
-  }[];
-  
-  // Audit information
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
-  createdBy?: string;
-  updatedBy?: string;
-}
+// Re-export the ProjectFormData type from project types
+export type ProjectFormData = BaseProjectFormData;
 
 export interface ProjectFormErrors {
   name?: string;
@@ -81,21 +24,23 @@ export type ProjectFormStep =
   | 'attachments'
   | 'review';
 
+export interface UseProjectFormProps {
+  onCreateProject?: (data: ProjectFormData) => void;
+  onClose?: () => void;
+  defaultValues?: Partial<ProjectFormData>;
+}
+
 export interface UseProjectFormReturn {
+  activeTab: string;
+  setActiveTab: (tab: string) => void;
   formData: ProjectFormData;
-  setFormData: (data: Partial<ProjectFormData>) => void;
-  errors: ProjectFormErrors;
-  setErrors: (errors: ProjectFormErrors) => void;
-  validateForm: () => boolean;
-  handleSubmit: () => void;
-  isSubmitting: boolean;
+  errors: Partial<Record<string, string>>;
+  projectId: string;
   resetForm: () => void;
-  currentStep: ProjectFormStep;
-  setCurrentStep: (step: ProjectFormStep) => void;
-  nextStep: () => void;
-  prevStep: () => void;
-  isLastStep: boolean;
-  isFirstStep: boolean;
+  updateFormData: (field: string, value: any) => void;
+  handleSubmit: () => void;
+  draftSaved: boolean;
+  saveDraft: () => void;
 }
 
 export const projectFormDataToProject = (formData: ProjectFormData): Project => {
@@ -108,6 +53,6 @@ export const projectFormDataToProject = (formData: ProjectFormData): Project => 
     dueDate: formData.dueDate ? new Date(formData.dueDate).toISOString() : null,
     createdAt: formData.createdAt ? new Date(formData.createdAt).toISOString() : new Date().toISOString(),
     updatedAt: formData.updatedAt ? new Date(formData.updatedAt).toISOString() : new Date().toISOString(),
-    // Add additional fields as needed from formData
+    entries_count: formData.entries_count || 0,
   };
 };
