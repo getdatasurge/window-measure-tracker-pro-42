@@ -91,7 +91,7 @@ const AppLayout: React.FC = () => {
         {/* You can add a persistent header here in the future */}
       </div>
       
-      <main className="container mx-auto p-4">
+      <main className="container mx-auto">
         <Outlet />
       </main>
     </div>
