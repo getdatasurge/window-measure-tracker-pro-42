@@ -41,22 +41,32 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
           throw projectError;
         }
         
-        // For each project, fetch the count of related entries
-        const projectsWithEntryCounts = await Promise.all(projectData.map(async (project) => {
-          const { count, error: countError } = await supabase
-            .from('entries')
-            .select('*', { count: 'exact', head: true })
-            .eq('project_id', project.id);
-            
-          if (countError) {
-            console.error('Error fetching entry count:', countError);
+        // For each project, fetch the count of related entries with proper error handling
+        const projectsWithEntryCounts = await Promise.all((projectData || []).map(async (project) => {
+          if (!project || !project.id) {
+            // Handle potentially malformed project data
             return { ...project, entries_count: 0 };
           }
           
-          return { ...project, entries_count: count || 0 };
+          try {
+            const { count, error: countError } = await supabase
+              .from('entries')
+              .select('*', { count: 'exact', head: true })
+              .eq('project_id', project.id);
+              
+            if (countError) {
+              console.error('Error fetching entry count for project:', project.id, countError);
+              return { ...project, entries_count: 0 };
+            }
+            
+            return { ...project, entries_count: count || 0 };
+          } catch (countErr) {
+            console.error('Exception fetching entry count for project:', project.id, countErr);
+            return { ...project, entries_count: 0 };
+          }
         }));
         
-        setProjects(projectsWithEntryCounts);
+        setProjects(projectsWithEntryCounts || []);
       } catch (error) {
         console.error('Error fetching projects:', error);
         toast({
@@ -72,10 +82,9 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
     fetchProjects();
   }, [toast]);
   
-  // Transform the projects data to match the expected format for ProjectTable
-  // Also format the deadline date nicely
+  // Transform the projects data with safe handling of optional properties
   const formattedProjects = projects.map(project => ({
-    id: project.id,
+    id: project.id || 'unknown-id',
     name: project.name || 'Untitled Project',
     client: project.client_name || 'No Client',
     location: project.location || 'No Location',

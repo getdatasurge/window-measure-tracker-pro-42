@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -137,9 +138,10 @@ function addToRemoveQueue(toastId: string) {
   toastTimeouts.set(toastId, timeout)
 }
 
-export function toast({
+// Export the toast function properly
+export const toast = ({
   ...props
-}: Omit<ToasterToast, "id">) {
+}: Omit<ToasterToast, "id">) => {
   const id = genId()
 
   const update = (props: ToasterToast) =>
