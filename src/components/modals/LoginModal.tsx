@@ -8,13 +8,14 @@ import useAuthModalStore from '@/stores/useAuthModalStore';
 import { Github, Mail } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 
 const LoginModal = () => {
   const { isLoginOpen, closeAll, openSignup } = useAuthModalStore();
   const navigate = useNavigate();
+  const location = useLocation();
   
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
@@ -22,6 +23,9 @@ const LoginModal = () => {
     password: '',
   });
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Get redirect path from location state or default to dashboard
+  const from = location.state?.from?.pathname || '/dashboard';
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -55,7 +59,7 @@ const LoginModal = () => {
       if (data?.session) {
         toast.success('Logged in successfully!');
         closeAll();
-        navigate('/dashboard');
+        navigate(from, { replace: true });
       }
     } catch (error: any) {
       console.error('Login failed:', error);
@@ -73,7 +77,7 @@ const LoginModal = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth-callback?redirect=${encodeURIComponent(from)}`,
         },
       });
       

@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -32,6 +33,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
+import AuthCallback from "./pages/AuthCallback";
 
 const queryClient = new QueryClient();
 
@@ -42,22 +44,22 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <ThemeProvider>
-        <UserProvider>
+        <BrowserRouter>
           <AuthProvider>
-            <Toaster />
-            <Sonner />
-            <ToastContainer
-              position="top-center"
-              autoClose={3000}
-              hideProgressBar={false}
-              newestOnTop
-              closeOnClick
-              pauseOnFocusLoss
-              draggable
-              pauseOnHover
-              theme="dark"
-            />
-            <BrowserRouter>
+            <UserProvider>
+              <Toaster />
+              <Sonner />
+              <ToastContainer
+                position="top-center"
+                autoClose={3000}
+                hideProgressBar={false}
+                newestOnTop
+                closeOnClick
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+              />
               <div className="fixed bottom-4 right-4 z-50">
                 <PromptHistoryViewer variant="dialog" />
               </div>
@@ -71,6 +73,7 @@ const App = () => (
                 <Route path="/" element={<LandingPage />} />
                 <Route path="/landing" element={<Navigate to="/" replace />} />
                 <Route path="/sign-in" element={<SignInPage />} />
+                <Route path="/auth-callback" element={<AuthCallback />} />
 
                 {/* Protected Routes */}
                 <Route 
@@ -181,9 +184,9 @@ const App = () => (
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
-            </BrowserRouter>
+            </UserProvider>
           </AuthProvider>
-        </UserProvider>
+        </BrowserRouter>
       </ThemeProvider>
     </TooltipProvider>
   </QueryClientProvider>

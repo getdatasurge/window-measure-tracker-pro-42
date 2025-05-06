@@ -62,7 +62,8 @@ const SignupModal = () => {
           data: {
             full_name: values.name,
             birthday: values.birthday,
-          }
+          },
+          emailRedirectTo: `${window.location.origin}/auth-callback?redirect=/dashboard`
         }
       });
       
@@ -101,7 +102,7 @@ const SignupModal = () => {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth-callback?redirect=/dashboard`,
         }
       });
       

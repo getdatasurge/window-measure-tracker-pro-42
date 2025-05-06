@@ -1,8 +1,11 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { LogOut } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavItem {
   name: string;
@@ -12,7 +15,7 @@ interface NavItem {
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, signOut } = useAuth();
   const isMobile = useIsMobile();
 
   // Define navigation items
@@ -35,6 +38,10 @@ const Sidebar: React.FC = () => {
     schedule: 'M8 2v20M16 2v20M3 6h18M3 18h18',
     reports: 'M16 17v2a2 2 0 01-2 2H5a2 2 0 01-2-2v-7a2 2 0 012-2h7a2 2 0 012 2v2m3-7V3a2 2 0 012-2h2a2 2 0 012 2v11a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2m-3-4h18',
     settings: 'M12 2v2m-4 0v2M4 2v2m16 0v2M21 12h-2m-4 0h-2M4 12h2m4 0h2M16 20v2m-4 0v2M4 20v2m16 0v2',
+  };
+
+  const handleLogout = () => {
+    signOut();
   };
 
   return (
@@ -73,9 +80,24 @@ const Sidebar: React.FC = () => {
         </div>
       </div>
       {isAuthenticated && !isMobile && (
-        <div className="p-4 border-t">
-          {/* Authentication status or user info can go here */}
+        <div className="p-4 border-t flex items-center justify-between">
           <p className="text-sm text-gray-500">Logged in</p>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={handleLogout}
+                  className="p-2 rounded-md text-red-500 hover:bg-gray-100 hover:text-red-600 transition-colors"
+                  aria-label="Log out"
+                >
+                  <LogOut size={18} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Log out</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       )}
     </div>
