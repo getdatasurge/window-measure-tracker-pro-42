@@ -85,6 +85,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   // Function to fetch user profile
   const fetchProfile = useCallback(async (userId: string, userData: User) => {
     try {
+      setLoading(true);
       const { data, error: profileError } = await supabase
         .from('profiles')
         .select('*')
@@ -104,6 +105,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
     } catch (err) {
       console.error('Error fetching user profile:', err);
+    } finally {
+      setLoading(false);
     }
   }, [syncProfileData]);
 

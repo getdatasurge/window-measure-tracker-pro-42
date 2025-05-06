@@ -1,6 +1,6 @@
 
-import React from 'react';
-import { LogOut } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { LogOut, User } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/tooltip";
 import { useAuth } from '@/contexts/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface SidebarUserProfileProps {
   collapsed: boolean;
@@ -20,10 +21,16 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   collapsed
 }) => {
   const navigate = useNavigate();
-  const { signOut, profile, loading } = useAuth();
+  const { signOut, profile, loading, refreshProfile } = useAuth();
   
+  // Fetch profile data when component mounts
+  useEffect(() => {
+    refreshProfile();
+  }, [refreshProfile]);
+
   // Generate initials from full name
   const getInitials = (name: string) => {
+    if (!name) return 'U';
     return name
       .split(' ')
       .map(word => word[0])
@@ -85,8 +92,19 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
             </Avatar>
           </div>
           <div className="ml-3">
-            <div className="text-sm font-medium text-white">{profile?.full_name || 'Loading...'}</div>
-            <div className="text-xs text-zinc-400">{profile?.role || 'User'}</div>
+            {loading ? (
+              <>
+                <Skeleton className="h-4 w-20 mb-1" />
+                <Skeleton className="h-3 w-16" />
+              </>
+            ) : (
+              <>
+                <div className="text-sm font-medium text-white">{profile?.full_name || 'User'}</div>
+                {profile?.role && (
+                  <div className="text-xs text-zinc-400">{profile.role}</div>
+                )}
+              </>
+            )}
           </div>
         </div>
         
