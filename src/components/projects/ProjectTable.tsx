@@ -2,7 +2,7 @@
 import React from 'react';
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Loader2 } from 'lucide-react';
+import { Loader2, MapPin, Calendar } from 'lucide-react';
 
 interface Project {
   id: string;
@@ -23,12 +23,14 @@ const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case 'active':
       return 'bg-green-900/30 text-green-400 border border-green-700/30';
+    case 'in progress':
+      return 'bg-blue-900/30 text-blue-400 border border-blue-700/30';
+    case 'planned':
+      return 'bg-purple-900/30 text-purple-400 border border-purple-700/30';
     case 'pending':
       return 'bg-amber-900/30 text-amber-400 border border-amber-700/30';
     case 'delayed':
       return 'bg-red-900/30 text-red-400 border border-red-700/30';
-    case 'planning':
-      return 'bg-blue-900/30 text-blue-400 border border-blue-700/30';
     case 'on track':
       return 'bg-green-900/30 text-green-400 border border-green-700/30';
     default:
@@ -61,9 +63,9 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects, loading = false }
           <TableRow className="border-zinc-700/30">
             <TableHead className="text-zinc-400">Project</TableHead>
             <TableHead className="text-zinc-400">Client</TableHead>
-            <TableHead className="text-zinc-400">Location</TableHead>
+            <TableHead className="text-zinc-400 hidden md:table-cell">Location</TableHead>
             <TableHead className="text-zinc-400">Status</TableHead>
-            <TableHead className="text-zinc-400">Deadline</TableHead>
+            <TableHead className="text-zinc-400 hidden md:table-cell">Deadline</TableHead>
             <TableHead className="text-zinc-400 text-right">Entries</TableHead>
           </TableRow>
         </TableHeader>
@@ -71,14 +73,26 @@ const ProjectTable: React.FC<ProjectTableProps> = ({ projects, loading = false }
           {projects.map((project) => (
             <TableRow key={project.id} className="border-zinc-700/30">
               <TableCell className="font-medium text-white">{project.name}</TableCell>
-              <TableCell className="text-zinc-300">{project.client}</TableCell>
-              <TableCell className="text-zinc-300">{project.location || '—'}</TableCell>
+              <TableCell className="text-zinc-300">
+                {project.client}
+                <div className="md:hidden mt-1 text-xs text-zinc-400 flex items-center gap-1">
+                  {project.location && (
+                    <>
+                      <MapPin className="h-3 w-3" /> {project.location}
+                    </>
+                  )}
+                </div>
+                <div className="md:hidden mt-1 text-xs text-zinc-400 flex items-center gap-1">
+                  <Calendar className="h-3 w-3" /> {project.deadline}
+                </div>
+              </TableCell>
+              <TableCell className="hidden md:table-cell text-zinc-300">{project.location || '—'}</TableCell>
               <TableCell>
                 <Badge className={`px-2 py-0.5 ${getStatusColor(project.status)}`}>
                   {project.status}
                 </Badge>
               </TableCell>
-              <TableCell className="text-zinc-300">{project.deadline}</TableCell>
+              <TableCell className="hidden md:table-cell text-zinc-300">{project.deadline}</TableCell>
               <TableCell className="text-zinc-300 text-right">{project.entries_count}</TableCell>
             </TableRow>
           ))}

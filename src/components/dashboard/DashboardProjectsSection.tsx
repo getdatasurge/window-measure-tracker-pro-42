@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import ProjectTable from '../projects/ProjectTable';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { useToast } from '@/components/ui/use-toast';
+import { format } from 'date-fns';
 
 interface DashboardProjectsSectionProps {
   className?: string;
@@ -29,11 +30,12 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
       try {
         setLoading(true);
         
-        // Fetch active projects (not completed) - FIXED QUERY SYNTAX
+        // Fetch active projects
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
           .select('id, name, client_name, location, deadline, status')
-          .neq('status', 'completed');
+          .eq('is_active', true)
+          .order('deadline', { ascending: true });
           
         if (projectError) {
           throw projectError;
@@ -71,12 +73,13 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
   }, [toast]);
   
   // Transform the projects data to match the expected format for ProjectTable
+  // Also format the deadline date nicely
   const formattedProjects = projects.map(project => ({
     id: project.id,
     name: project.name || 'Untitled Project',
     client: project.client_name || 'No Client',
     location: project.location || 'No Location',
-    deadline: project.deadline ? new Date(project.deadline).toLocaleDateString() : 'No Deadline',
+    deadline: project.deadline ? format(new Date(project.deadline), 'MMM d, yyyy') : 'No Deadline',
     status: project.status || 'active',
     entries_count: project.entries_count || 0
   }));
