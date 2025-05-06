@@ -1,40 +1,34 @@
 
-import { ProjectFormData } from '@/types/project';
+import { ProjectFormData } from "./types";
 
-// Default form data for a new project
-export const defaultFormData: ProjectFormData = {
-  name: '',
-  type: '',
-  status: 'Planned',
-  description: '',
-  
+// Default values for the project form
+export const defaultProjectFormData: ProjectFormData = {
+  name: "",
+  description: "",
+  status: "draft",
+  client: "",
+  dueDate: null,
   location: {
-    addressLine1: '',
-    addressLine2: '',
-    city: '',
-    state: '',
-    zip: '',
+    addressLine1: "",
+    addressLine2: "",
+    city: "",
+    state: "",
+    zip: ""
   },
-  
-  timeline: {
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: '',
-    completionDate: '',
-  },
-  
-  team: {
-    projectManager: '',
-    installers: [],
-  },
-  estimatedWindows: 0,
-  instructions: '',
-  
-  attachments: {
-    blueprints: [],
-    photos: [],
-    contracts: [],
-  },
+  type: "",
   tags: [],
-  priority: 'Medium',
-  budgetEstimate: 0,
+  priority: 'medium',
+  budgetEstimate: null,
+  timeline: {
+    startDate: null,
+    endDate: null,
+    phases: []
+  },
+  team: {
+    members: [],
+    requiredRoles: []
+  },
+  estimatedWindows: null,
+  instructions: "",
+  attachments: []
 };
