@@ -13,7 +13,6 @@ import {
 } from '@/components/ui/alert-dialog';
 import { ProjectData } from '@/hooks/useProjects';
 import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 interface DeleteProjectModalProps {
   isOpen: boolean;
@@ -41,6 +40,7 @@ export function DeleteProjectModal({
   return (
     <AlertDialog open={isOpen} onOpenChange={onClose}>
       <AlertDialogContent>
+        <AlertDialogClose />
         <AlertDialogHeader>
           <AlertDialogTitle>Confirm Deletion</AlertDialogTitle>
           <AlertDialogDescription>

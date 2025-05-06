@@ -45,14 +45,8 @@ const AlertDialogContent = React.forwardRef<
         "max-w-full sm:max-w-lg md:max-w-xl lg:max-w-2xl sm:rounded-lg overflow-hidden",
         className
       )}
-      onInteractOutside={(e) => e.preventDefault()}
-      onEscapeKeyDown={(e) => e.preventDefault()}
       {...props}
     >
-      <AlertDialogPrimitive.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </AlertDialogPrimitive.Close>
       {props.children}
     </AlertDialogPrimitive.Content>
   </AlertDialogPortal>
@@ -140,6 +134,25 @@ const AlertDialogCancel = React.forwardRef<
 ))
 AlertDialogCancel.displayName = AlertDialogPrimitive.Cancel.displayName
 
+// Custom Close component that's not in the Radix UI AlertDialog primitives
+const AlertDialogClose = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, ...props }, ref) => (
+  <button
+    ref={ref}
+    className={cn(
+      "absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none",
+      className
+    )}
+    {...props}
+  >
+    <X className="h-4 w-4" />
+    <span className="sr-only">Close</span>
+  </button>
+))
+AlertDialogClose.displayName = "AlertDialogClose"
+
 export {
   AlertDialog,
   AlertDialogPortal,
@@ -152,4 +165,5 @@ export {
   AlertDialogDescription,
   AlertDialogAction,
   AlertDialogCancel,
+  AlertDialogClose, // Export our custom component
 }
