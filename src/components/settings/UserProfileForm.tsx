@@ -15,7 +15,7 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone: string; // This is mapped to phone_number in the database
   jobTitle: string;
   avatarUrl?: string;
 }
@@ -41,7 +41,7 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
         firstName,
         lastName,
         email: initialData.email || '',
-        phone: initialData.phone_number || '',
+        phone: initialData.phone_number || '', // Map from phone_number in database to phone in form
         jobTitle: initialData.role || '',
         avatarUrl: initialData.avatar_url
       });

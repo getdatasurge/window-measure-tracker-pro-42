@@ -6,7 +6,7 @@ interface FormData {
   firstName: string;
   lastName: string;
   email: string;
-  phone: string;
+  phone: string; // This is mapped to phone_number in the database
   jobTitle: string;
   avatarUrl: string;
 }

@@ -6,7 +6,7 @@ import UserProfileForm from '@/components/settings/UserProfileForm';
 import ApplicationSettingsCard from '@/components/settings/ApplicationSettingsCard';
 import NotificationPreferences from '@/components/settings/NotificationPreferences';
 import DefaultProjectSettings from '@/components/settings/DefaultProjectSettings';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -23,7 +23,7 @@ const SettingsTabs = [
 const UserSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('account');
   const { id } = useParams<{ id: string }>();
-  const { user, profile } = useUser();
+  const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
   
@@ -63,11 +63,14 @@ const UserSettingsPage = () => {
   
   const handleProfileUpdate = async (formData: any) => {
     try {
+      // Combine first and last name into full name and trim whitespace
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+      
       const { error } = await supabase
         .from('profiles')
         .update({
-          full_name: `${formData.firstName} ${formData.lastName}`.trim(),
-          phone: formData.phone || null,
+          full_name: fullName,
+          phone_number: formData.phone || null, // Map to correct column name
           role: formData.jobTitle || null,
           updated_at: new Date().toISOString()
         })

@@ -8,7 +8,7 @@ import {
   NotificationSettings,
   DataPrivacy
 } from '@/components/settings';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
@@ -26,12 +26,12 @@ const Settings = () => {
     firstName: '',
     lastName: '',
     email: '',
-    phone: '',
+    phone: '', // We'll map this to phone_number in the database
     jobTitle: '',
     avatarUrl: ''
   });
   
-  const { user, profile } = useUser();
+  const { user, profile } = useAuth();
   
   // Load user data when component mounts or when user/profile changes
   useEffect(() => {
@@ -45,7 +45,7 @@ const Settings = () => {
         firstName,
         lastName,
         email: user.email || '',
-        phone: profile.phone_number || '',
+        phone: profile.phone_number || '', // Map from phone_number in the database to phone in the form
         jobTitle: profile.role || '',
         avatarUrl: profile.avatar_url || ''
       });
@@ -68,15 +68,15 @@ const Settings = () => {
     setIsSaving(true);
     
     try {
-      // Combine first and last name into full name
+      // Combine first and last name into full name and trim whitespace
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       
-      // Update profile in Supabase
+      // Update profile in Supabase with the correct column names
       const { error } = await supabase
         .from('profiles')
         .update({
           full_name: fullName,
-          phone_number: formData.phone || null,
+          phone_number: formData.phone || null, // Map to the correct column name
           role: formData.jobTitle || null,
           avatar_url: formData.avatarUrl || null,
           updated_at: new Date().toISOString()
@@ -87,7 +87,7 @@ const Settings = () => {
       
       toast({
         title: "Profile updated",
-        description: "Your profile information has been successfully updated.",
+        description: "Your profile has been successfully updated.",
       });
     } catch (error) {
       console.error('Error updating profile:', error);
