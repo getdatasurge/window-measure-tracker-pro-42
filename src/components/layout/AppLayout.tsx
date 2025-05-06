@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useUser } from '@/contexts/UserContext';
@@ -14,27 +13,33 @@ import { AlertTriangle } from 'lucide-react';
  * - Renders child routes using Outlet when authenticated
  */
 const AppLayout: React.FC = () => {
-  const { user, profile, isLoading, profileNotFound, error, refreshProfile } = useUser();
+  const {
+    user,
+    profile,
+    isLoading,
+    profileNotFound,
+    error,
+    refreshProfile
+  } = useUser();
   const location = useLocation();
 
   // While checking authentication status
   if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
+    return <div className="flex items-center justify-center min-h-screen">
         <Spinner className="w-8 h-8 text-green-500" />
-      </div>
-    );
+      </div>;
   }
 
   // If not authenticated, redirect to sign-in
   if (!user) {
-    return <Navigate to="/sign-in" state={{ from: location }} replace />;
+    return <Navigate to="/sign-in" state={{
+      from: location
+    }} replace />;
   }
 
   // If we have authentication errors
   if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+    return <div className="flex flex-col items-center justify-center min-h-screen p-4">
         <Alert variant="destructive" className="max-w-md mb-4">
           <AlertTriangle className="h-4 w-4" />
           <AlertTitle>Authentication Error</AlertTitle>
@@ -42,20 +47,15 @@ const AppLayout: React.FC = () => {
             There was a problem with your authentication. Please try signing in again.
           </AlertDescription>
         </Alert>
-        <button 
-          onClick={() => window.location.reload()} 
-          className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
-        >
+        <button onClick={() => window.location.reload()} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
           Refresh Page
         </button>
-      </div>
-    );
+      </div>;
   }
 
   // If we have a user but no profile (and we've attempted to load it)
   if (profileNotFound) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
+    return <div className="flex flex-col items-center justify-center min-h-screen p-4 text-center">
         <div className="max-w-md">
           <Alert variant="warning" className="mb-4">
             <AlertTriangle className="h-4 w-4" />
@@ -65,37 +65,27 @@ const AppLayout: React.FC = () => {
             </AlertDescription>
           </Alert>
           <div className="flex space-x-4 justify-center mt-4">
-            <button 
-              onClick={() => refreshProfile()} 
-              className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded"
-            >
+            <button onClick={() => refreshProfile()} className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded">
               Retry
             </button>
-            <button 
-              onClick={() => window.location.reload()} 
-              className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded"
-            >
+            <button onClick={() => window.location.reload()} className="bg-gray-500 hover:bg-gray-600 text-white px-6 py-2 rounded">
               Refresh Page
             </button>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // If all checks pass, render the Outlet (child routes)
-  return (
-    <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen bg-gray-50">
       {/* Future placeholder for header/navigation */}
       <div className="header-placeholder">
         {/* You can add a persistent header here in the future */}
       </div>
       
-      <main className="container mx-auto transition-all duration-300 ease-in-out">
+      <main className="container transition-all duration-300 ease-in-out">
         <Outlet />
       </main>
-    </div>
-  );
+    </div>;
 };
-
 export default AppLayout;
