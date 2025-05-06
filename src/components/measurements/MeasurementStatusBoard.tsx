@@ -8,6 +8,7 @@ import StatusColumn from './StatusColumn';
 import MeasurementFilterBar from './MeasurementFilterBar';
 import WeeklyNavBar from './WeeklyNavBar';
 import EditMeasurementModal from './EditMeasurementModal';
+import { AnimatePresence } from 'framer-motion';
 
 interface FilterState {
   projectId: string | null;
@@ -260,20 +261,22 @@ const MeasurementStatusBoard: React.FC = () => {
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {['Measured', 'Cut', 'Installed / Completed'].map(columnName => (
-          <StatusColumn
-            key={columnName}
-            title={columnName}
-            status={columnName as any}
-            measurements={getMeasurementsForColumn(columnName)}
-            onEditMeasurement={handleCardClick}
-            color={
-              columnName === 'Measured' ? 'bg-amber-500/30' : 
-              columnName === 'Cut' ? 'bg-blue-500/30' : 
-              'bg-green-500/30'
-            }
-          />
-        ))}
+        <AnimatePresence>
+          {['Measured', 'Cut', 'Installed / Completed'].map(columnName => (
+            <StatusColumn
+              key={columnName}
+              title={`${columnName} (${getMeasurementsForColumn(columnName).length})`}
+              status={columnName as any}
+              measurements={getMeasurementsForColumn(columnName)}
+              onEditMeasurement={handleCardClick}
+              color={
+                columnName === 'Measured' ? 'bg-amber-500/30' : 
+                columnName === 'Cut' ? 'bg-blue-500/30' : 
+                'bg-green-500/30'
+              }
+            />
+          ))}
+        </AnimatePresence>
       </div>
       
       <EditMeasurementModal

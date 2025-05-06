@@ -4,6 +4,7 @@ import { Measurement } from '@/types/measurement';
 import MeasurementCard from './MeasurementCard';
 import { Ruler, Scissors, CheckCircle, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { motion } from 'framer-motion';
 
 interface StatusColumnProps {
   title: string;
@@ -55,11 +56,18 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
       </div>
       <div className="p-2 h-[calc(100%-40px)] overflow-y-auto">
         {measurements.map(measurement => (
-          <MeasurementCard 
+          <motion.div
             key={measurement.id}
-            measurement={measurement}
-            onEdit={onEditMeasurement}
-          />
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <MeasurementCard 
+              measurement={measurement}
+              onEdit={onEditMeasurement}
+            />
+          </motion.div>
         ))}
         {measurements.length === 0 && (
           <div className="flex items-center justify-center h-20 border border-dashed border-zinc-800 rounded-md">

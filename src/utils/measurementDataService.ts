@@ -27,7 +27,6 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
@@ -40,6 +39,9 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
       .order('measurement_date', { ascending: false });
       
     if (error) throw error;
+    
+    // Make sure data is not null before mapping
+    if (!data) return [];
     
     // Transform the data to match our Measurement type
     return data.map(item => ({
@@ -54,7 +56,6 @@ export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
       direction: (item.direction || 'N/A') as any,
-      glassType: item.glass_type,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
@@ -85,7 +86,6 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
@@ -97,6 +97,9 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
       .order('updated_at', { ascending: false });
       
     if (error) throw error;
+    
+    // Make sure data is not null before mapping
+    if (!data) return [];
     
     // Transform the data to match our Measurement type
     return data.map(item => ({
@@ -110,8 +113,7 @@ export const fetchMeasurementsByStatus = async (status: string): Promise<Measure
       area: item.area ? `${item.area} ft²` : '0 ft²',
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
-      direction: (item.direction || 'N/A') as any, 
-      glassType: item.glass_type,
+      direction: (item.direction || 'N/A') as any,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
@@ -142,7 +144,6 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
         quantity,
         recorded_by,
         direction,
-        glass_type,
         notes,
         status,
         measurement_date,
@@ -153,6 +154,9 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
       .order('updated_at', { ascending: false });
       
     if (error) throw error;
+    
+    // Make sure data is not null before mapping
+    if (!data) return [];
     
     // Transform the data to match our Measurement type
     return data.map(item => ({
@@ -167,7 +171,6 @@ export const fetchMeasurements = async (): Promise<Measurement[]> => {
       quantity: item.quantity || 1,
       recordedBy: item.recorded_by || '',
       direction: (item.direction || 'N/A') as any,
-      glassType: item.glass_type,
       notes: item.notes,
       status: (item.status || 'Pending') as any,
       measurementDate: item.measurement_date || new Date().toISOString(),
