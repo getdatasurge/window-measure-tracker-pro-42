@@ -1,6 +1,5 @@
-
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import DashboardShell from '@/components/layout/DashboardShell';
 import UserProfileForm from '@/components/settings/UserProfileForm';
 import ApplicationSettingsCard from '@/components/settings/ApplicationSettingsCard';
@@ -26,17 +25,58 @@ const UserSettingsPage = () => {
   const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
+  const navigate = useNavigate();
   
-  // Only fetch data if viewing another user's profile
   useEffect(() => {
+    // If not authenticated, we can't fetch any profile
+    if (!user) {
+      setIsLoading(false);
+      return;
+    }
+    
     const fetchUserProfile = async () => {
-      if (!id || (user && id === user.id)) {
-        // Using current user's profile
-        setProfileData(profile);
-        setIsLoading(false);
+      // Special case for "current" - use the authenticated user's ID
+      if (id === 'current') {
+        if (profile) {
+          // If we already have the profile from auth context, use it
+          setProfileData(profile);
+          setIsLoading(false);
+          return;
+        }
+        
+        // Otherwise fetch the current user's profile
+        try {
+          const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser();
+          
+          if (userError || !currentUser) {
+            throw new Error(userError?.message || "Not authenticated");
+          }
+          
+          const { data, error } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', currentUser.id)
+            .single();
+            
+          if (error) throw error;
+          setProfileData(data);
+        } catch (error) {
+          console.error('Error fetching current user profile:', error);
+          toast({
+            title: "Error",
+            description: "Could not load your profile. Please try again later.",
+            variant: "destructive"
+          });
+          
+          // Redirect to dashboard if we can't load the profile
+          navigate('/');
+        } finally {
+          setIsLoading(false);
+        }
         return;
       }
       
+      // For other user IDs (when viewing someone else's profile)
       try {
         const { data, error } = await supabase
           .from('profiles')
@@ -59,10 +99,17 @@ const UserSettingsPage = () => {
     };
     
     fetchUserProfile();
-  }, [id, user, profile]);
+  }, [id, user, profile, navigate]);
   
   const handleProfileUpdate = async (formData: any) => {
     try {
+      // Determine the correct user ID to update
+      const userId = id === 'current' ? user?.id : id;
+      
+      if (!userId) {
+        throw new Error("No user ID available for update");
+      }
+      
       // Combine first and last name into full name and trim whitespace
       const fullName = `${formData.firstName} ${formData.lastName}`.trim();
       
@@ -74,7 +121,7 @@ const UserSettingsPage = () => {
           role: formData.jobTitle || null,
           updated_at: new Date().toISOString()
         })
-        .eq('id', id);
+        .eq('id', userId);
         
       if (error) throw error;
       
@@ -127,7 +174,7 @@ const UserSettingsPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <UserProfileForm 
-                userId={id} 
+                userId={id === 'current' ? user?.id : id} 
                 initialData={profileData}
                 isLoading={isLoading}
                 onSave={handleProfileUpdate}
