@@ -30,7 +30,8 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
     try {
       await supabase.auth.signOut();
       toast.success('Successfully logged out');
-      navigate('/login');
+      // Redirect to homepage instead of login
+      window.location.href = `${window.location.origin}/`;
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Failed to log out');

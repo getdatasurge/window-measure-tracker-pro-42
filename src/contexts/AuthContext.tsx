@@ -67,12 +67,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setSession(null);
       setIsAuthenticated(false);
       toast.success('You have been successfully logged out');
-      navigate('/');
+      // Redirect to homepage instead of a specific route
+      window.location.href = `${window.location.origin}/`;
     } catch (error: any) {
       console.error('Logout error:', error);
       toast.error(error.message || 'Failed to log out');
     }
-  }, [navigate]);
+  }, []);
 
   useEffect(() => {
     // First, set up the auth state listener

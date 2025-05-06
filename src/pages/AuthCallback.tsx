@@ -54,13 +54,14 @@ const AuthCallback = () => {
           // No session found
           console.error('No session found after authentication');
           setError('Authentication failed. Please try again.');
-          setTimeout(() => navigate('/sign-in', { replace: true }), 3000);
+          // Redirect to homepage instead of sign-in page
+          setTimeout(() => window.location.href = `${window.location.origin}/`, 3000);
         }
       } catch (error: any) {
         console.error('Auth callback error:', error);
         setError(error.message || 'Authentication process failed');
-        // Redirect to login after showing error
-        setTimeout(() => navigate('/sign-in', { replace: true }), 3000);
+        // Redirect to homepage after showing error
+        setTimeout(() => window.location.href = `${window.location.origin}/`, 3000);
       }
     };
     
@@ -73,7 +74,7 @@ const AuthCallback = () => {
         <div className="text-center">
           <h1 className="text-xl font-bold text-red-400 mb-2">Authentication Error</h1>
           <p className="text-zinc-300">{error}</p>
-          <p className="text-zinc-400 mt-4">Redirecting to login...</p>
+          <p className="text-zinc-400 mt-4">Redirecting to homepage...</p>
         </div>
       ) : (
         <div className="text-center">
