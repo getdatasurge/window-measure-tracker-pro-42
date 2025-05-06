@@ -1,6 +1,7 @@
+
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useUser } from '@/contexts/UserContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -16,15 +17,15 @@ const AppLayout: React.FC = () => {
   const {
     user,
     profile,
-    isLoading,
+    loading,
     profileNotFound,
     error,
     refreshProfile
-  } = useUser();
+  } = useAuth();
   const location = useLocation();
 
   // While checking authentication status
-  if (isLoading) {
+  if (loading) {
     return <div className="flex items-center justify-center min-h-screen">
         <Spinner className="w-8 h-8 text-green-500" />
       </div>;
@@ -88,4 +89,5 @@ const AppLayout: React.FC = () => {
       </main>
     </div>;
 };
+
 export default AppLayout;

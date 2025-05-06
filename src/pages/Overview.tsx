@@ -2,14 +2,14 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@/contexts/auth/AuthContext';
+import { useAuth } from '@/contexts/auth/AuthContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import LandingPage from './Landing';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { Clock } from 'lucide-react';
 
 const Overview = () => {
-  const { user, profile, profileNotFound } = useUser();
+  const { user, profile, profileNotFound } = useAuth();
   const { openLogin } = useAuthModalStore();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
