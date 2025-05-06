@@ -31,6 +31,8 @@ import Measurements from "./pages/Measurements";
 import MeasurementEntries from "./pages/MeasurementEntries";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
+import LoginModal from "./components/modals/LoginModal";
+import SignupModal from "./components/modals/SignupModal";
 
 const queryClient = new QueryClient();
 
@@ -60,6 +62,11 @@ const App = () => (
               <div className="fixed bottom-4 right-4 z-50">
                 <PromptHistoryViewer variant="dialog" />
               </div>
+              
+              {/* Global modals */}
+              <LoginModal />
+              <SignupModal />
+              
               <Routes>
                 {/* Public Routes */}
                 <Route path="/" element={<LandingPage />} />
