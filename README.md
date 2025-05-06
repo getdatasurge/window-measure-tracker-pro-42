@@ -1,6 +1,6 @@
 
 # 🧠 Dynamic Markdown Knowledgebase
-
+![Visualization of the codebase](./diagram.svg)
 This project transforms markdown logs of tracked user actions into a dynamic, scrollable React UI. It syncs directly with Lovable's Knowledge Base and logs prompt-response activity to help build smarter AI-driven apps.
 
 ## 🚀 Quick Start
