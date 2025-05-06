@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import DashboardShell from '@/components/layout/DashboardShell';
-import UserProfileForm from '@/components/settings/UserProfileForm';
+import ProfileForm, { ProfileFormData } from '@/components/settings/ProfileForm';
 import ApplicationSettingsCard from '@/components/settings/ApplicationSettingsCard';
 import NotificationPreferences from '@/components/settings/NotificationPreferences';
 import DefaultProjectSettings from '@/components/settings/DefaultProjectSettings';
@@ -22,9 +22,9 @@ const SettingsTabs = [
 const UserSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('account');
   const { id } = useParams<{ id: string }>();
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
-  const [profileData, setProfileData] = useState(null);
+  const [profileData, setProfileData] = useState<ProfileFormData | null>(null);
   const navigate = useNavigate();
   
   useEffect(() => {
@@ -39,7 +39,19 @@ const UserSettingsPage = () => {
       if (id === 'current') {
         if (profile) {
           // If we already have the profile from auth context, use it
-          setProfileData(profile);
+          const nameParts = (profile.full_name || '').split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+          
+          setProfileData({
+            firstName,
+            lastName,
+            email: user.email || '',
+            phone: profile.phone_number || '',
+            jobTitle: profile.role || '',
+            avatarUrl: profile.avatar_url || '',
+            role: profile.role || ''
+          });
           setIsLoading(false);
           return;
         }
@@ -59,7 +71,21 @@ const UserSettingsPage = () => {
             .single();
             
           if (error) throw error;
-          setProfileData(data);
+          
+          // Format the data for our form
+          const nameParts = (data.full_name || '').split(' ');
+          const firstName = nameParts[0] || '';
+          const lastName = nameParts.slice(1).join(' ') || '';
+          
+          setProfileData({
+            firstName,
+            lastName,
+            email: currentUser.email || '',
+            phone: data.phone_number || '',
+            jobTitle: data.role || '',
+            avatarUrl: data.avatar_url,
+            role: data.role || ''
+          });
         } catch (error) {
           console.error('Error fetching current user profile:', error);
           toast({
@@ -85,7 +111,28 @@ const UserSettingsPage = () => {
           .single();
           
         if (error) throw error;
-        setProfileData(data);
+        
+        // Get the user's email if possible
+        let email = '';
+        // We won't be able to get emails for other users, so only try for the current user
+        if (user.id === id) {
+          email = user.email || '';
+        }
+        
+        // Format the data for our form
+        const nameParts = (data.full_name || '').split(' ');
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.slice(1).join(' ') || '';
+        
+        setProfileData({
+          firstName,
+          lastName,
+          email,
+          phone: data.phone_number || '',
+          jobTitle: data.role || '',
+          avatarUrl: data.avatar_url,
+          role: data.role || ''
+        });
       } catch (error) {
         console.error('Error fetching user profile:', error);
         toast({
@@ -101,47 +148,8 @@ const UserSettingsPage = () => {
     fetchUserProfile();
   }, [id, user, profile, navigate]);
   
-  const handleProfileUpdate = async (formData: any) => {
-    try {
-      // Determine the correct user ID to update
-      const userId = id === 'current' ? user?.id : id;
-      
-      if (!userId) {
-        throw new Error("No user ID available for update");
-      }
-      
-      // Combine first and last name into full name and trim whitespace
-      const fullName = `${formData.firstName} ${formData.lastName}`.trim();
-      
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          full_name: fullName,
-          phone_number: formData.phone || null, // Map to correct column name
-          role: formData.jobTitle || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', userId);
-        
-      if (error) throw error;
-      
-      // Refresh the profile in the auth context to update UI across the app
-      await refreshProfile();
-      
-      toast({
-        title: "Profile updated",
-        description: "Profile has been successfully updated",
-      });
-      
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Update failed",
-        description: "There was a problem updating the profile",
-        variant: "destructive"
-      });
-    }
-  };
+  // Determine if the current user is viewing their own profile or someone else's
+  const isOwnProfile = id === 'current' || (user && id === user.id);
   
   return (
     <DashboardShell>
@@ -149,7 +157,9 @@ const UserSettingsPage = () => {
         <div>
           <h1 className="text-2xl font-bold">Settings</h1>
           <p className="text-zinc-500 dark:text-zinc-400 mt-1">
-            Manage your account settings and preferences
+            {isOwnProfile 
+              ? "Manage your account settings and preferences" 
+              : "View user profile and settings"}
           </p>
         </div>
         
@@ -176,11 +186,11 @@ const UserSettingsPage = () => {
         {activeTab === 'account' && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <UserProfileForm 
+              <ProfileForm 
                 userId={id === 'current' ? user?.id : id} 
-                initialData={profileData}
+                initialData={profileData || undefined}
                 isLoading={isLoading}
-                onSave={handleProfileUpdate}
+                readOnly={!isOwnProfile}
               />
             </div>
             <div className="space-y-6">
