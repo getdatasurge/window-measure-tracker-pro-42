@@ -17,6 +17,7 @@ interface Project {
   location?: string;
   status?: string;
   entries_count?: number;
+  deadline?: string; // Added deadline property to match the ProjectTable component's expectations
 }
 
 const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ className }) => {
@@ -34,7 +35,7 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
         // Fetch active projects
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
-          .select('id, name, client_name, location, status')
+          .select('id, name, client_name, location, status, deadline')
           .eq('is_active', true);
           
         if (projectError) {
@@ -99,7 +100,8 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
     client: project.client_name || 'No Client',
     location: project.location || 'No Location',
     status: project.status || 'active',
-    entries_count: project.entries_count || 0
+    entries_count: project.entries_count || 0,
+    deadline: project.deadline || 'Not set' // Added deadline property with a default value
   }));
 
   return (
