@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -126,20 +125,19 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
         avatarUrl: publicUrl
       }));
       
-      // If this is the current user's profile, update it immediately in the database
-      if (!onSave && userId === user.id) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ avatar_url: publicUrl })
-          .eq('id', user.id);
-          
-        if (updateError) throw updateError;
+      // Always update the profile in the database regardless of the onSave prop
+      const updateUserId = userId || user.id;
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', updateUserId);
         
-        toast({
-          title: "Avatar updated",
-          description: "Your profile picture has been successfully updated.",
-        });
-      }
+      if (updateError) throw updateError;
+      
+      toast({
+        title: "Avatar updated",
+        description: "Your profile picture has been successfully updated.",
+      });
     } catch (error) {
       console.error('Error uploading avatar:', error);
       toast({
