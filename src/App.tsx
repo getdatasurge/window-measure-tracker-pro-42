@@ -11,6 +11,7 @@ import { AuthProvider } from "./contexts/auth/AuthContext";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { useEffect } from "react";
 import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
+import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
 
 import MainLayout from "./components/layout/MainLayout";
 import LandingPage from "./pages/Landing";
@@ -45,8 +46,19 @@ const isDev = process.env.NODE_ENV === 'development';
 const App = () => {
   // Initialize the feedbucket patch when the app mounts
   useEffect(() => {
-    const cleanup = enableFeedbucketInteraction();
-    return cleanup;
+    const feedbucketCleanup = enableFeedbucketInteraction();
+    
+    // Setup console error tracker
+    const errorTrackerCleanup = setupConsoleErrorTracker({
+      timeWindow: 30000, // 30 seconds
+      maxErrors: 15,     // Maximum errors before showing toast
+      showOnce: true     // Only show the toast once per session
+    });
+    
+    return () => {
+      feedbucketCleanup();
+      errorTrackerCleanup();
+    };
   }, []);
 
   return (
