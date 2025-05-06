@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -63,7 +62,7 @@ const SignupModal = () => {
             full_name: values.name,
             birthday: values.birthday,
           },
-          emailRedirectTo: `${window.location.origin}/auth-callback?redirect=/dashboard`
+          emailRedirectTo: `${window.location.origin}/auth-callback`
         }
       });
       
@@ -94,28 +93,20 @@ const SignupModal = () => {
     }
   };
 
-  const handleOAuthSignup = async (provider: 'google' | 'github') => {
-    try {
-      setIsLoading(true);
-      setOauthError(null);
-      
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: `${window.location.origin}/auth-callback?redirect=/dashboard`,
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      // No need to navigate manually, the redirect URL will be handled by Supabase OAuth flow
-    } catch (error: any) {
-      console.error(`${provider} signup failed:`, error);
-      setOauthError(error.message || `Failed to signup with ${provider}`);
-      setIsLoading(false);
-    }
+  const handleOAuthSignup = (provider: 'google' | 'github') => {
+    // First, close the modal to prevent DOM context issues
+    closeAll();
+    
+    // Store the redirect path in localStorage for when the user returns
+    localStorage.setItem('authRedirectTo', '/dashboard');
+    
+    // Construct the redirect URL for the OAuth callback
+    const redirectTo = `${window.location.origin}/auth-callback`;
+    
+    // Use direct window location for OAuth redirect to avoid iframe/modal restrictions
+    window.location.href = `https://bvipslspkgbjovgztubb.supabase.co/auth/v1/authorize?provider=${provider}&redirect_to=${encodeURIComponent(redirectTo)}`;
+    
+    // No need to handle errors here as we're redirecting away from the page
   };
 
   const handleLoginClick = () => {
