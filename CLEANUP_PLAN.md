@@ -26,8 +26,8 @@ The following files have been consolidated into `src/contexts/auth/AuthProvider.
 
 ## Phase 3: Component and Helper Consolidation
 
-- [ ] Consolidate dashboard metric components
-- [ ] Consolidate activity feed implementations
+- [x] Consolidated dashboard metric components
+- [x] Consolidated activity feed implementations by removing duplicate `TeamActivity.tsx`
 
 ## Phase 4: Type Definitions Cleanup
 
@@ -41,5 +41,4 @@ After completing the above phases, we should:
 - [ ] Remove any remaining references to old contexts
 - [ ] Update import statements project-wide
 - [ ] Remove unused files from the index exports
-
 

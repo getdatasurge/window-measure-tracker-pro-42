@@ -1,6 +1,8 @@
 
+// Backward compatibility module for UserContext
+// Redirects to the consolidated auth context
 import { useAuth } from './auth';
 
-// This file exists for backward compatibility
-// New code should import from './auth' directly
+// Provide the same interface for files still importing from UserContext
 export const useUser = useAuth;
+export default useAuth;

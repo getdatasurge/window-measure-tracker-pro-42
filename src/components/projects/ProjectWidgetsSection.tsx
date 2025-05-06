@@ -11,7 +11,7 @@ import {
   Cell
 } from 'recharts';
 import RecentMeasurements from '../dashboard/RecentMeasurements';
-import TeamActivityFeed from '../dashboard/activity-feed';
+import { TeamActivityFeed } from '../dashboard/activity-feed';
 
 interface WidgetCardProps {
   title: string;
