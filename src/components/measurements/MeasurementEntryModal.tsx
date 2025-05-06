@@ -8,6 +8,9 @@ import { Measurement } from '@/types/measurement';
 import MeasurementTabs from './MeasurementTabs';
 import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
+import { useAuth } from '@/contexts/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 type MeasurementEntryModalProps = {
   isOpen: boolean;
@@ -29,6 +32,9 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
   const [activeTab, setActiveTab] = useState('details');
   const [formData, setFormData] = useState<Measurement>(measurement || generateNewMeasurement(defaultValues));
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const { user, profile } = useAuth();
+  const { toast } = useToast();
 
   // Use our custom hook for localStorage management
   const {
@@ -44,17 +50,23 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
         setFormData(measurement);
       } else if (Object.keys(defaultValues).length > 0) {
         // If we have default values from context, use those
-        setFormData(generateNewMeasurement(defaultValues));
+        setFormData(generateNewMeasurement({
+          ...defaultValues,
+          recordedBy: profile?.full_name || 'Unknown User'
+        }));
       } else if (initialFormData) {
         // If we have data from localStorage, use that
         const now = new Date().toISOString();
         setFormData({
           ...generateNewMeasurement(),
-          ...initialFormData
+          ...initialFormData,
+          recordedBy: profile?.full_name || initialFormData.recordedBy || 'Unknown User'
         });
       } else {
         // Start fresh
-        setFormData(generateNewMeasurement());
+        setFormData(generateNewMeasurement({
+          recordedBy: profile?.full_name || 'Unknown User'
+        }));
       }
 
       // Reset the form submission state
@@ -62,24 +74,45 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       // Always start at the first tab when opening the modal
       setActiveTab('details');
     }
-  }, [isOpen, measurement, defaultValues, initialFormData]);
+  }, [isOpen, measurement, defaultValues, initialFormData, profile]);
   
-  const handleSave = () => {
-    // Update the timestamp 
-    const updatedMeasurement = {
-      ...formData,
-      updatedAt: new Date().toISOString()
-    };
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    try {
+      // Update the timestamp 
+      const updatedMeasurement = {
+        ...formData,
+        updatedAt: new Date().toISOString(),
+        updatedBy: profile?.full_name || 'Unknown User'
+      };
 
-    // Save to localStorage for future use
-    saveFormData(formData);
-
-    // Mark as submitted
-    setFormSubmitted(true);
-
-    // Send back to parent component
-    onSave(updatedMeasurement);
-    onOpenChange(false);
+      // If we have a user ID, save it in recorded_by for database
+      if (user?.id) {
+        // This is separated from updatedMeasurement to avoid including in the UI form data
+        // It will be used when inserting/updating in the database
+        updatedMeasurement.recorded_by = user.id;
+      }
+  
+      // Save to localStorage for future use
+      saveFormData(formData);
+  
+      // Mark as submitted
+      setFormSubmitted(true);
+  
+      // Send back to parent component
+      onSave(updatedMeasurement);
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error saving measurement:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to save the measurement. Please try again.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
   
   const updateFormData = (field: string, value: any) => {
@@ -147,14 +180,16 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
                 <Button 
                   variant="outline" 
                   onClick={() => onOpenChange(false)}
+                  disabled={isSaving}
                 >
                   Cancel
                 </Button>
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white" 
                   onClick={handleSave}
+                  disabled={isSaving}
                 >
-                  Save Changes
+                  {isSaving ? 'Saving...' : 'Save Changes'}
                 </Button>
               </div>
             </div>

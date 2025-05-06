@@ -2,33 +2,27 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { 
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue
-} from '@/components/ui/select';
 import { Measurement } from '@/types/measurement';
+import { useAuth } from '@/contexts/auth';
 
 interface MeasurementDetailsTabProps {
   formData: Measurement;
   updateFormData: (field: string, value: any) => void;
 }
 
-const glassTypes = [
-  'Clear',
-  'Tinted',
-  'Reflective',
-  'Frosted',
-  'Tempered',
-  'Other',
-];
-
 const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ 
   formData, 
   updateFormData 
 }) => {
+  const { profile } = useAuth();
+  
+  // Autofill recorded by field with current user's name when component mounts
+  React.useEffect(() => {
+    if (profile?.full_name && !formData.recordedBy) {
+      updateFormData('recordedBy', profile.full_name);
+    }
+  }, [profile, formData.recordedBy, updateFormData]);
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
@@ -64,29 +58,10 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({
         <Input
           id="recordedBy"
           value={formData.recordedBy}
-          onChange={(e) => updateFormData('recordedBy', e.target.value)}
-          className="bg-zinc-800/50 border-zinc-700 text-white"
-          placeholder="Enter name"
+          readOnly
+          className="bg-zinc-800/50 border-zinc-700 text-white opacity-70"
+          placeholder="Automatically filled"
         />
-      </div>
-      
-      <div className="space-y-2">
-        <Label htmlFor="glassType" className="text-sm text-zinc-400">
-          Glass Type
-        </Label>
-        <Select 
-          value={formData.glassType || ''} 
-          onValueChange={(value) => updateFormData('glassType', value)}
-        >
-          <SelectTrigger id="glassType" className="bg-zinc-800/50 border-zinc-700 text-white">
-            <SelectValue placeholder="Select glass type" />
-          </SelectTrigger>
-          <SelectContent className="bg-zinc-800 border-zinc-700">
-            {glassTypes.map((type) => (
-              <SelectItem key={type} value={type}>{type}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
     </div>
   );

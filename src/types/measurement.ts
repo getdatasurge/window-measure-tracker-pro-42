@@ -15,7 +15,6 @@ export interface Measurement {
   quantity: number;
   recordedBy: string;
   direction: Direction;
-  glassType?: string;
   notes?: string;
   status: MeasurementStatus;
   measurementDate: string;
@@ -24,6 +23,8 @@ export interface Measurement {
   approvalBy?: string;
   reviewComments?: string;
   film_required?: boolean;
+  photos?: string[];
+  recorded_by?: string; // User ID for database purposes
 }
 
 export interface MeasurementFilter {

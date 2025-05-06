@@ -1,9 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import MeasurementDetailsTab from './tabs/MeasurementDetailsTab';
 import DimensionsTab from './tabs/DimensionsTab';
 import AttributesTab from './tabs/AttributesTab';
 import StatusWorkflowTab from './tabs/StatusWorkflowTab';
+import PhotosTab from './tabs/PhotosTab';
 import { Measurement } from '@/types/measurement';
 
 interface MeasurementTabsProps {
@@ -27,6 +29,7 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
     details: 'recordedBy',
     dimensions: 'area',
     attributes: 'notes',
+    photos: 'photos',
     status: 'reviewComments'
   };
   
@@ -38,8 +41,10 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
       currentTab = 'details';
     } else if (['width', 'height', 'area', 'quantity'].includes(field)) {
       currentTab = 'dimensions';
-    } else if (['direction', 'glassType', 'notes'].includes(field)) {
+    } else if (['direction', 'notes'].includes(field)) {
       currentTab = 'attributes';
+    } else if (['photos'].includes(field)) {
+      currentTab = 'photos';
     } else if (['status', 'reviewComments'].includes(field)) {
       currentTab = 'status';
     }
@@ -61,6 +66,8 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
         } else if (currentTab === 'dimensions') {
           setTimeout(() => setActiveTab('attributes'), 300);
         } else if (currentTab === 'attributes') {
+          setTimeout(() => setActiveTab('photos'), 300);
+        } else if (currentTab === 'photos') {
           setTimeout(() => setActiveTab('status'), 300);
         }
       }
@@ -109,6 +116,12 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
             Attributes
           </TabsTrigger>
           <TabsTrigger 
+            value="photos" 
+            className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
+          >
+            Photos
+          </TabsTrigger>
+          <TabsTrigger 
             value="status" 
             className="data-[state=active]:border-b-2 data-[state=active]:border-green-500 data-[state=active]:text-white px-0 py-3 bg-transparent rounded-none text-sm font-medium text-zinc-400 data-[state=active]:shadow-none"
           >
@@ -132,6 +145,12 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
         </TabsContent>
         <TabsContent value="attributes" className="m-0">
           <AttributesTab 
+            formData={formData} 
+            updateFormData={enhancedUpdateFormData} 
+          />
+        </TabsContent>
+        <TabsContent value="photos" className="m-0">
+          <PhotosTab 
             formData={formData} 
             updateFormData={enhancedUpdateFormData} 
           />
