@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MeasurementOverview from './MeasurementOverview';
-import ActivityFeed from './ActivityFeed';
+import ActivityFeed from './activity-feed';
 
 const DashboardChartsSection: React.FC = () => {
   return (

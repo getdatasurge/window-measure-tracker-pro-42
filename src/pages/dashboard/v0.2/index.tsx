@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { CalendarDays, CheckCheck, LayoutDashboard, ListChecks, Users2 } from 'lucide-react';
 import DashboardHeader from '../../../components/dashboard/DashboardHeader';
@@ -9,7 +8,7 @@ import { Button } from '../../../components/ui/button';
 import RecentMeasurements from '../../../components/dashboard/RecentMeasurements';
 import MeasurementOverview from '../../../components/dashboard/MeasurementOverview';
 import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
-import ActivityFeed from '../../../components/dashboard/ActivityFeed';
+import ActivityFeed from '../../../components/dashboard/activity-feed';
 import DashboardGridRow from '../../../components/layout/DashboardGridRow';
 import DashboardMeasurementSection from '../../../components/dashboard/DashboardMeasurementSection';
 
