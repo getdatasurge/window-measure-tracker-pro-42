@@ -9,6 +9,7 @@ const AuthContext = createContext<AuthContextType>({
   profile: null,
   loading: true,
   isAuthenticated: false,
+  profileNotFound: false,
   refreshProfile: async () => {},
   signOut: async () => {},
 });

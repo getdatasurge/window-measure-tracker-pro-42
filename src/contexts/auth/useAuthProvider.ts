@@ -12,6 +12,7 @@ export const useAuthProvider = () => {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [profileNotFound, setProfileNotFound] = useState(false);
   const navigate = useNavigate();
 
   // Function to create a new profile for a user if one doesn't exist
@@ -67,6 +68,7 @@ export const useAuthProvider = () => {
         
         if (newProfile) {
           setProfile(newProfile);
+          setProfileNotFound(false);
         }
       } else {
         // Profile exists, update it if necessary
@@ -124,27 +126,32 @@ export const useAuthProvider = () => {
   const fetchProfile = useCallback(async (userId: string, userData: User) => {
     try {
       setLoading(true);
+      setProfileNotFound(false);
+      
       const { data, error: profileError } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .maybeSingle();  // Use maybeSingle instead of single to avoid errors
       
       if (profileError) {
-        throw profileError;
-      }
-      
-      if (data) {
-        setProfile(data);
-        // If we have user data, ensure profile is in sync
-        await syncProfileData(userId, userData);
-      } else {
+        console.error('Error fetching user profile:', profileError);
+        // Don't set profileNotFound here as this is a query error, not a "not found" case
+      } else if (!data) {
         console.warn('Profile not found for user', userId);
+        setProfileNotFound(true);
         // If no profile exists, create one
         await ensureProfileExists(userData);
+      } else {
+        setProfile(data);
+        setProfileNotFound(false);
+        // If we have user data, ensure profile is in sync
+        await syncProfileData(userId, userData);
       }
     } catch (err) {
       console.error('Error fetching user profile:', err);
+      // Don't loop infinitely on failure
+      setProfileNotFound(true);
     } finally {
       setLoading(false);
     }
@@ -169,6 +176,7 @@ export const useAuthProvider = () => {
       setSession(null);
       setProfile(null);
       setIsAuthenticated(false);
+      setProfileNotFound(false);
       toast.success('You have been successfully logged out');
       // Redirect to homepage instead of a specific route
       window.location.href = `${window.location.origin}/`;
@@ -193,6 +201,7 @@ export const useAuthProvider = () => {
           setSession(null);
           setProfile(null);
           setIsAuthenticated(false);
+          setProfileNotFound(false);
         } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
           setUser(newSession?.user ?? null);
           setSession(newSession);
@@ -224,9 +233,9 @@ export const useAuthProvider = () => {
         ensureProfileExists(sessionUser).then(() => {
           fetchProfile(sessionUser.id, sessionUser);
         });
+      } else {
+        setLoading(false);
       }
-      
-      setLoading(false);
     });
 
     return () => {
@@ -240,6 +249,7 @@ export const useAuthProvider = () => {
     profile,
     loading,
     isAuthenticated,
+    profileNotFound,
     refreshProfile,
     signOut
   };

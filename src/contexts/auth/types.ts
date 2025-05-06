@@ -11,6 +11,7 @@ export type AuthContextType = {
   profile: Profile | null;
   loading: boolean;
   isAuthenticated: boolean;
+  profileNotFound: boolean;
   refreshProfile: () => Promise<void>;
   signOut: () => Promise<void>;
 };

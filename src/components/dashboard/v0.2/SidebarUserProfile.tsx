@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { LogOut, User } from 'lucide-react';
+import { LogOut, User, AlertCircle, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -12,6 +12,7 @@ import {
 import { useAuth } from '@/contexts/auth/AuthContext';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Button } from "@/components/ui/button";
 
 interface SidebarUserProfileProps {
   collapsed: boolean;
@@ -21,7 +22,7 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   collapsed
 }) => {
   const navigate = useNavigate();
-  const { signOut, profile, loading, refreshProfile } = useAuth();
+  const { signOut, profile, loading, refreshProfile, profileNotFound } = useAuth();
   
   // Fetch profile data when component mounts
   useEffect(() => {
@@ -51,6 +52,11 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
     }
   };
 
+  const handleRetryProfileFetch = () => {
+    toast.info('Refreshing profile data...');
+    refreshProfile();
+  };
+
   if (collapsed) {
     return (
       <div className="p-4 border-t border-zinc-800/70 flex flex-col items-center gap-2">
@@ -60,6 +66,24 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
             <AvatarFallback>{profile?.full_name ? getInitials(profile.full_name) : 'U'}</AvatarFallback>
           </Avatar>
         </div>
+        
+        {profileNotFound && !loading && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button 
+                  onClick={handleRetryProfileFetch}
+                  className="text-amber-400 hover:text-amber-300 p-1.5 rounded-md hover:bg-zinc-800 transition-colors"
+                >
+                  <RefreshCw size={16} />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Refresh profile</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
         
         <TooltipProvider>
           <Tooltip>
@@ -97,6 +121,20 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
                 <Skeleton className="h-4 w-20 mb-1" />
                 <Skeleton className="h-3 w-16" />
               </>
+            ) : profileNotFound ? (
+              <div className="flex flex-col">
+                <div className="text-sm font-medium text-amber-400 flex items-center gap-1">
+                  <AlertCircle size={12} />
+                  <span>Profile loading...</span>
+                </div>
+                <button 
+                  onClick={handleRetryProfileFetch}
+                  className="text-xs text-zinc-400 hover:text-zinc-300 flex items-center gap-1 mt-1"
+                >
+                  <RefreshCw size={10} />
+                  <span>Retry</span>
+                </button>
+              </div>
             ) : (
               <>
                 <div className="text-sm font-medium text-white">{profile?.full_name || 'User'}</div>
