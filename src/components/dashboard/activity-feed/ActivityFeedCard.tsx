@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Card, CardContent } from "@/components/ui/card";
-import { TeamActivityFeed } from './index';
+import TeamActivityFeed from './TeamActivityFeed';
 
 const ActivityFeedCard: React.FC = () => {
   return (
