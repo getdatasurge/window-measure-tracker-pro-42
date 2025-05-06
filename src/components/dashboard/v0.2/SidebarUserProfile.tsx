@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useAuth } from '@/contexts/AuthContext';
 
 interface SidebarUserProfileProps {
   collapsed: boolean;
@@ -25,13 +26,11 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
   role
 }) => {
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   
   const handleLogout = async () => {
     try {
-      await supabase.auth.signOut();
-      toast.success('Successfully logged out');
-      // Redirect to homepage instead of login
-      window.location.href = `${window.location.origin}/`;
+      await signOut();
     } catch (error) {
       console.error('Error logging out:', error);
       toast.error('Failed to log out');

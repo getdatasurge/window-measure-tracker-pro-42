@@ -4,10 +4,15 @@ import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
+import { Tables } from '@/integrations/supabase/types';
+
+// Define the Profile type based on your Supabase schema
+type Profile = Tables<'profiles'>;
 
 type AuthContextType = {
   user: User | null;
   session: Session | null;
+  profile: Profile | null;
   loading: boolean;
   isAuthenticated: boolean;
   refreshProfile: () => Promise<void>;
@@ -18,6 +23,7 @@ type AuthContextType = {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   session: null,
+  profile: null,
   loading: true,
   isAuthenticated: false,
   refreshProfile: async () => {},
@@ -28,9 +34,32 @@ const AuthContext = createContext<AuthContextType>({
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const navigate = useNavigate();
+
+  // Function to fetch user profile
+  const fetchProfile = useCallback(async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+      
+      if (error) {
+        console.error('Error fetching profile:', error);
+        return;
+      }
+      
+      if (data) {
+        setProfile(data);
+      }
+    } catch (error) {
+      console.error('Unexpected error fetching profile:', error);
+    }
+  }, []);
 
   // Function to refresh user profile
   const refreshProfile = useCallback(async () => {
@@ -45,15 +74,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(session.user);
         setSession(session);
         setIsAuthenticated(true);
+        
+        // Fetch user profile
+        await fetchProfile(session.user.id);
       } else {
         setUser(null);
         setSession(null);
+        setProfile(null);
         setIsAuthenticated(false);
       }
     } catch (error) {
       console.error('Error refreshing session:', error);
     }
-  }, []);
+  }, [fetchProfile]);
 
   // Function to sign out
   const signOut = useCallback(async () => {
@@ -65,6 +98,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       
       setUser(null);
       setSession(null);
+      setProfile(null);
       setIsAuthenticated(false);
       toast.success('You have been successfully logged out');
       // Redirect to homepage instead of a specific route
@@ -87,11 +121,20 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       if (event === 'SIGNED_OUT') {
         setUser(null);
         setSession(null);
+        setProfile(null);
         setIsAuthenticated(false);
       } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
         setUser(newSession?.user ?? null);
         setSession(newSession);
         setIsAuthenticated(!!newSession);
+        
+        // Fetch user profile after sign-in
+        // Using setTimeout to avoid potential auth deadlocks
+        if (newSession?.user) {
+          setTimeout(() => {
+            fetchProfile(newSession.user.id);
+          }, 0);
+        }
       }
     });
 
@@ -101,18 +144,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(sessionUser);
       setSession(data?.session);
       setIsAuthenticated(!!sessionUser);
+      
+      // Fetch profile if user is authenticated
+      if (sessionUser) {
+        fetchProfile(sessionUser.id);
+      }
+      
       setLoading(false);
     });
 
     return () => {
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchProfile]);
 
   return (
     <AuthContext.Provider value={{ 
       user, 
       session, 
+      profile,
       loading, 
       isAuthenticated, 
       refreshProfile, 
