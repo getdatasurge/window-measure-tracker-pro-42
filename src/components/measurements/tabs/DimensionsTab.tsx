@@ -1,9 +1,8 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 
 interface DimensionsTabProps {
   formData: Measurement;

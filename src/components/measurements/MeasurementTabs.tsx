@@ -1,11 +1,10 @@
-
 import React, { useEffect, useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import MeasurementDetailsTab from './tabs/MeasurementDetailsTab';
 import DimensionsTab from './tabs/DimensionsTab';
 import AttributesTab from './tabs/AttributesTab';
 import StatusWorkflowTab from './tabs/StatusWorkflowTab';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 
 interface MeasurementTabsProps {
   activeTab: string;

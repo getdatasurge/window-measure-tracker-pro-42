@@ -1,8 +1,7 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { teamDistributionData, roleDistributionData } from '@/data/teamData';
+import { teamDistributionData, roleDistributionData } from '@/types/team';
 
 // Org chart node component
 const OrgNode = ({ title, subtext, bgColor = "bg-blue-600", size = "large" }: 

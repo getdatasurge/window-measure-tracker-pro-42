@@ -1,66 +1,231 @@
 
+import { Measurement } from '@/types/measurement';
+import { supabase } from '@/integrations/supabase/client';
+import { formatDistanceToNow } from 'date-fns';
+
 /**
- * Helper function to convert fractional string measurements to decimal
- * Handles formats like "2 1/2" converting to 2.5
+ * Generate a new measurement with default values
  */
-export const fractionToDecimal = (input: string): number => {
-  // Remove any extra spaces and trim
-  const trimmedInput = input.trim();
+export const generateNewMeasurement = (defaultValues: Partial<Measurement> = {}): Measurement => {
+  const now = new Date().toISOString();
+  const datePart = now.split('T')[0];
   
-  // Check if input is already a number
-  if (!isNaN(Number(trimmedInput))) {
-    return Number(trimmedInput);
-  }
-  
-  // Handle inputs like "2 1/2"
-  const wholeFractionRegex = /^(\d+)\s+(\d+)\/(\d+)$/;
-  const wholeFractionMatch = trimmedInput.match(wholeFractionRegex);
-  if (wholeFractionMatch) {
-    const whole = parseInt(wholeFractionMatch[1], 10);
-    const numerator = parseInt(wholeFractionMatch[2], 10);
-    const denominator = parseInt(wholeFractionMatch[3], 10);
-    if (denominator === 0) return whole; // Prevent division by zero
-    return whole + (numerator / denominator);
-  }
-  
-  // Handle inputs like "1/2"
-  const fractionRegex = /^(\d+)\/(\d+)$/;
-  const fractionMatch = trimmedInput.match(fractionRegex);
-  if (fractionMatch) {
-    const numerator = parseInt(fractionMatch[1], 10);
-    const denominator = parseInt(fractionMatch[2], 10);
-    if (denominator === 0) return 0; // Prevent division by zero
-    return numerator / denominator;
-  }
-  
-  // If no patterns match, just try to convert directly
-  return Number(trimmedInput) || 0;
+  return {
+    id: crypto.randomUUID(),
+    projectId: defaultValues.projectId || '',
+    projectName: defaultValues.projectName || 'Select Project',
+    location: defaultValues.location || '',
+    width: defaultValues.width || '0"',
+    height: defaultValues.height || '0"',
+    area: defaultValues.area || '0 ft²',
+    quantity: defaultValues.quantity || 1,
+    recordedBy: defaultValues.recordedBy || '',
+    direction: defaultValues.direction || 'N/A',
+    glassType: defaultValues.glassType || '',
+    notes: defaultValues.notes || '',
+    status: defaultValues.status || 'Pending',
+    measurementDate: defaultValues.measurementDate || datePart,
+    updatedAt: now,
+    updatedBy: defaultValues.updatedBy || 'Current User',
+  };
 };
 
 /**
- * Helper function to generate a new measurement record with default values
+ * Fetch measurements for a specific date
  */
-export const generateNewMeasurement = (defaultValues: Partial<any> = {}): any => {
-  const now = new Date().toISOString();
-  return {
-    id: crypto.randomUUID(),
-    projectId: '',
-    projectName: '',
-    location: '',
-    width: '',
-    height: '',
-    depth: '',
-    area: '',
-    quantity: 1,
-    status: 'pending',
-    film_required: true,
-    requires_special_tools: false,
-    notes: '',
-    createdAt: now,
-    updatedAt: now,
-    updatedBy: 'current-user', // This would typically be populated from context
-    window_type: '',
-    glass_type: '',
-    ...defaultValues
-  };
+export const fetchMeasurementsForDay = async (date: Date): Promise<Measurement[]> => {
+  try {
+    // Format date to ISO string for Supabase query
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+    
+    const { data, error } = await supabase
+      .from('measurements')
+      .select(`
+        id,
+        project_id,
+        location,
+        width,
+        height,
+        depth,
+        area,
+        quantity,
+        recorded_by,
+        direction,
+        glass_type,
+        notes,
+        status,
+        measurement_date,
+        updated_at,
+        updated_by,
+        projects (name)
+      `)
+      .gte('measurement_date', startDate.toISOString())
+      .lt('measurement_date', endDate.toISOString())
+      .order('measurement_date', { ascending: false });
+      
+    if (error) throw error;
+    
+    // Transform the data to match our Measurement type
+    return (data || []).map(item => ({
+      id: item.id,
+      projectId: item.project_id,
+      projectName: item.projects?.name || 'Unknown Project',
+      location: item.location || '',
+      width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
+      height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
+      depth: item.depth ? `${item.depth}"` : undefined,
+      area: item.area ? `${item.area} ft²` : '0 ft²',
+      quantity: item.quantity || 1,
+      recordedBy: item.recorded_by || '',
+      direction: item.direction as Direction || 'N/A',
+      glassType: item.glass_type,
+      notes: item.notes,
+      status: item.status as MeasurementStatus || 'Pending',
+      measurementDate: item.measurement_date || new Date().toISOString(),
+      updatedAt: item.updated_at || new Date().toISOString(),
+      updatedBy: item.updated_by,
+    }));
+  } catch (error) {
+    console.error('Error fetching measurements for day:', error);
+    return [];
+  }
+};
+
+/**
+ * Fetch measurements filtered by status
+ */
+export const fetchMeasurementsByStatus = async (status: string): Promise<Measurement[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('measurements')
+      .select(`
+        id,
+        project_id,
+        location,
+        width,
+        height,
+        depth,
+        area,
+        quantity,
+        recorded_by,
+        direction,
+        glass_type,
+        notes,
+        status,
+        measurement_date,
+        updated_at,
+        updated_by,
+        projects (name)
+      `)
+      .eq('status', status.toLowerCase())
+      .order('updated_at', { ascending: false });
+      
+    if (error) throw error;
+    
+    // Transform the data to match our Measurement type
+    return (data || []).map(item => ({
+      id: item.id,
+      projectId: item.project_id,
+      projectName: item.projects?.name || 'Unknown Project',
+      location: item.location || '',
+      width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
+      height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
+      depth: item.depth ? `${item.depth}"` : undefined,
+      area: item.area ? `${item.area} ft²` : '0 ft²',
+      quantity: item.quantity || 1,
+      recordedBy: item.recorded_by || '',
+      direction: item.direction as Direction || 'N/A',
+      glassType: item.glass_type,
+      notes: item.notes,
+      status: item.status as MeasurementStatus || 'Pending',
+      measurementDate: item.measurement_date || new Date().toISOString(),
+      updatedAt: item.updated_at || new Date().toISOString(),
+      updatedBy: item.updated_by,
+    }));
+  } catch (error) {
+    console.error('Error fetching measurements by status:', error);
+    return [];
+  }
+};
+
+/**
+ * Fetch all measurements
+ */
+export const fetchMeasurements = async (): Promise<Measurement[]> => {
+  try {
+    const { data, error } = await supabase
+      .from('measurements')
+      .select(`
+        id,
+        project_id,
+        location,
+        width,
+        height,
+        depth,
+        area,
+        quantity,
+        recorded_by,
+        direction,
+        glass_type,
+        notes,
+        status,
+        measurement_date,
+        updated_at,
+        updated_by,
+        projects (name)
+      `)
+      .order('updated_at', { ascending: false });
+      
+    if (error) throw error;
+    
+    // Transform the data to match our Measurement type
+    return (data || []).map(item => ({
+      id: item.id,
+      projectId: item.project_id,
+      projectName: item.projects?.name || 'Unknown Project',
+      location: item.location || '',
+      width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
+      height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
+      depth: item.depth ? `${item.depth}"` : undefined,
+      area: item.area ? `${item.area} ft²` : '0 ft²',
+      quantity: item.quantity || 1,
+      recordedBy: item.recorded_by || '',
+      direction: item.direction as Direction || 'N/A',
+      glassType: item.glass_type,
+      notes: item.notes,
+      status: item.status as MeasurementStatus || 'Pending',
+      measurementDate: item.measurement_date || new Date().toISOString(),
+      updatedAt: item.updated_at || new Date().toISOString(),
+      updatedBy: item.updated_by,
+    }));
+  } catch (error) {
+    console.error('Error fetching all measurements:', error);
+    return [];
+  }
+};
+
+export const formatTimeAgo = (dateString: string) => {
+  try {
+    return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+  } catch (e) {
+    return 'Unknown time';
+  }
+};
+
+// Mock functions to support older components until we fully migrate to Supabase
+// These will return empty arrays but maintain the expected API
+export const getMeasurementsForDay = async (date: Date): Promise<Measurement[]> => {
+  return fetchMeasurementsForDay(date);
+};
+
+export const getMeasurementsByStatus = async (status: string): Promise<Measurement[]> => {
+  return fetchMeasurementsByStatus(status);
+};
+
+export const getArchivedMeasurements = async (): Promise<Measurement[]> => {
+  return fetchMeasurements();
 };

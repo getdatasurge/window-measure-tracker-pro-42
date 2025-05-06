@@ -1,11 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { Calendar as CalendarIcon, Filter, ChevronDown } from 'lucide-react';
-import { installers, projects, statuses } from '@/data/measurementsData';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
+import { Project, Installer, StatusOption } from '@/types/measurement';
+import { supabase } from '@/integrations/supabase/client';
+
 interface MeasurementFilterBarProps {
   onFilterChange: (filters: FilterState) => void;
 }
@@ -18,6 +20,7 @@ interface FilterState {
     to: Date | undefined;
   };
 }
+
 const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
   onFilterChange
 }) => {
@@ -30,6 +33,71 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
       to: undefined
     }
   });
+  
+  const [projects, setProjects] = useState<Project[]>([
+    { id: 'all', name: 'All Projects' }
+  ]);
+  
+  const [installers, setInstallers] = useState<Installer[]>([
+    { id: 'all', name: 'All Installers' }
+  ]);
+  
+  const [statuses, setStatuses] = useState<StatusOption[]>([
+    { value: 'all', label: 'All Statuses' },
+    { value: 'pending', label: 'Pending' },
+    { value: 'film cut', label: 'Film Cut' },
+    { value: 'installed', label: 'Installed' },
+    { value: 'under review', label: 'Under Review' },
+    { value: 'completed', label: 'Completed' }
+  ]);
+  
+  // Fetch projects and installers from Supabase
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('projects')
+          .select('id, name')
+          .order('name');
+          
+        if (error) throw error;
+        
+        if (data) {
+          setProjects([
+            { id: 'all', name: 'All Projects' },
+            ...data.map(proj => ({ id: proj.id, name: proj.name }))
+          ]);
+        }
+      } catch (err) {
+        console.error('Error fetching projects for filters:', err);
+      }
+    };
+    
+    const fetchInstallers = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('id, full_name')
+          .eq('role', 'installer')
+          .order('full_name');
+          
+        if (error) throw error;
+        
+        if (data) {
+          setInstallers([
+            { id: 'all', name: 'All Installers' },
+            ...data.map(user => ({ id: user.id, name: user.full_name || 'Unknown' }))
+          ]);
+        }
+      } catch (err) {
+        console.error('Error fetching installers for filters:', err);
+      }
+    };
+    
+    fetchProjects();
+    fetchInstallers();
+  }, []);
+
   const handleFilterChange = (key: keyof FilterState, value: any) => {
     const newFilters = {
       ...filters,
@@ -38,6 +106,7 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
     setFilters(newFilters);
     onFilterChange(newFilters);
   };
+  
   return <div className="flex flex-wrap gap-2 mb-6">
       {/* Project Filter */}
       <DropdownMenu>
@@ -115,4 +184,5 @@ const MeasurementFilterBar: React.FC<MeasurementFilterBarProps> = ({
       
     </div>;
 };
+
 export default MeasurementFilterBar;

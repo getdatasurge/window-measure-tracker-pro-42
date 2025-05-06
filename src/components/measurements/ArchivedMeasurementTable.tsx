@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 import { Badge } from '@/components/ui/badge';
 import {
   Table,

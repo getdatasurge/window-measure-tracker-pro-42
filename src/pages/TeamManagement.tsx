@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Search, Download, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -12,6 +11,7 @@ import TeamFilterDropdown from '@/components/teams/TeamFilterDropdown';
 import DashboardGridRow from '@/components/layout/DashboardGridRow';
 import withResponsiveLayout from '@/hoc/withResponsiveLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { TeamMember } from '@/types/team';
 
 // Define type for role and status filter options
 interface FilterOption {
@@ -89,7 +89,7 @@ const TeamManagementPage: React.FC = () => {
           role: profile.role || 'Team Member',
           team: 'Residential', // Default team if not available
           avatar: profile.avatar_url || '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png',
-          status: 'active', // Default status
+          status: 'active' as 'active' | 'on-leave' | 'training', // Cast to the allowed values
           projects: 0, // Default project count 
           email: profile.email || '',
           phone: profile.phone_number || '',

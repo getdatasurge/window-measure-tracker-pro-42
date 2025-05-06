@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Eye, Calendar, MapPin, User, Clock } from 'lucide-react';

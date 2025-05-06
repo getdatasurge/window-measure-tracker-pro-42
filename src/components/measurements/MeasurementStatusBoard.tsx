@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
-import { Measurement, getMeasurementsForDay, getMeasurementsByStatus, getArchivedMeasurements } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
+import { fetchMeasurementsForDay, fetchMeasurements } from '@/utils/measurementUtils';
 import MeasurementFilterBar from './MeasurementFilterBar';
 import WeeklyNavBar from './WeeklyNavBar';
 import StatusColumn from './StatusColumn';
@@ -18,18 +19,32 @@ const MeasurementStatusBoard: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNewMeasurementModalOpen, setIsNewMeasurementModalOpen] = useState(false);
   const [contextualDefaultValues, setContextualDefaultValues] = useState<Partial<Measurement>>({});
+  const [loading, setLoading] = useState(false);
 
   // Initialize with today's measurements
   useEffect(() => {
-    const measurementsForToday = getMeasurementsForDay(selectedDate);
-    setMeasurements(measurementsForToday);
-    setAllMeasurements(getArchivedMeasurements());
+    const loadMeasurements = async () => {
+      setLoading(true);
+      try {
+        const measurementsForToday = await fetchMeasurementsForDay(selectedDate);
+        setMeasurements(measurementsForToday);
+        
+        const allMeasurementsData = await fetchMeasurements();
+        setAllMeasurements(allMeasurementsData);
+        
+        // Update contextual default values based on selected date
+        setContextualDefaultValues(prev => ({
+          ...prev,
+          measurementDate: selectedDate.toISOString().split('T')[0]
+        }));
+      } catch (error) {
+        console.error("Error loading measurements:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Update contextual default values based on selected date
-    setContextualDefaultValues(prev => ({
-      ...prev,
-      measurementDate: selectedDate.toISOString().split('T')[0]
-    }));
+    loadMeasurements();
   }, [selectedDate]);
 
   const handleDateSelect = (date: Date) => {
@@ -56,23 +71,34 @@ const MeasurementStatusBoard: React.FC = () => {
     console.log('Filters changed:', filters);
     // In a real implementation, this would filter the measurements
     // For now, we'll just update based on the selected date
-    const measurementsForDay = getMeasurementsForDay(selectedDate);
-    setMeasurements(measurementsForDay);
+    const loadFilteredMeasurements = async () => {
+      setLoading(true);
+      try {
+        const measurementsForDay = await fetchMeasurementsForDay(selectedDate);
+        setMeasurements(measurementsForDay);
+        
+        // Update contextual default values based on filters
+        if (filters.location) {
+          setContextualDefaultValues(prev => ({
+            ...prev,
+            location: filters.location
+          }));
+        }
+        
+        if (filters.projectId) {
+          setContextualDefaultValues(prev => ({
+            ...prev,
+            projectId: filters.projectId
+          }));
+        }
+      } catch (error) {
+        console.error("Error loading filtered measurements:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
     
-    // Update contextual default values based on filters
-    if (filters.location) {
-      setContextualDefaultValues(prev => ({
-        ...prev,
-        location: filters.location
-      }));
-    }
-    
-    if (filters.projectId) {
-      setContextualDefaultValues(prev => ({
-        ...prev,
-        projectId: filters.projectId
-      }));
-    }
+    loadFilteredMeasurements();
   };
 
   const openNewMeasurementModal = () => {
@@ -123,4 +149,5 @@ const MeasurementStatusBoard: React.FC = () => {
       />
     </div>;
 };
+
 export default MeasurementStatusBoard;

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Measurement, MeasurementStatus } from '@/data/measurementsData';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 import MeasurementCard from './MeasurementCard';
 import { Ruler, Scissors, CheckCircle } from 'lucide-react';
 

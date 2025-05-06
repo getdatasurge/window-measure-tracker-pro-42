@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 
 const LOCAL_STORAGE_KEY = 'lastMeasurementEntry';
 const EXPIRATION_TIME = 30 * 60 * 1000; // 30 minutes in milliseconds

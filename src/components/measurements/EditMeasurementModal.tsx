@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MeasurementEntryModal from './MeasurementEntryModal';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 
 interface EditMeasurementModalProps {
   measurement: Measurement | null;

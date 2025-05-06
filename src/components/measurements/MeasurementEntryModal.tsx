@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Measurement } from '@/data/measurementsData';
+import { Measurement } from '@/types/measurement';
 import MeasurementTabs from './MeasurementTabs';
 import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';

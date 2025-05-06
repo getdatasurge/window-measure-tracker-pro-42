@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
@@ -9,7 +8,7 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
-import { Measurement, MeasurementStatus } from '@/data/measurementsData';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 
 interface StatusWorkflowTabProps {
   formData: Measurement;
