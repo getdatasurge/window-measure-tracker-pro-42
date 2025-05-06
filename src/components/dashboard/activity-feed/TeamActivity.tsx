@@ -7,7 +7,6 @@ import LoadingState from './LoadingState';
 import ErrorState from './ErrorState';
 import EmptyState from './EmptyState';
 import { useActivityFeed } from './useActivityFeed';
-import { TeamActivity } from './types';
 
 /**
  * Main component that renders the team activity feed
@@ -17,19 +16,28 @@ const TeamActivityFeed: React.FC = () => {
 
   // Animation variants
   const container = {
-    hidden: { opacity: 0 },
+    hidden: {
+      opacity: 0
+    },
     show: {
       opacity: 1,
-      transition: { staggerChildren: 0.1 }
+      transition: {
+        staggerChildren: 0.1
+      }
     }
   };
 
   const item = {
-    hidden: { opacity: 0, y: 10 },
+    hidden: {
+      opacity: 0,
+      y: 10
+    },
     show: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.4 }
+      transition: {
+        duration: 0.4
+      }
     }
   };
 

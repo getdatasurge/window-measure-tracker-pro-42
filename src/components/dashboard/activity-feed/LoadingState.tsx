@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
+import { Spinner } from '@/components/ui/spinner';
 
 /**
  * Displays a loading skeleton for the activity feed
