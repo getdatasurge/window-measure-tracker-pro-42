@@ -9,9 +9,11 @@ export const enableFeedbucketInteraction = () => {
   const applyFeedbucketFix = () => {
     const feedbucketElement = document.querySelector('feedbucket-app');
     if (feedbucketElement) {
+      // Cast to HTMLElement to access style property
+      const element = feedbucketElement as HTMLElement;
       // Apply the fix only if needed
-      if (feedbucketElement.style.pointerEvents !== 'all') {
-        feedbucketElement.style.pointerEvents = 'all';
+      if (element.style.pointerEvents !== 'all') {
+        element.style.pointerEvents = 'all';
         console.log('[Feedbucket] pointer-events enabled.');
         
         // If we found and fixed it, we can disconnect the observer
