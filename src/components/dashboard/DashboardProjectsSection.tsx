@@ -29,6 +29,8 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
       try {
         setLoading(true);
         
+        console.log('Fetching projects from Supabase...');
+        
         // Fetch active projects
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
@@ -36,7 +38,17 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
           .eq('is_active', true);
           
         if (projectError) {
+          console.error('Error fetching projects:', projectError);
           throw projectError;
+        }
+
+        console.log('Projects data received:', projectData);
+        
+        if (!projectData || projectData.length === 0) {
+          console.log('No active projects found');
+          setProjects([]);
+          setLoading(false);
+          return;
         }
         
         // For each project, fetch the count of related entries with proper error handling
