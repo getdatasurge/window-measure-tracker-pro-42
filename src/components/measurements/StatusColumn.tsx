@@ -1,12 +1,13 @@
 
 import React from 'react';
-import { Measurement, MeasurementStatus } from '@/types/measurement';
+import { Measurement } from '@/types/measurement';
 import MeasurementCard from './MeasurementCard';
-import { Ruler, Scissors, CheckCircle } from 'lucide-react';
+import { Ruler, Scissors, CheckCircle, Plus } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface StatusColumnProps {
   title: string;
-  status: MeasurementStatus;
+  status: string;
   measurements: Measurement[];
   onEditMeasurement: (measurement: Measurement) => void;
   color: string;
@@ -21,13 +22,11 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
 }) => {
   const getIcon = () => {
     switch(status) {
-      case 'Pending':
-      case 'Under Review':
+      case 'Measured':
         return <Ruler size={16} />;
-      case 'Film Cut':
+      case 'Cut':
         return <Scissors size={16} />;
-      case 'Installed':
-      case 'Completed':
+      case 'Installed / Completed':
         return <CheckCircle size={16} />;
       default:
         return <Ruler size={16} />;
@@ -36,16 +35,12 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
 
   const getBorderColor = () => {
     switch(status) {
-      case 'Pending': return 'border-amber-700';
-      case 'Film Cut': return 'border-blue-700';
-      case 'Installed': return 'border-green-700';
-      case 'Under Review': return 'border-purple-700';
-      case 'Completed': return 'border-green-700';
+      case 'Measured': return 'border-amber-700';
+      case 'Cut': return 'border-blue-700';
+      case 'Installed / Completed': return 'border-green-700';
       default: return 'border-zinc-700';
     }
   };
-  
-  const filteredMeasurements = measurements.filter(m => m.status === status);
   
   return (
     <div className="h-full flex-1 bg-zinc-900/50 rounded-md">
@@ -55,18 +50,18 @@ const StatusColumn: React.FC<StatusColumnProps> = ({
         </div>
         <h2 className="font-medium text-white">{title}</h2>
         <div className="flex items-center justify-center w-5 h-5 rounded-full bg-zinc-800 text-xs">
-          {filteredMeasurements.length}
+          {measurements.length}
         </div>
       </div>
       <div className="p-2 h-[calc(100%-40px)] overflow-y-auto">
-        {filteredMeasurements.map(measurement => (
+        {measurements.map(measurement => (
           <MeasurementCard 
             key={measurement.id}
             measurement={measurement}
             onEdit={onEditMeasurement}
           />
         ))}
-        {filteredMeasurements.length === 0 && (
+        {measurements.length === 0 && (
           <div className="flex items-center justify-center h-20 border border-dashed border-zinc-800 rounded-md">
             <p className="text-sm text-zinc-500">No measurements</p>
           </div>

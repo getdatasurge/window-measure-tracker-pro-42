@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface WeeklyNavBarProps {
-  onSelectDate: (date: Date) => void;
+  onDateChange: (date: Date) => void;
   selectedDate: Date;
 }
 
-const WeeklyNavBar: React.FC<WeeklyNavBarProps> = ({ onSelectDate, selectedDate }) => {
+const WeeklyNavBar: React.FC<WeeklyNavBarProps> = ({ onDateChange, selectedDate }) => {
   const [weekDates, setWeekDates] = useState<Date[]>([]);
   
   // Get week dates based on selected date
@@ -56,13 +56,13 @@ const WeeklyNavBar: React.FC<WeeklyNavBarProps> = ({ onSelectDate, selectedDate 
   const navigatePreviousWeek = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() - 7);
-    onSelectDate(newDate);
+    onDateChange(newDate);
   };
   
   const navigateNextWeek = () => {
     const newDate = new Date(selectedDate);
     newDate.setDate(selectedDate.getDate() + 7);
-    onSelectDate(newDate);
+    onDateChange(newDate);
   };
 
   return (
@@ -91,7 +91,7 @@ const WeeklyNavBar: React.FC<WeeklyNavBarProps> = ({ onSelectDate, selectedDate 
               ${isSelectedDate(date) ? 'bg-green-600 hover:bg-green-700 text-white' : 'bg-zinc-800/50 border-zinc-700/50 hover:bg-zinc-700'}
               ${isCurrentDate(date) && !isSelectedDate(date) ? 'border-green-600/50' : ''}
             `}
-            onClick={() => onSelectDate(date)}
+            onClick={() => onDateChange(date)}
           >
             <span className="text-xs font-normal">{getDayName(date)}</span>
             <span className="text-lg font-medium">{formatDate(date)}</span>

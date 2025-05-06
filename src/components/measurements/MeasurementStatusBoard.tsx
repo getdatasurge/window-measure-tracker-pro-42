@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
@@ -219,6 +220,27 @@ const MeasurementStatusBoard: React.FC = () => {
     setFilteredMeasurements(filtered);
   }, [measurements, filter]);
 
+  // Helper function to determine which column a measurement belongs to
+  const getMeasurementsForColumn = (columnName: string) => {
+    switch (columnName) {
+      case 'Measured':
+        return filteredMeasurements.filter(m => 
+          m.status.toLowerCase() === 'pending'
+        );
+      case 'Cut':
+        return filteredMeasurements.filter(m => 
+          m.status.toLowerCase() === 'film_cut'
+        );
+      case 'Installed / Completed':
+        return filteredMeasurements.filter(m => 
+          m.status.toLowerCase() === 'installed' || 
+          m.status.toLowerCase() === 'completed'
+        );
+      default:
+        return [];
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -237,16 +259,19 @@ const MeasurementStatusBoard: React.FC = () => {
         />
       </div>
       
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {['Pending', 'Film Cut', 'Installed', 'Completed'].map(status => (
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {['Measured', 'Cut', 'Installed / Completed'].map(columnName => (
           <StatusColumn
-            key={status}
-            status={status}
-            measurements={filteredMeasurements.filter(m => 
-              m.status.toLowerCase() === status.toLowerCase().replace(' ', '_')
-            )}
-            onCardClick={handleCardClick}
-            onAddNew={handleNewMeasurement}
+            key={columnName}
+            title={columnName}
+            status={columnName as any}
+            measurements={getMeasurementsForColumn(columnName)}
+            onEditMeasurement={handleCardClick}
+            color={
+              columnName === 'Measured' ? 'bg-amber-500/30' : 
+              columnName === 'Cut' ? 'bg-blue-500/30' : 
+              'bg-green-500/30'
+            }
           />
         ))}
       </div>

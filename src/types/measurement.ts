@@ -1,6 +1,6 @@
 
 // Define measurement related types
-export type MeasurementStatus = 'Pending' | 'Film Cut' | 'Installed' | 'Under Review' | 'Completed';
+export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
 export type Direction = 'North' | 'South' | 'East' | 'West' | 'N/A';
 
 export interface Measurement {
