@@ -58,17 +58,11 @@ export const setupConsoleErrorTracker = (options = {
         }
       });
 
-      // Show toast notification
+      // Show toast notification with string-based content instead of JSX
       toast.error(
-        <div>
-          <div className="font-semibold">Repeated errors detected</div>
-          <p className="text-sm">This action is failing repeatedly. Please refresh the page or contact support.</p>
-          {process.env.NODE_ENV === 'development' && (
-            <div className="mt-2 text-xs opacity-75 break-all">
-              Most common: {mostFrequentError}
-            </div>
-          )}
-        </div>,
+        `Repeated errors detected: This action is failing repeatedly. Please refresh the page or contact support.${
+          process.env.NODE_ENV === 'development' ? `\n\nMost common: ${mostFrequentError}` : ''
+        }`,
         { 
           autoClose: 10000, // Stay visible longer
           toastId: 'repeated-errors' // Prevent duplicate toasts

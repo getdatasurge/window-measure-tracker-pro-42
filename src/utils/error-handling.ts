@@ -40,16 +40,10 @@ export const handleError = (
 
   // Show toast if needed
   if (showToast) {
-    toast.error(
-      <div>
-        <div className="font-semibold">{title}</div>
-        <p className="text-sm">{errorMessage}</p>
-      </div>,
-      { 
-        position: "top-center",
-        autoClose: 5000,
-      }
-    );
+    toast.error(`${title}: ${errorMessage}`, { 
+      position: "top-center",
+      autoClose: 5000,
+    });
   }
 
   return errorMessage;
