@@ -1,9 +1,10 @@
 
+// I need to fix the attachment handling by ensuring we properly access nested properties
 import React from 'react';
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Upload } from "lucide-react";
+import { Button } from '@/components/ui/button';
+import { FileUploader } from './FileUploader';
 import { ProjectFormData } from '@/types/project';
+import { Upload, X } from 'lucide-react';
 
 interface AttachmentsSectionProps {
   formData: ProjectFormData;
@@ -11,123 +12,154 @@ interface AttachmentsSectionProps {
 }
 
 const AttachmentsSection: React.FC<AttachmentsSectionProps> = ({ 
-  formData, 
+  formData,
   updateFormData 
 }) => {
-  const handleFileUpload = (field: 'blueprints' | 'photos' | 'contracts', files: FileList | null) => {
-    if (files) {
-      const newFiles = Array.from(files);
-      updateFormData(`attachments.${field}`, [...(formData.attachments?.[field] || []), ...newFiles]);
+  // Function to get attachment array or initialize it
+  const getAttachments = () => {
+    return formData.attachments || [];
+  };
+
+  // Function to get specific attachment type or initialize it
+  const getAttachmentsByType = (type: string) => {
+    const attachments = getAttachments();
+    // Find the attachment object for this type
+    const attachmentObj = attachments.find(a => a.type === type);
+    if (attachmentObj) {
+      // Return the files array for this type or initialize it
+      return attachmentObj[type] || [];
     }
+    return [];
+  };
+
+  // Function to update attachments by type
+  const updateAttachments = (type: string, files: File[]) => {
+    const attachments = [...getAttachments()];
+    const index = attachments.findIndex(a => a.type === type);
+    
+    if (index >= 0) {
+      // Update existing attachment object
+      attachments[index] = {
+        ...attachments[index],
+        [type]: files
+      };
+    } else {
+      // Create new attachment object
+      attachments.push({
+        type,
+        [type]: files
+      });
+    }
+    
+    updateFormData('attachments', attachments);
+  };
+
+  // Function to handle file removal
+  const removeFile = (type: string, fileIndex: number) => {
+    const files = [...getAttachmentsByType(type)];
+    files.splice(fileIndex, 1);
+    updateAttachments(type, files);
   };
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-2 mb-2">
-        <div className="h-4 w-4 rounded-full bg-green-500"></div>
-        <h3 className="text-sm font-medium text-white">Attachments & Documentation</h3>
+    <div className="space-y-6">
+      <div>
+        <h3 className="text-sm font-medium mb-2">Blueprints</h3>
+        <FileUploader
+          onFilesAdded={(files) => {
+            const blueprints = [...getAttachmentsByType('blueprints'), ...Array.from(files)];
+            updateAttachments('blueprints', blueprints);
+          }}
+          accept=".pdf,.dwg,.dxf"
+          maxSize={10 * 1024 * 1024}
+        />
+        
+        {getAttachmentsByType('blueprints').length > 0 && (
+          <div className="mt-3 space-y-2">
+            {getAttachmentsByType('blueprints').map((file: File, index: number) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-zinc-800 rounded-md">
+                <div className="flex items-center">
+                  <Upload size={16} className="mr-2 text-zinc-400" />
+                  <span className="text-sm">{file.name}</span>
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 w-6 p-0 hover:bg-zinc-700"
+                  onClick={() => removeFile('blueprints', index)}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
       
-      <div className="space-y-4">
-        <div className="space-y-2">
-          <Label className="text-sm text-zinc-400">
-            Blueprints / Drawings
-          </Label>
-          <div className="flex">
-            <Button 
-              type="button"
-              variant="outline" 
-              className="flex items-center gap-1 bg-zinc-800/70 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-              onClick={() => document.getElementById('blueprintsUpload')?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Upload Blueprints</span>
-            </Button>
-            <input
-              id="blueprintsUpload"
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFileUpload('blueprints', e.target.files)}
-            />
-          </div>
-          {formData.attachments?.blueprints && formData.attachments.blueprints.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {formData.attachments.blueprints.map((file, index) => (
-                <div key={index} className="text-xs text-zinc-400">
-                  • {file.name}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+      <div>
+        <h3 className="text-sm font-medium mb-2">Site Photos</h3>
+        <FileUploader
+          onFilesAdded={(files) => {
+            const photos = [...getAttachmentsByType('photos'), ...Array.from(files)];
+            updateAttachments('photos', photos);
+          }}
+          accept="image/*"
+          maxSize={5 * 1024 * 1024}
+        />
         
-        <div className="space-y-2">
-          <Label className="text-sm text-zinc-400">
-            Photos
-          </Label>
-          <div className="flex">
-            <Button 
-              type="button"
-              variant="outline" 
-              className="flex items-center gap-1 bg-zinc-800/70 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-              onClick={() => document.getElementById('photosUpload')?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Upload Photos</span>
-            </Button>
-            <input
-              id="photosUpload"
-              type="file"
-              multiple
-              accept="image/*"
-              className="hidden"
-              onChange={(e) => handleFileUpload('photos', e.target.files)}
-            />
-          </div>
-          {formData.attachments?.photos && formData.attachments.photos.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {formData.attachments.photos.map((file, index) => (
-                <div key={index} className="text-xs text-zinc-400">
-                  • {file.name}
+        {getAttachmentsByType('photos').length > 0 && (
+          <div className="mt-3 space-y-2">
+            {getAttachmentsByType('photos').map((file: File, index: number) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-zinc-800 rounded-md">
+                <div className="flex items-center">
+                  <Upload size={16} className="mr-2 text-zinc-400" />
+                  <span className="text-sm">{file.name}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 w-6 p-0 hover:bg-zinc-700"
+                  onClick={() => removeFile('photos', index)}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      <div>
+        <h3 className="text-sm font-medium mb-2">Contract Documents</h3>
+        <FileUploader
+          onFilesAdded={(files) => {
+            const contracts = [...getAttachmentsByType('contracts'), ...Array.from(files)];
+            updateAttachments('contracts', contracts);
+          }}
+          accept=".pdf,.doc,.docx"
+          maxSize={5 * 1024 * 1024}
+        />
         
-        <div className="space-y-2">
-          <Label className="text-sm text-zinc-400">
-            Contracts / Agreements
-          </Label>
-          <div className="flex">
-            <Button 
-              type="button"
-              variant="outline" 
-              className="flex items-center gap-1 bg-zinc-800/70 border-zinc-700 text-white hover:bg-zinc-700 hover:text-white"
-              onClick={() => document.getElementById('contractsUpload')?.click()}
-            >
-              <Upload className="h-4 w-4" />
-              <span>Upload Contracts</span>
-            </Button>
-            <input
-              id="contractsUpload"
-              type="file"
-              multiple
-              className="hidden"
-              onChange={(e) => handleFileUpload('contracts', e.target.files)}
-            />
-          </div>
-          {formData.attachments?.contracts && formData.attachments.contracts.length > 0 && (
-            <div className="mt-2 space-y-2">
-              {formData.attachments.contracts.map((file, index) => (
-                <div key={index} className="text-xs text-zinc-400">
-                  • {file.name}
+        {getAttachmentsByType('contracts').length > 0 && (
+          <div className="mt-3 space-y-2">
+            {getAttachmentsByType('contracts').map((file: File, index: number) => (
+              <div key={index} className="flex items-center justify-between p-2 bg-zinc-800 rounded-md">
+                <div className="flex items-center">
+                  <Upload size={16} className="mr-2 text-zinc-400" />
+                  <span className="text-sm">{file.name}</span>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-6 w-6 p-0 hover:bg-zinc-700"
+                  onClick={() => removeFile('contracts', index)}
+                >
+                  <X size={14} />
+                </Button>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

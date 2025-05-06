@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from 'react';
 import { ProjectFormData } from '@/types/project';
 import { notify } from '@/utils/toast-utils';
 import { defaultFormData } from './default-data';
-import { mergeDefaultValues, validateProjectForm } from './utils';
+import { updateFormData, validateFormData } from './utils';
 import { UseProjectFormProps, UseProjectFormReturn } from './types';
 
 const DRAFT_STORAGE_KEY = 'project_form_draft';
@@ -25,7 +26,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     
     // Fall back to default form data with any provided default values
     if (defaultValues) {
-      return mergeDefaultValues(defaultFormData, defaultValues);
+      return updateFormData(defaultFormData, defaultValues);
     }
     return defaultFormData;
   });
@@ -43,7 +44,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     
     // Apply default values when resetting the form
     if (defaultValues) {
-      setFormData(mergeDefaultValues(defaultFormData, defaultValues));
+      setFormData(updateFormData(defaultFormData, defaultValues));
     } else {
       setFormData(defaultFormData);
     }
@@ -52,7 +53,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     setDraftSaved(false);
   };
   
-  const updateFormData = (field: string, value: any) => {
+  const updateFormDataField = (field: string, value: any) => {
     console.log(`Updating field: ${field} with value:`, value);
     setDraftSaved(false);
     
@@ -97,7 +98,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
   };
   
   const validateForm = (): boolean => {
-    const newErrors = validateProjectForm(formData);
+    const newErrors = validateFormData(formData);
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -122,7 +123,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
       localStorage.removeItem(DRAFT_STORAGE_KEY);
       
       // Close modal and show success message
-      onClose();
+      onClose?.();
       notify.success(`${formData.name} has been successfully created.`);
     } else {
       // Show error message for validation failures
@@ -148,7 +149,7 @@ export function useProjectForm({ onCreateProject, onClose, defaultValues }: UseP
     errors,
     projectId,
     resetForm,
-    updateFormData,
+    updateFormData: updateFormDataField,
     handleSubmit,
     draftSaved,
     saveDraft,

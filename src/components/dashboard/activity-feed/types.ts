@@ -19,6 +19,20 @@ export interface ActivityData {
   };
   status?: string;
   priority?: 'low' | 'medium' | 'high';
+  // Additional properties from Supabase data structure
+  profiles?: { 
+    full_name?: string; 
+    avatar_url?: string;
+  };
+  projects?: { 
+    name?: string;
+  };
+  action_type?: string;
+  description?: string;
+  metadata?: any;
+  performed_at?: string;
+  performed_by?: string;
+  project_id?: string;
 }
 
 export interface TeamActivity {
@@ -31,6 +45,13 @@ export interface TeamActivity {
   };
   action: string;
   timestamp: string;
+  timeAgo: string;
+  avatar?: string;
+  name?: string;
+  icon?: 'measurement' | 'team' | 'complete' | 'issue' | 'update';
+  target?: string;
+  targetType?: 'project' | 'team' | 'measurement';
+  metadata?: Record<string, any>;
   project?: {
     id: string;
     name: string;

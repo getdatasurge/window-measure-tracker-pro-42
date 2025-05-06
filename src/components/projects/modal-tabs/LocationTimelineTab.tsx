@@ -1,139 +1,189 @@
 
+// I'll add a TypeGuard function at the beginning of the file to safely access location fields
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Button } from '@/components/ui/button';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { ProjectFormData } from '@/types/project';
-import FormGrid from '@/components/form/FormGrid';
-import FormSection from '@/components/form/FormSection';
-import FormRow from '@/components/form/FormRow';
+
+// Type guard for location object
+const isLocationObject = (location: any): location is {
+  addressLine1: string;
+  addressLine2: string;
+  city: string;
+  state: string;
+  zip: string;
+} => {
+  return typeof location === 'object' && location !== null;
+};
 
 interface LocationTimelineTabProps {
   formData: ProjectFormData;
   updateFormData: (field: string, value: any) => void;
-  errors: Record<string, string | undefined>;
+  errors: Partial<Record<string, string>>;
 }
 
-const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({ 
-  formData, 
+const LocationTimelineTab: React.FC<LocationTimelineTabProps> = ({
+  formData,
   updateFormData,
   errors
 }) => {
-  // Helper to handle nested location updates
-  const updateLocation = (field: string, value: string) => {
+  const location = formData.location || {
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    zip: ''
+  };
+  
+  const locationObj = isLocationObject(location) ? location : {
+    addressLine1: '',
+    addressLine2: '',
+    city: '',
+    state: '',
+    zip: ''
+  };
+  
+  const handleLocationChange = (field: string, value: string) => {
     updateFormData(`location.${field}`, value);
   };
 
-  // Helper to handle nested timeline updates
-  const updateTimeline = (field: string, value: string) => {
-    updateFormData(`timeline.${field}`, value);
+  // Format date for display
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return 'Select date';
+    return typeof date === 'string' ? format(new Date(date), 'PP') : format(date, 'PP');
   };
 
   return (
     <div className="space-y-6">
-      <FormSection title="Location Information" description="Enter the location details for this project">
-        <FormGrid columns={2}>
-          <FormRow>
-            <Label htmlFor="addressLine1" className="text-sm text-zinc-400">
-              Address Line 1
-            </Label>
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Project Location</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label htmlFor="addressLine1" className="text-sm">Address Line 1</Label>
             <Input
               id="addressLine1"
-              placeholder="Street address"
-              value={formData.location?.addressLine1 || ''}
-              onChange={(e) => updateLocation('addressLine1', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              value={locationObj.addressLine1}
+              onChange={(e) => handleLocationChange('addressLine1', e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="123 Main St"
             />
-            {errors['location.addressLine1'] && <p className="text-xs text-red-500 mt-1">{errors['location.addressLine1']}</p>}
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="addressLine2" className="text-sm text-zinc-400">
-              Address Line 2
-            </Label>
+            {errors['location.addressLine1'] && (
+              <p className="text-red-500 text-xs mt-1">{errors['location.addressLine1']}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="addressLine2" className="text-sm">Address Line 2</Label>
             <Input
               id="addressLine2"
-              placeholder="Apt, Suite, Building (optional)"
-              value={formData.location?.addressLine2 || ''}
-              onChange={(e) => updateLocation('addressLine2', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              value={locationObj.addressLine2}
+              onChange={(e) => handleLocationChange('addressLine2', e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="Suite 101"
             />
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="city" className="text-sm text-zinc-400">
-              City
-            </Label>
+          </div>
+          
+          <div>
+            <Label htmlFor="city" className="text-sm">City</Label>
             <Input
               id="city"
-              placeholder="City"
-              value={formData.location?.city || ''}
-              onChange={(e) => updateLocation('city', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              value={locationObj.city}
+              onChange={(e) => handleLocationChange('city', e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="New York"
             />
-            {errors['location.city'] && <p className="text-xs text-red-500 mt-1">{errors['location.city']}</p>}
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="state" className="text-sm text-zinc-400">
-              State
-            </Label>
+            {errors['location.city'] && (
+              <p className="text-red-500 text-xs mt-1">{errors['location.city']}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="state" className="text-sm">State</Label>
             <Input
               id="state"
-              placeholder="State"
-              value={formData.location?.state || ''}
-              onChange={(e) => updateLocation('state', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              value={locationObj.state}
+              onChange={(e) => handleLocationChange('state', e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="NY"
             />
-            {errors['location.state'] && <p className="text-xs text-red-500 mt-1">{errors['location.state']}</p>}
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="zip" className="text-sm text-zinc-400">
-              ZIP Code
-            </Label>
+            {errors['location.state'] && (
+              <p className="text-red-500 text-xs mt-1">{errors['location.state']}</p>
+            )}
+          </div>
+          
+          <div>
+            <Label htmlFor="zip" className="text-sm">ZIP Code</Label>
             <Input
               id="zip"
-              placeholder="ZIP"
-              value={formData.location?.zip || ''}
-              onChange={(e) => updateLocation('zip', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              value={locationObj.zip}
+              onChange={(e) => handleLocationChange('zip', e.target.value)}
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="10001"
             />
-            {errors['location.zip'] && <p className="text-xs text-red-500 mt-1">{errors['location.zip']}</p>}
-          </FormRow>
-        </FormGrid>
-      </FormSection>
-
-      <FormSection title="Timeline" description="Schedule the project timeline">
-        <FormGrid columns={2}>
-          <FormRow>
-            <Label htmlFor="startDate" className="text-sm text-zinc-400">
-              Start Date
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
-            <Input
-              id="startDate"
-              type="date"
-              value={formData.timeline?.startDate || ''}
-              onChange={(e) => updateTimeline('startDate', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-            />
-            {errors['timeline.startDate'] && <p className="text-xs text-red-500 mt-1">{errors['timeline.startDate']}</p>}
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="endDate" className="text-sm text-zinc-400">
-              Estimated End Date
-            </Label>
-            <Input
-              id="endDate"
-              type="date"
-              value={formData.timeline?.endDate || ''}
-              onChange={(e) => updateTimeline('endDate', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-            />
-          </FormRow>
-        </FormGrid>
-      </FormSection>
+            {errors['location.zip'] && (
+              <p className="text-red-500 text-xs mt-1">{errors['location.zip']}</p>
+            )}
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Project Timeline</h2>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <Label className="text-sm">Start Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full bg-zinc-800 border-zinc-700 text-white justify-start text-left"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.timeline && formatDate(formData.timeline.startDate)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="bg-zinc-800 border-zinc-700 text-white p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.timeline?.startDate ? new Date(formData.timeline.startDate) : undefined}
+                  onSelect={(date) => updateFormData('timeline.startDate', date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+          
+          <div>
+            <Label className="text-sm">End Date</Label>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="w-full bg-zinc-800 border-zinc-700 text-white justify-start text-left"
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formData.timeline && formatDate(formData.timeline.endDate)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="bg-zinc-800 border-zinc-700 text-white p-0">
+                <Calendar
+                  mode="single"
+                  selected={formData.timeline?.endDate ? new Date(formData.timeline.endDate) : undefined}
+                  onSelect={(date) => updateFormData('timeline.endDate', date)}
+                  initialFocus
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

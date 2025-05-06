@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { TeamActivity, ActivityData } from './types';
+import { TeamActivity } from './types';
 import { transformActivityData } from './utils';
 
 /**
@@ -38,7 +38,8 @@ export const useActivityFeed = () => {
         }
 
         if (data) {
-          const transformedActivities = transformActivityData(data as ActivityData[]);
+          // Cast to any to avoid TypeScript errors during transformation
+          const transformedActivities = transformActivityData(data as any[]);
           setActivities(transformedActivities);
         }
       } catch (err) {

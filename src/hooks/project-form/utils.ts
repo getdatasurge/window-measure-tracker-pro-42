@@ -113,3 +113,14 @@ export const validateFormData = (formData: ProjectFormData) => {
   
   return errors;
 };
+
+// Helper to merge default values with provided values
+export const mergeDefaultValues = (
+  defaultData: ProjectFormData, 
+  userValues: Partial<ProjectFormData>
+): ProjectFormData => {
+  return updateFormData(defaultData, userValues);
+};
+
+// Alias for validateFormData for compatibility
+export const validateProjectForm = validateFormData;

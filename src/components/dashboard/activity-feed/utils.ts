@@ -1,3 +1,4 @@
+
 import { ActivityData, TeamActivity } from "./types";
 import { format, formatDistanceToNow } from 'date-fns';
 import { Json } from '@/integrations/supabase/types';
@@ -90,7 +91,7 @@ export const processMetadata = (
 /**
  * Transform raw activity data to TeamActivity format
  */
-export const transformActivityData = (data: ActivityData[]): TeamActivity[] => {
+export const transformActivityData = (data: any[]): TeamActivity[] => {
   return data.map(item => {
     // Safely access potentially null properties
     const profileName = item.profiles?.full_name || 'Unknown User';
@@ -101,16 +102,24 @@ export const transformActivityData = (data: ActivityData[]): TeamActivity[] => {
     
     // Process metadata
     const { metadata, targetType } = processMetadata(item.metadata);
+    
+    const iconType = mapActionTypeToIcon(actionType);
 
     return {
       id: item.id,
+      user: {
+        id: item.performed_by || 'unknown',
+        name: profileName,
+        avatar: avatarUrl
+      },
+      timestamp: item.performed_at || new Date().toISOString(),
       avatar: avatarUrl,
       name: profileName,
       action: description,
       target: projectName,
       targetType,
       timeAgo: formatTimeDistance(item.performed_at),
-      icon: mapActionTypeToIcon(actionType),
+      icon: iconType,
       metadata
     };
   });

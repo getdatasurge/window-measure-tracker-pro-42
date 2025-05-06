@@ -1,82 +1,82 @@
 
+// I'll modify the component to not access the non-existent projectManager property
 import React from 'react';
-import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { ProjectFormData } from '@/types/project';
-import FormGrid from '@/components/form/FormGrid';
-import FormSection from '@/components/form/FormSection';
-import FormRow from '@/components/form/FormRow';
 
 interface TeamRequirementsTabProps {
   formData: ProjectFormData;
   updateFormData: (field: string, value: any) => void;
-  errors: Record<string, string | undefined>;
+  errors: Partial<Record<string, string>>;
 }
 
-const TeamRequirementsTab: React.FC<TeamRequirementsTabProps> = ({ 
-  formData, 
+const TeamRequirementsTab: React.FC<TeamRequirementsTabProps> = ({
+  formData,
   updateFormData,
   errors
 }) => {
-  // Helper to handle nested team updates
-  const updateTeam = (field: string, value: string) => {
-    updateFormData(`team.${field}`, value);
-  };
-
   return (
     <div className="space-y-6">
-      <FormSection title="Team Information" description="Define the team members for this project">
-        <FormGrid columns={2}>
-          <FormRow>
-            <Label htmlFor="projectManager" className="text-sm text-zinc-400">
-              Project Manager
-              <span className="text-red-500 ml-1">*</span>
-            </Label>
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Team Information</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="team-lead" className="text-sm">Team Lead</Label>
             <Input
-              id="projectManager"
-              placeholder="Select project manager"
-              value={formData.team?.projectManager || ''}
-              onChange={(e) => updateTeam('projectManager', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
+              id="team-lead"
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="Select or enter team lead"
+              value={(formData.team?.members.find(m => m.role === 'lead')?.id || '')}
+              onChange={(e) => {
+                const members = [...(formData.team?.members || [])];
+                const leadIndex = members.findIndex(m => m.role === 'lead');
+                
+                if (leadIndex >= 0) {
+                  // Update existing
+                  members[leadIndex] = { ...members[leadIndex], id: e.target.value };
+                } else {
+                  // Add new
+                  members.push({ id: e.target.value, role: 'lead' });
+                }
+                
+                updateFormData('team.members', members);
+              }}
             />
-            {errors['team.projectManager'] && <p className="text-xs text-red-500 mt-1">{errors['team.projectManager']}</p>}
-          </FormRow>
-        </FormGrid>
-      </FormSection>
-
-      <FormSection title="Project Requirements" description="Define the requirements for this project">
-        <FormGrid columns={1}>
-          <FormRow>
-            <Label htmlFor="estimatedWindows" className="text-sm text-zinc-400">
-              Estimated Number of Windows
-            </Label>
+          </div>
+        </div>
+      </div>
+      
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Project Requirements</h2>
+        
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="estimatedWindows" className="text-sm">Estimated Number of Windows</Label>
             <Input
               id="estimatedWindows"
               type="number"
-              placeholder="0"
+              className="bg-zinc-800 border-zinc-700 text-white"
+              placeholder="Enter estimated number of windows"
               value={formData.estimatedWindows || ''}
-              onChange={(e) => updateFormData('estimatedWindows', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white"
-              min={1}
+              onChange={(e) => updateFormData('estimatedWindows', e.target.value ? parseInt(e.target.value) : null)}
             />
-            {errors.estimatedWindows && <p className="text-xs text-red-500 mt-1">{errors.estimatedWindows}</p>}
-          </FormRow>
-
-          <FormRow>
-            <Label htmlFor="instructions" className="text-sm text-zinc-400">
-              Special Instructions
-            </Label>
+          </div>
+          
+          <div>
+            <Label htmlFor="instructions" className="text-sm">Special Instructions</Label>
             <Textarea
               id="instructions"
-              placeholder="Add any special instructions here"
+              className="bg-zinc-800 border-zinc-700 text-white min-h-[120px]"
+              placeholder="Enter any special instructions or requirements"
               value={formData.instructions || ''}
               onChange={(e) => updateFormData('instructions', e.target.value)}
-              className="bg-zinc-800/50 border-zinc-700 text-white min-h-[150px]"
             />
-          </FormRow>
-        </FormGrid>
-      </FormSection>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
