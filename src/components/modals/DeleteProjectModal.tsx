@@ -8,9 +8,12 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
-  AlertDialogTitle
+  AlertDialogTitle,
+  AlertDialogClose
 } from '@/components/ui/alert-dialog';
 import { ProjectData } from '@/hooks/useProjects';
+import { X } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface DeleteProjectModalProps {
   isOpen: boolean;
