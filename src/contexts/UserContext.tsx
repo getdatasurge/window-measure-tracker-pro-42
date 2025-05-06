@@ -17,6 +17,7 @@ interface UserContextValue {
   isLoading: boolean;
   error: Error | null;
   refreshProfile: () => Promise<void>;
+  profileNotFound: boolean; // New flag to indicate profile not found
 }
 
 const UserContext = createContext<UserContextValue | undefined>(undefined);
@@ -32,6 +33,10 @@ export const UserProvider = ({ children }: UserProviderProps) => {
   const [role, setRole] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
+  const [profileNotFound, setProfileNotFound] = useState<boolean>(false);
+  
+  // Track initialization state
+  const [initialCheckDone, setInitialCheckDone] = useState<boolean>(false);
 
   // Cache of fetched user IDs to prevent redundant queries
   const fetchedUserIds = new Set<string>();
@@ -43,10 +48,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     }
   };
 
+  // Modified fetchProfile with better error handling and caching
   const fetchProfile = async (userId: string) => {
+    // Guard against empty userId
+    if (!userId) {
+      logDebug('Skipping profile fetch - no valid user ID provided');
+      setProfileNotFound(true); // Consider this a "not found" case
+      return;
+    }
+    
     // Prevent fetch if we've already queried this ID
-    if (!userId || fetchedUserIds.has(userId)) {
-      logDebug(`Skipping profile fetch for user ${userId} (already fetched or invalid ID)`);
+    if (fetchedUserIds.has(userId)) {
+      logDebug(`Skipping duplicate profile fetch for user ${userId}`);
       return;
     }
     
@@ -69,15 +82,18 @@ export const UserProvider = ({ children }: UserProviderProps) => {
       if (data) {
         setProfile(data);
         setRole(data.role || null);
+        setProfileNotFound(false);
       } else {
         logDebug('No profile found for user');
         // Still set profile to null to indicate we tried fetching
         setProfile(null);
         setRole(null);
+        setProfileNotFound(true); // Explicitly set not found flag
       }
     } catch (err) {
       console.error('Error fetching user profile:', err);
       setError(err instanceof Error ? err : new Error('Failed to fetch user profile'));
+      setProfileNotFound(true); // Consider errors as "not found" for UI purposes
       handleError(err, { 
         title: 'Profile Error', 
         message: 'Unable to load your profile. Some features might be limited.', 
@@ -97,22 +113,60 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     await fetchProfile(user.id);
   };
 
-  // Handle initial session loading
+  // Handle initial session loading with retry for eventual consistency
   useEffect(() => {
+    let isMounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 800; // ms
+    
     const setupUser = async () => {
+      if (!isMounted) return;
+      
       logDebug('Setting up initial user session');
       setIsLoading(true);
       
       try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        logDebug('Initial session retrieved', initialSession ? 'Session found' : 'No session');
+        // Get initial session
+        const { data: { session: initialSession }, error: sessionError } = await supabase.auth.getSession();
         
-        setSession(initialSession);
-        const initialUser = initialSession?.user || null;
-        setUser(initialUser);
+        if (sessionError) {
+          throw sessionError;
+        }
+        
+        if (initialSession) {
+          logDebug('Initial session retrieved', 'Session found');
+          
+          // Handle clock skew warning - log it but continue
+          if (initialSession.expires_at && initialSession.expires_at * 1000 > Date.now() + 120000) {
+            console.warn('Possible clock skew detected. Server time may be ahead of local time.');
+          }
+          
+          setSession(initialSession);
+          
+          const initialUser = initialSession?.user || null;
+          setUser(initialUser);
 
-        if (initialUser?.id) {
-          await fetchProfile(initialUser.id);
+          if (initialUser?.id) {
+            // Fetch profile asynchronously - don't block loading state on this
+            setTimeout(() => {
+              if (isMounted) {
+                fetchProfile(initialUser.id);
+              }
+            }, 0);
+          }
+          
+          setInitialCheckDone(true);
+        } else if (retryCount < MAX_RETRIES) {
+          // Retry for eventual consistency after OAuth redirect
+          logDebug(`No session found, retrying (${retryCount + 1}/${MAX_RETRIES})...`);
+          retryCount++;
+          setTimeout(setupUser, RETRY_DELAY);
+          return; // Don't complete loading state yet
+        } else {
+          // No session after retries
+          logDebug('No session found after retries');
+          setInitialCheckDone(true);
         }
       } catch (err) {
         console.error('Error setting up user:', err);
@@ -122,21 +176,31 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           message: 'There was a problem setting up your session', 
           showToast: true 
         });
+        setInitialCheckDone(true);
       } finally {
-        setIsLoading(false);
-        logDebug('Initial setup complete, isLoading set to false');
+        if (isMounted) {
+          setIsLoading(false);
+          logDebug('Initial setup complete, isLoading set to false');
+        }
       }
     };
 
     setupUser();
+    
+    return () => { 
+      isMounted = false; 
+    };
   }, []);
 
-  // Handle auth state changes
+  // Handle auth state changes separately from initial loading
   useEffect(() => {
+    let isMounted = true;
     logDebug('Setting up auth state change listener');
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, newSession) => {
+        if (!isMounted) return;
+        
         logDebug(`Auth state changed: ${_event}`);
         
         const newUser = newSession?.user || null;
@@ -156,16 +220,16 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           // Reset profile state when user changes
           setProfile(null);
           setRole(null);
+          setProfileNotFound(false);
           
           // Only fetch profile for new user if we have a valid ID
           if (newUser?.id) {
             // Use setTimeout to break potential deadlock with auth state changes
             setTimeout(() => {
-              fetchProfile(newUser.id);
+              if (isMounted) {
+                fetchProfile(newUser.id);
+              }
             }, 0);
-          } else {
-            // Always ensure loading completes
-            setIsLoading(false);
           }
         }
 
@@ -174,16 +238,26 @@ export const UserProvider = ({ children }: UserProviderProps) => {
           logDebug('User signed out, clearing profile data');
           setProfile(null);
           setRole(null);
+          setProfileNotFound(false);
           fetchedUserIds.clear();
         }
       }
     );
 
     return () => {
+      isMounted = false;
       logDebug('Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, [user?.id]); // Only re-register when user ID changes to prevent loops
+
+  // Effect to ensure loading state resolves
+  useEffect(() => {
+    if (initialCheckDone && isLoading) {
+      logDebug('Ensuring isLoading is set to false after initialization');
+      setIsLoading(false);
+    }
+  }, [initialCheckDone, isLoading]);
 
   const contextValue: UserContextValue = {
     session,
@@ -193,6 +267,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     isLoading,
     error,
     refreshProfile,
+    profileNotFound,
   };
 
   return (

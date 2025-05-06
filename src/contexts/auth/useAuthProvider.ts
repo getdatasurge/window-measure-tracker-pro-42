@@ -1,254 +1,181 @@
 
 import { useState, useEffect, useCallback } from 'react';
-import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
-import { Profile } from './types';
+import type { AuthContextType } from './types';
+import { handleError } from '@/utils/error-handling';
 
-export const useAuthProvider = () => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+export const useAuthProvider = (): AuthContextType => {
+  const [user, setUser] = useState(null);
+  const [session, setSession] = useState(null);
+  const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [profileNotFound, setProfileNotFound] = useState(false);
-  const navigate = useNavigate();
+  
+  // Cache fetched profile IDs to avoid redundant fetches
+  const fetchedIds = new Set<string>();
 
-  // Function to create a new profile for a user if one doesn't exist
-  const ensureProfileExists = useCallback(async (userData: User) => {
+  // Fetch user profile from Supabase
+  const fetchProfile = useCallback(async (userId: string) => {
+    if (!userId || fetchedIds.has(userId)) return;
+    
+    console.log(`[Auth] Fetching profile for user ${userId}`);
+    fetchedIds.add(userId);
+    
     try {
-      // First check if profile already exists
-      const { data: existingProfile, error: fetchError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userData.id)
-        .maybeSingle();
-      
-      if (fetchError) {
-        console.error('Error checking for existing profile:', fetchError);
-        return;
-      }
-      
-      // If profile doesn't exist, create one
-      if (!existingProfile) {
-        console.log('No profile found for user, creating new profile');
-        
-        // Get the best available name from user metadata
-        const userFullName = userData.user_metadata?.full_name || 
-                            userData.user_metadata?.name ||
-                            userData.user_metadata?.preferred_username ||
-                            userData.email?.split('@')[0] ||
-                            'User';
-        
-        // Insert the new profile
-        const { error: insertError } = await supabase
-          .from('profiles')
-          .insert({
-            id: userData.id,
-            email: userData.email,
-            full_name: userFullName,
-            // Use avatar_url from metadata if available
-            ...(userData.user_metadata?.avatar_url && { avatar_url: userData.user_metadata.avatar_url })
-          });
-        
-        if (insertError) {
-          console.error('Error creating profile:', insertError);
-          return;
-        }
-        
-        console.log('Profile created successfully');
-        
-        // Fetch the newly created profile
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', userData.id)
-          .maybeSingle();
-        
-        if (newProfile) {
-          setProfile(newProfile);
-          setProfileNotFound(false);
-        }
-      } else {
-        // Profile exists, update it if necessary
-        await syncProfileData(userData.id, userData);
-      }
-    } catch (error) {
-      console.error('Unexpected error ensuring profile exists:', error);
-    }
-  }, []);
-
-  // Function to sync user display_name to profile.full_name if needed
-  const syncProfileData = useCallback(async (userId: string, userData: User) => {
-    try {
-      // First get the existing profile
-      const { data: existingProfile, error: fetchError } = await supabase
+      const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
+        
+      if (error) throw error;
       
-      if (fetchError) {
-        console.error('Error fetching profile for sync:', fetchError);
-        return;
-      }
-      
-      // Determine the best user name to use for full_name
-      const userFullName = userData.user_metadata?.full_name || 
-                           userData.user_metadata?.name ||
-                           userData.app_metadata?.name ||
-                           userData.email?.split('@')[0] ||
-                           'User';
-      
-      // Check if we need to update the profile
-      if (existingProfile && (!existingProfile.full_name || existingProfile.full_name !== userFullName)) {
-        const { error: updateError } = await supabase
-          .from('profiles')
-          .update({ full_name: userFullName })
-          .eq('id', userId);
-          
-        if (updateError) {
-          console.error('Error updating profile full_name:', updateError);
-        } else {
-          console.log('Profile full_name updated successfully');
-          
-          // Update the local profile state with the new full_name
-          setProfile(prev => prev ? { ...prev, full_name: userFullName } : null);
-        }
-      }
+      setProfile(data);
+      setProfileNotFound(!data);
     } catch (error) {
-      console.error('Unexpected error syncing profile data:', error);
-    }
-  }, []);
-
-  // Function to fetch user profile
-  const fetchProfile = useCallback(async (userId: string, userData: User) => {
-    try {
-      setLoading(true);
-      setProfileNotFound(false);
-      
-      const { data, error: profileError } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('id', userId)
-        .maybeSingle();  // Use maybeSingle instead of single to avoid errors
-      
-      if (profileError) {
-        console.error('Error fetching user profile:', profileError);
-        // Don't set profileNotFound here as this is a query error, not a "not found" case
-      } else if (!data) {
-        console.warn('Profile not found for user', userId);
-        setProfileNotFound(true);
-        // If no profile exists, create one
-        await ensureProfileExists(userData);
-      } else {
-        setProfile(data);
-        setProfileNotFound(false);
-        // If we have user data, ensure profile is in sync
-        await syncProfileData(userId, userData);
-      }
-    } catch (err) {
-      console.error('Error fetching user profile:', err);
-      // Don't loop infinitely on failure
+      console.error('Error fetching profile:', error);
       setProfileNotFound(true);
-    } finally {
-      setLoading(false);
+      handleError(error, { 
+        title: 'Profile Error',
+        message: 'Failed to load your profile. Some features may be limited.',
+        showToast: true
+      });
     }
-  }, [syncProfileData, ensureProfileExists]);
-
-  // Function to refresh user's profile data
+  }, []);
+  
+  // Refresh profile data
   const refreshProfile = useCallback(async () => {
-    if (user?.id) {
-      await fetchProfile(user.id, user);
-    }
-  }, [user, fetchProfile]);
-
-  // Function to sign out
+    if (!user?.id) return;
+    fetchedIds.delete(user.id);
+    await fetchProfile(user.id);
+  }, [user?.id, fetchProfile]);
+  
+  // Sign out function
   const signOut = useCallback(async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) {
-        throw error;
-      }
-      
+      await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setProfile(null);
-      setIsAuthenticated(false);
-      setProfileNotFound(false);
-      toast.success('You have been successfully logged out');
-      // Redirect to homepage instead of a specific route
-      window.location.href = `${window.location.origin}/`;
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      toast.error(error.message || 'Failed to log out');
+      fetchedIds.clear();
+    } catch (error) {
+      console.error('Error signing out:', error);
+      handleError(error, {
+        title: 'Sign Out Error',
+        message: 'There was a problem signing you out.',
+        showToast: true
+      });
     }
   }, []);
-
+  
+  // Set up auth listener and initial session
   useEffect(() => {
-    // First, set up the auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, newSession) => {
-        // Update auth state based on event
-        setSession(newSession);
-        setUser(newSession?.user ?? null);
-        setIsAuthenticated(!!newSession);
+    let isMounted = true;
+    let retryCount = 0;
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY = 800;
+    
+    // Check for session with retries for eventual consistency
+    const checkSession = async () => {
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
         
-        // Handle specific auth events
-        if (event === 'SIGNED_OUT') {
-          setUser(null);
-          setSession(null);
-          setProfile(null);
-          setIsAuthenticated(false);
-          setProfileNotFound(false);
-        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-          setUser(newSession?.user ?? null);
-          setSession(newSession);
-          setIsAuthenticated(!!newSession);
-          
-          // Fetch user profile after sign-in
-          // Using setTimeout to avoid potential auth deadlocks
-          if (newSession?.user) {
-            setTimeout(() => {
-              ensureProfileExists(newSession.user).then(() => {
-                fetchProfile(newSession.user.id, newSession.user);
-              });
-            }, 0);
+        if (error) throw error;
+        
+        if (currentSession) {
+          if (isMounted) {
+            setSession(currentSession);
+            setUser(currentSession.user);
+            
+            // Fetch profile asynchronously
+            if (currentSession.user?.id) {
+              setTimeout(() => {
+                if (isMounted) fetchProfile(currentSession.user.id);
+              }, 0);
+            }
+            
+            setLoading(false);
+          }
+        } else if (retryCount < MAX_RETRIES) {
+          // Retry for eventual consistency after auth redirects
+          retryCount++;
+          setTimeout(checkSession, RETRY_DELAY);
+        } else {
+          // No session after retries
+          if (isMounted) {
+            setSession(null);
+            setUser(null);
+            setLoading(false);
           }
         }
+      } catch (err) {
+        console.error('Auth initialization error:', err);
+        if (isMounted) {
+          setLoading(false);
+          handleError(err, {
+            title: 'Authentication Error',
+            message: 'There was a problem setting up your session.',
+            showToast: true
+          });
+        }
       }
-    );
-
-    // Then check for existing session
-    supabase.auth.getSession().then(({ data }) => {
-      const sessionUser = data?.session?.user || null;
-      setUser(sessionUser);
-      setSession(data?.session);
-      setIsAuthenticated(!!sessionUser);
+    };
+    
+    // Set up auth change listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (!isMounted) return;
       
-      // Fetch profile if user is authenticated
-      if (sessionUser) {
-        // First ensure profile exists, then fetch it
-        ensureProfileExists(sessionUser).then(() => {
-          fetchProfile(sessionUser.id, sessionUser);
-        });
-      } else {
-        setLoading(false);
+      console.log(`[Auth] Auth state changed: ${event}`);
+      setSession(currentSession);
+      
+      const currentUser = currentSession?.user || null;
+      setUser(currentUser);
+      
+      // Reset profile when user changes
+      if (currentUser?.id !== user?.id) {
+        setProfile(null);
+        setProfileNotFound(false);
+        
+        // Fetch profile for new user
+        if (currentUser?.id) {
+          // Use setTimeout to break potential deadlock
+          setTimeout(() => {
+            if (isMounted) fetchProfile(currentUser.id);
+          }, 0);
+        }
       }
+      
+      // Ensure loading completes even during auth changes
+      setLoading(false);
     });
-
+    
+    // Start the session check
+    checkSession();
+    
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
-  }, [fetchProfile, ensureProfileExists]);
-
+  }, [fetchProfile, user?.id]);
+  
+  // Force loading to complete after 5 seconds as a safety mechanism
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      if (loading) {
+        console.warn('[Auth] Force completing loading state due to timeout');
+        setLoading(false);
+      }
+    }, 5000);
+    
+    return () => clearTimeout(timeoutId);
+  }, [loading]);
+  
   return {
     user,
     session,
     profile,
     loading,
-    isAuthenticated,
+    isAuthenticated: !!user,
     profileNotFound,
     refreshProfile,
     signOut
