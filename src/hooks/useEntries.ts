@@ -4,7 +4,7 @@ import { useUser } from '@/contexts/UserContext';
 import { EntryData, SplitEntryResult } from '@/types/entries';
 import * as entryService from '@/services/entryService';
 import * as entryHistoryService from '@/services/entryHistoryService';
-import { fractionToDecimal } from '@/utils/measurementUtils';
+import { fractionToDecimal } from '@/utils/conversion';
 
 /**
  * Hook for managing entry CRUD operations and history
@@ -131,5 +131,5 @@ export const useEntries = () => {
 };
 
 // Re-export the fractionToDecimal function for direct imports
-export { fractionToDecimal } from '@/utils/measurementUtils';
+export { fractionToDecimal } from '@/utils/conversion';
 export type { EntryData, EntryStatus } from '@/types/entries';
