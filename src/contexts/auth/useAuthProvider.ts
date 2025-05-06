@@ -1,37 +1,12 @@
 
-import { createContext, useContext, useState, useEffect, ReactNode, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Session, User } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'react-toastify';
 import { useNavigate } from 'react-router-dom';
-import { Tables } from '@/integrations/supabase/types';
+import { Profile } from './types';
 
-// Define the Profile type based on your Supabase schema
-type Profile = Tables<'profiles'>;
-
-type AuthContextType = {
-  user: User | null;
-  session: Session | null;
-  profile: Profile | null;
-  loading: boolean;
-  isAuthenticated: boolean;
-  refreshProfile: () => Promise<void>;
-  signOut: () => Promise<void>;
-};
-
-// Rename UserContext to AuthContext to match expected imports
-const AuthContext = createContext<AuthContextType>({
-  user: null,
-  session: null,
-  profile: null,
-  loading: true,
-  isAuthenticated: false,
-  refreshProfile: async () => {},
-  signOut: async () => {},
-});
-
-// Export AuthProvider instead of UserProvider to match what's imported in App.tsx
-export const AuthProvider = ({ children }: { children: ReactNode }) => {
+export const useAuthProvider = () => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -259,35 +234,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, [fetchProfile, ensureProfileExists]);
 
-  return (
-    <AuthContext.Provider value={{ 
-      user, 
-      session, 
-      profile,
-      loading, 
-      isAuthenticated, 
-      refreshProfile, 
-      signOut 
-    }}>
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-// Export both useUser (for backward compatibility) and useAuth (as expected by Sidebar.tsx)
-export const useUser = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useUser must be used within an AuthProvider');
-  }
-  return context;
-};
-
-// Add useAuth function that is expected by Sidebar component
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  return {
+    user,
+    session,
+    profile,
+    loading,
+    isAuthenticated,
+    refreshProfile,
+    signOut
+  };
 };

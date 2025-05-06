@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { useUser } from '@/contexts/UserContext';
+import { useUser } from '@/contexts/auth/AuthContext';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import LandingPage from './Landing';
 
