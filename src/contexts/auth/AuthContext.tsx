@@ -1,6 +1,6 @@
 
 import { createContext, useContext, ReactNode } from 'react';
-import { useAuthProvider } from './useAuthProvider';
+import { useSessionProfile } from '@/contexts/session-profile';
 import { AuthContextType } from './types';
 
 const AuthContext = createContext<AuthContextType>({
@@ -17,7 +17,7 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useAuthProvider();
+  const auth = useSessionProfile();
   
   return (
     <AuthContext.Provider value={auth}>

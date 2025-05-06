@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth';
+import { useSessionProfile } from '@/contexts/session-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
@@ -10,7 +10,7 @@ interface SidebarUserProfileProps {
 }
 
 const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) => {
-  const { user, profile, isLoading } = useAuth();
+  const { user, profile, isLoading } = useSessionProfile();
   const navigate = useNavigate();
   
   // Handle navigation to profile settings

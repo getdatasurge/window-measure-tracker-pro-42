@@ -8,7 +8,7 @@ import {
   DataPrivacy
 } from '@/components/settings';
 import ProfileForm, { ProfileFormData } from '@/components/settings/ProfileForm';
-import { useAuth } from '@/contexts/auth';
+import { useSessionProfile } from '@/contexts/session-profile';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('account');
@@ -29,7 +29,7 @@ const Settings = () => {
     role: ''
   });
   
-  const { user, profile } = useAuth();
+  const { user, profile } = useSessionProfile();
   
   // Load user data when component mounts or when user/profile changes
   useEffect(() => {
