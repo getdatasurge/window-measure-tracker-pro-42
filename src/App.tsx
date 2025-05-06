@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -14,6 +13,7 @@ import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
 
 import MainLayout from "./components/layout/MainLayout";
+import AppLayout from "./components/layout/AppLayout"; // Add the new AppLayout component
 import LandingPage from "./pages/Landing";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
@@ -32,7 +32,6 @@ import Overview from "./pages/Overview";
 import TeamManagement from "./pages/TeamManagement"; 
 import Measurements from "./pages/Measurements"; 
 import MeasurementEntries from "./pages/MeasurementEntries";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
 import SignInPage from "./pages/SignInPage";
 import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
@@ -96,110 +95,26 @@ const App = () => {
                   <Route path="/sign-in" element={<SignInPage />} />
                   <Route path="/auth-callback" element={<AuthCallback />} />
 
-                  {/* Protected Routes */}
-                  <Route 
-                    path="/dashboard" 
-                    element={
-                      <ProtectedRoute>
-                        <DashboardV2 />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/overview" 
-                    element={
-                      <ProtectedRoute>
-                        <Overview />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/actions" 
-                    element={
-                      <ProtectedRoute>
-                        <ActionViewer />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/projects-new" 
-                    element={
-                      <ProtectedRoute>
-                        <ProjectsNew />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/teams" 
-                    element={
-                      <ProtectedRoute>
-                        <TeamManagement />
-                      </ProtectedRoute>
-                    } 
-                  /> 
-                  <Route 
-                    path="/schedule" 
-                    element={
-                      <ProtectedRoute>
-                        <SchedulePage />
-                      </ProtectedRoute>
-                    } 
-                  /> 
-                  <Route 
-                    path="/reports" 
-                    element={
-                      <ProtectedRoute>
-                        <ReportsNew />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/measurements" 
-                    element={
-                      <ProtectedRoute>
-                        <Measurements />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route 
-                    path="/measurement-entries" 
-                    element={
-                      <ProtectedRoute>
-                        <MeasurementEntries />
-                      </ProtectedRoute>
-                    } 
-                  /> 
-                  <Route 
-                    path="/user/:id/settings" 
-                    element={
-                      <ProtectedRoute>
-                        <UserSettingsPage />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  {isDev && (
-                    <Route 
-                      path="/__debug" 
-                      element={
-                        <ProtectedRoute>
-                          <DebugPage />
-                        </ProtectedRoute>
-                      } 
-                    />
-                  )} 
-
-                  {/* Layout Routes with Protection */}
-                  <Route 
-                    path="/" 
-                    element={
-                      <ProtectedRoute>
-                        <MainLayout />
-                      </ProtectedRoute>
-                    }
-                  >
-                    <Route path="projects" element={<Projects />} />
-                    <Route path="reports-old" element={<Reports />} />
-                    <Route path="settings" element={<Settings />} />
+                  {/* Protected Routes Using AppLayout */}
+                  <Route path="/" element={<AppLayout />}>
+                    <Route path="dashboard" element={<DashboardV2 />} />
+                    <Route path="overview" element={<Overview />} />
+                    <Route path="actions" element={<ActionViewer />} />
+                    <Route path="projects-new" element={<ProjectsNew />} />
+                    <Route path="teams" element={<TeamManagement />} />
+                    <Route path="schedule" element={<SchedulePage />} />
+                    <Route path="reports" element={<ReportsNew />} />
+                    <Route path="measurements" element={<Measurements />} />
+                    <Route path="measurement-entries" element={<MeasurementEntries />} />
+                    <Route path="user/:id/settings" element={<UserSettingsPage />} />
+                    {isDev && <Route path="__debug" element={<DebugPage />} />}
+                    
+                    {/* Nested Layout Route - Only for components that need the sidebar */}
+                    <Route path="/" element={<MainLayout />}>
+                      <Route path="projects" element={<Projects />} />
+                      <Route path="reports-old" element={<Reports />} />
+                      <Route path="settings" element={<Settings />} />
+                    </Route>
                   </Route>
                   
                   {/* 404 Route */}
