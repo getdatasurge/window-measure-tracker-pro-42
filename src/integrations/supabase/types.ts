@@ -680,6 +680,7 @@ export type Database = {
           description: string | null
           Eemail: string | null
           id: string
+          is_active: boolean | null
           location: string | null
           name: string
           status: string | null
@@ -693,6 +694,7 @@ export type Database = {
           description?: string | null
           Eemail?: string | null
           id?: string
+          is_active?: boolean | null
           location?: string | null
           name: string
           status?: string | null
@@ -706,6 +708,7 @@ export type Database = {
           description?: string | null
           Eemail?: string | null
           id?: string
+          is_active?: boolean | null
           location?: string | null
           name?: string
           status?: string | null

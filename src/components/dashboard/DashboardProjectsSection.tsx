@@ -29,7 +29,7 @@ const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ cla
       try {
         setLoading(true);
         
-        // Fetch active projects (not completed)
+        // Fetch active projects (not completed) - FIXED QUERY SYNTAX
         const { data: projectData, error: projectError } = await supabase
           .from('projects')
           .select('id, name, client_name, location, deadline, status')
