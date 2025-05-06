@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Spinner } from '@/components/ui/spinner';
 import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle } from 'lucide-react';
@@ -17,7 +17,7 @@ const AppLayout: React.FC = () => {
   const {
     user,
     profile,
-    loading,
+    isLoading,
     profileNotFound,
     error,
     refreshProfile
@@ -25,7 +25,7 @@ const AppLayout: React.FC = () => {
   const location = useLocation();
 
   // While checking authentication status
-  if (loading) {
+  if (isLoading) {
     return <div className="flex items-center justify-center min-h-screen">
         <Spinner className="w-8 h-8 text-green-500" />
       </div>;

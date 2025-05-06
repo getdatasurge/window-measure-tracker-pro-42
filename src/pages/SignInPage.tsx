@@ -1,13 +1,13 @@
 
 import React, { useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import LoginModal from '@/components/modals/LoginModal';
 import useAuthModalStore from '@/stores/useAuthModalStore';
 import { Spinner } from '@/components/ui/spinner';
 
 const SignInPage: React.FC = () => {
-  const { user, loading } = useAuth();
+  const { user, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const { openLogin } = useAuthModalStore();
@@ -17,21 +17,21 @@ const SignInPage: React.FC = () => {
 
   useEffect(() => {
     // Automatically open the login modal when the page loads
-    if (!loading && !user) {
+    if (!isLoading && !user) {
       openLogin();
     }
-  }, [openLogin, loading, user]);
+  }, [openLogin, isLoading, user]);
 
   // Central redirect handler - redirect authenticated users
   useEffect(() => {
     // Only redirect if we're not in a loading state and have a user
-    if (!loading && user) {
+    if (!isLoading && user) {
       navigate(from, { replace: true });
     }
-  }, [user, loading, navigate, from]);
+  }, [user, isLoading, navigate, from]);
 
   // Show loading spinner while checking authentication
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner className="w-8 h-8 text-green-500" />

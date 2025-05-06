@@ -1,7 +1,6 @@
 
-import { UserProvider, useUser } from './user';
+import { useAuth } from './auth';
 
 // This file exists for backward compatibility
-// New code should import from './user' directly
-export { UserProvider, useUser };
-export default { UserProvider, useUser };
+// New code should import from './auth' directly
+export const useUser = useAuth;

@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from '@/components/ui/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
 
 interface UseLogoutOptions {
   redirectUrl?: string;
@@ -11,20 +11,14 @@ interface UseLogoutOptions {
 export const useLogout = (options: UseLogoutOptions = {}) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const navigate = useNavigate();
+  const { signOut } = useAuth();
   const { redirectUrl = '/' } = options;
 
   const logout = async () => {
     setIsLoggingOut(true);
     
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Clear any cached project data or local storage if needed
-      // This ensures users don't see cached data from previous sessions
+      await signOut();
       
       // Navigate to root after successful logout
       navigate(redirectUrl);

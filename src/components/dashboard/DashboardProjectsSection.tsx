@@ -4,6 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ProjectTable from '../projects/ProjectTable';
 import { useToast } from '@/hooks/use-toast';
 import { fetchProjects } from '@/services/projectService';
+import { supabase } from '@/integrations/supabase/client';
 
 interface DashboardProjectsSectionProps {
   className?: string;

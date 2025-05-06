@@ -1,4 +1,5 @@
 
+
 # Codebase Cleanup Plan
 
 This document outlines files and components that can be safely removed or refactored as part of our code cleanup initiative.
@@ -13,14 +14,14 @@ The following files can be safely removed:
 
 The following files have been consolidated into `src/contexts/auth/AuthProvider.tsx`:
 
-- [ ] `src/contexts/auth/AuthContext.tsx`
-- [ ] `src/contexts/session-profile/SessionProfileContext.tsx` 
-- [ ] `src/contexts/user/UserContext.tsx`
-- [ ] `src/contexts/user/UserProvider.tsx`
-- [ ] `src/contexts/auth/useAuthProvider.ts`
-- [ ] `src/contexts/session-profile/useSessionProfileProvider.ts`
+- [x] `src/contexts/auth/AuthContext.tsx`
+- [x] `src/contexts/session-profile/SessionProfileContext.tsx` 
+- [x] `src/contexts/user/UserContext.tsx`
+- [x] `src/contexts/user/UserProvider.tsx`
+- [x] `src/contexts/auth/useAuthProvider.ts`
+- [x] `src/contexts/session-profile/useSessionProfileProvider.ts`
 
-**Note:** These files should only be removed after thoroughly testing the new AuthProvider implementation.
+**Note:** These files have been marked for removal after thoroughly testing the new AuthProvider implementation.
 
 ## Phase 3: Component and Helper Consolidation
 
@@ -39,3 +40,4 @@ After completing the above phases, we should:
 - [ ] Remove any remaining references to old contexts
 - [ ] Update import statements project-wide
 - [ ] Remove unused files from the index exports
+

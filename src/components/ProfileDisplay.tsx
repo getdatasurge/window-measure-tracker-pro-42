@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { useSessionProfile } from '@/contexts/session-profile';
+import { useAuth } from '@/contexts/auth';
 import { Spinner } from '@/components/ui/spinner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 
 export const ProfileDisplay = () => {
-  const { user, profile, isLoading, error } = useSessionProfile();
+  const { user, profile, isLoading, error } = useAuth();
 
   // Function to get role badge color
   const getRoleBadgeColor = (role?: string) => {
