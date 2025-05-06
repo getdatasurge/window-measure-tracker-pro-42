@@ -1,6 +1,6 @@
-
 import { ActivityData, TeamActivity } from "./types";
 import { format, formatDistanceToNow } from 'date-fns';
+import { Json } from '@/integrations/supabase/types';
 
 /**
  * Maps an action type to an icon type
@@ -52,7 +52,7 @@ export const formatTimeDistance = (timestamp: string): string => {
  * Process metadata from activity data
  */
 export const processMetadata = (
-  rawMetadata: Record<string, any> | null | string | undefined
+  rawMetadata: Json | null | undefined
 ): { 
   metadata: Record<string, any> | null; 
   targetType: 'project' | 'team' | 'measurement' 
@@ -70,10 +70,17 @@ export const processMetadata = (
         console.error('Failed to parse metadata string:', e);
         metadata = null;
       }
-    } else {
-      // If it's already an object, use it directly
+    } 
+    // If it's an object (or array), we can use it directly
+    else if (typeof rawMetadata === 'object') {
+      // Convert the Json type to Record<string, any>
       metadata = rawMetadata as Record<string, any>;
       targetType = (metadata?.target_type as any) || 'project';
+    }
+    // If it's a primitive value like number or boolean, we can't use it as metadata
+    else {
+      console.warn('Metadata is not an object or string, ignoring:', rawMetadata);
+      metadata = null;
     }
   }
   
