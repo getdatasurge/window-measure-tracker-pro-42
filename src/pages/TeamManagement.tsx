@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { Search, Download, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,21 +11,105 @@ import TeamStructurePanel from '@/components/teams/TeamStructurePanel';
 import TeamFilterDropdown from '@/components/teams/TeamFilterDropdown';
 import DashboardGridRow from '@/components/layout/DashboardGridRow';
 import withResponsiveLayout from '@/hoc/withResponsiveLayout';
-import { 
-  teamMembersData,
-  teamRolesData,
-  roleFilterOptions,
-  statusFilterOptions
-} from '@/data/teamData';
+import { supabase } from '@/integrations/supabase/client';
+
+// Define type for role and status filter options
+interface FilterOption {
+  label: string;
+  value: string;
+}
+
+// Define team member interface
+interface TeamMember {
+  id: string;
+  name: string;
+  role: string;
+  team: string;
+  avatar?: string;
+  status: string;
+  projects: number;
+  email: string;
+  phone: string;
+  lastActive: string;
+}
 
 const TeamManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('all-teams');
   const [roleFilter, setRoleFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  // Role and status filter options
+  const roleFilterOptions: FilterOption[] = [
+    { label: 'All Roles', value: 'all' },
+    { label: 'Team Lead', value: 'team-lead' },
+    { label: 'Installer', value: 'installer' },
+    { label: 'Measurer', value: 'measurer' },
+    { label: 'Apprentice', value: 'apprentice' },
+    { label: 'Project Manager', value: 'project-manager' },
+    { label: 'Customer Service', value: 'customer-service' }
+  ];
+  
+  const statusFilterOptions: FilterOption[] = [
+    { label: 'All Statuses', value: 'all' },
+    { label: 'Active', value: 'active' },
+    { label: 'On Leave', value: 'on-leave' },
+    { label: 'Training', value: 'training' }
+  ];
+
+  // Team filter options
+  const teamFilterOptions: FilterOption[] = [
+    { label: 'All Teams', value: 'all' },
+    { label: 'Residential', value: 'residential' },
+    { label: 'Commercial', value: 'commercial' },
+    { label: 'Specialty', value: 'specialty' }
+  ];
+
+  // Fetch team members from Supabase
+  useEffect(() => {
+    const fetchTeamMembers = async () => {
+      try {
+        setLoading(true);
+        
+        // Fetch team members from profiles table
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*');
+          
+        if (error) {
+          throw error;
+        }
+        
+        // Transform data to match the expected format
+        const members: TeamMember[] = data.map((profile) => ({
+          id: profile.id,
+          name: profile.full_name || 'Unknown User',
+          role: profile.role || 'Team Member',
+          team: 'Residential', // Default team if not available
+          avatar: profile.avatar_url || '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png',
+          status: 'active', // Default status
+          projects: 0, // Default project count 
+          email: profile.email || '',
+          phone: profile.phone_number || '',
+          lastActive: 'Today' // Default last active
+        }));
+        
+        setTeamMembers(members);
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        setTeamMembers([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchTeamMembers();
+  }, []);
 
   // Filter team members based on active filters
-  const filteredMembers = teamMembersData.filter(member => {
+  const filteredMembers = teamMembers.filter(member => {
     const matchesTeam = activeTab === 'all-teams' || 
       member.team.toLowerCase() === activeTab.toLowerCase();
     
@@ -63,13 +148,13 @@ const TeamManagementPage: React.FC = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-zinc-400">Total Team Members</p>
-              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">18</h3>
+              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">{teamMembers.length}</h3>
               <div className="flex items-center mt-1">
                 <span className="text-xs font-medium text-green-500 flex items-center">
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
                     <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.061l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
                   </svg>
-                  2 new this month
+                  {teamMembers.length > 0 ? `${teamMembers.length} active members` : 'No members yet'}
                 </span>
               </div>
             </div>
@@ -102,13 +187,10 @@ const TeamManagementPage: React.FC = () => {
           <div className="flex items-start justify-between">
             <div>
               <p className="text-xs sm:text-sm font-medium text-zinc-400">Active Projects</p>
-              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">24</h3>
+              <h3 className="text-xl sm:text-2xl font-bold mt-1 text-white">--</h3>
               <div className="flex items-center mt-1">
-                <span className="text-xs font-medium text-green-500 flex items-center">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 mr-1">
-                    <path fillRule="evenodd" d="M12.577 4.878a.75.75 0 01.919-.53l4.78 1.281a.75.75 0 01.531.919l-1.281 4.78a.75.75 0 01-1.449-.387l.81-3.022a19.407 19.407 0 00-5.594 5.203.75.75 0 01-1.139.093L7 10.06l-4.72 4.72a.75.75 0 01-1.06-1.061l5.25-5.25a.75.75 0 011.06 0l3.074 3.073a20.923 20.923 0 015.545-4.931l-3.042-.815a.75.75 0 01-.53-.919z" clipRule="evenodd" />
-                  </svg>
-                  12% from last month
+                <span className="text-xs font-medium text-zinc-400">
+                  Loading project data...
                 </span>
               </div>
             </div>
@@ -138,7 +220,7 @@ const TeamManagementPage: React.FC = () => {
         </div>
       </div>
 
-      {/* Team Filter Tabs - Already responsive with overflow-x-auto */}
+      {/* Team Filter Tabs */}
       <TeamFilterTabs 
         activeTab={activeTab}
         onTabChange={setActiveTab}
@@ -176,7 +258,7 @@ const TeamManagementPage: React.FC = () => {
       {/* Team Member List */}
       <TeamMemberList members={filteredMembers} />
 
-      {/* Role Definitions and Team Structure - Now responsive */}
+      {/* Role Definitions and Team Structure */}
       <DashboardGridRow>
         <RoleDefinitionsPanel />
         <TeamStructurePanel />

@@ -31,14 +31,15 @@ export const useActivityFeed = () => {
             performed_by,
             profiles (full_name, avatar_url)
           `)
-          .limit(20);
+          .limit(20)
+          .order('performed_at', { ascending: false });
 
         if (queryError) {
           throw queryError;
         }
 
         if (data) {
-          // Cast to any to avoid TypeScript errors during transformation
+          // Transform the raw data to the format expected by the UI
           const transformedActivities = transformActivityData(data as any[]);
           setActivities(transformedActivities);
         }
@@ -56,6 +57,55 @@ export const useActivityFeed = () => {
     };
 
     fetchActivities();
+
+    // Set up real-time subscription for new activities
+    const channel = supabase
+      .channel('public:activities')
+      .on('postgres_changes', { 
+        event: 'INSERT', 
+        schema: 'public', 
+        table: 'activities' 
+      }, payload => {
+        console.log('New activity received:', payload);
+        // Fetch the complete activity with joined data
+        fetchNewActivity(payload.new.id);
+      })
+      .subscribe();
+
+    // Helper function to fetch a single new activity by ID
+    const fetchNewActivity = async (activityId: string) => {
+      try {
+        const { data, error } = await supabase
+          .from('activities')
+          .select(`
+            id,
+            description,
+            action_type,
+            performed_at,
+            metadata,
+            project_id,
+            projects (name),
+            performed_by,
+            profiles (full_name, avatar_url)
+          `)
+          .eq('id', activityId)
+          .single();
+
+        if (error) throw error;
+
+        if (data) {
+          const newActivity = transformActivityData([data as any])[0];
+          setActivities(prev => [newActivity, ...prev]);
+        }
+      } catch (err) {
+        console.error('Error fetching new activity:', err);
+      }
+    };
+
+    // Clean up the subscription
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   return { activities, loading, error };
