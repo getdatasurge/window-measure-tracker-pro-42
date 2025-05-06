@@ -1,5 +1,6 @@
 
 import { ActivityData, TeamActivity } from "./types";
+import { format, formatDistanceToNow } from 'date-fns';
 
 /**
  * Maps an action type to an icon type
@@ -107,5 +108,3 @@ export const transformActivityData = (data: ActivityData[]): TeamActivity[] => {
     };
   });
 };
-
-import { format, formatDistanceToNow } from 'date-fns';

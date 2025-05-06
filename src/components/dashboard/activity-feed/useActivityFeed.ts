@@ -31,8 +31,7 @@ export const useActivityFeed = () => {
             performed_by,
             profiles (full_name, avatar_url)
           `)
-          .order('performed_at', { ascending: false })
-          .limit(15);
+          .limit(20);
 
         if (queryError) {
           throw queryError;

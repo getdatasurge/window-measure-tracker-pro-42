@@ -7,6 +7,7 @@ export { default as ActivityList } from './ActivityList';
 export { default as ActivityListItem } from './ActivityListItem';
 export { default as ActivityItem } from './ActivityItem';
 export { default as ActivityIcon } from './ActivityIcon';
+export { default as TeamActivityFeed } from './TeamActivity';
 
 // Export utility functions and hooks
 export { useActivityData } from './hooks/useActivityData';
