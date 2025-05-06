@@ -8,9 +8,10 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   profile: null,
   loading: true,
+  isLoading: true, // Added isLoading property with default value
   isAuthenticated: false,
   profileNotFound: false,
-  error: null,  // Added error property with default value
+  error: null,
   refreshProfile: async () => {},
   signOut: async () => {},
 });
