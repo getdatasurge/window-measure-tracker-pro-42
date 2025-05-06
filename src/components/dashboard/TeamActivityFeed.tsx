@@ -5,6 +5,7 @@ import { FileText, UserPlus, CheckCircle, Calendar, AlertCircle } from 'lucide-r
 import { supabase } from '@/integrations/supabase/client';
 import { format, formatDistanceToNow } from 'date-fns';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { toast } from '@/components/ui/use-toast';
 
 interface TeamActivity {
   id: string;
@@ -15,7 +16,7 @@ interface TeamActivity {
   targetType?: 'project' | 'team' | 'measurement';
   timeAgo: string;
   icon: "measurement" | "team" | "complete" | "issue" | "update";
-  metadata?: Record<string, any>;
+  metadata?: Record<string, any> | null;
 }
 
 const TeamActivityFeed: React.FC = () => {
@@ -93,14 +94,34 @@ const TeamActivityFeed: React.FC = () => {
 
         if (data) {
           // Transform the data to match our TeamActivity interface
-          const transformedActivities: TeamActivity[] = data.map(item => {
+          const transformedActivities = data.map(item => {
             // Safely access potentially null properties
             const profileName = item.profiles?.full_name || 'Unknown User';
             const avatarUrl = item.profiles?.avatar_url || `/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png`;
             const projectName = item.projects?.name || 'Unknown Project';
             const actionType = item.action_type || 'update';
             const description = item.description || 'performed an action';
-            const targetType = item.metadata?.target_type || 'project';
+            
+            // Safely handle metadata - ensure it's an object
+            let metadata: Record<string, any> | null = null;
+            let targetType: 'project' | 'team' | 'measurement' = 'project';
+            
+            if (item.metadata) {
+              // If metadata is a string, try to parse it
+              if (typeof item.metadata === 'string') {
+                try {
+                  metadata = JSON.parse(item.metadata);
+                  targetType = metadata?.target_type as any || 'project';
+                } catch (e) {
+                  console.error('Failed to parse metadata string:', e);
+                  metadata = null;
+                }
+              } else {
+                // If it's already an object, use it directly
+                metadata = item.metadata as Record<string, any>;
+                targetType = (metadata?.target_type as any) || 'project';
+              }
+            }
 
             return {
               id: item.id,
@@ -108,10 +129,10 @@ const TeamActivityFeed: React.FC = () => {
               name: profileName,
               action: description,
               target: projectName,
-              targetType: targetType as 'project' | 'team' | 'measurement',
+              targetType: targetType,
               timeAgo: formatTimeDistance(item.performed_at),
               icon: mapActionTypeToIcon(actionType),
-              metadata: item.metadata
+              metadata: metadata
             };
           });
 
@@ -120,6 +141,11 @@ const TeamActivityFeed: React.FC = () => {
       } catch (err) {
         console.error('Error fetching activities:', err);
         setError(err instanceof Error ? err : new Error('Failed to fetch activities'));
+        toast({
+          variant: "destructive",
+          title: "Failed to load activity feed",
+          description: "Please try again later or contact support if the problem persists."
+        });
       } finally {
         setLoading(false);
       }
