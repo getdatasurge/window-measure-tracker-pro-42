@@ -77,7 +77,7 @@ const AppLayout: React.FC = () => {
   }
 
   // If all checks pass, render the Outlet (child routes)
-  return <div className="min-h-screen bg-gray-50">
+  return <div className="min-h-screen min-w-screen bg-gray-50">
       {/* Future placeholder for header/navigation */}
       <div className="header-placeholder">
         {/* You can add a persistent header here in the future */}
