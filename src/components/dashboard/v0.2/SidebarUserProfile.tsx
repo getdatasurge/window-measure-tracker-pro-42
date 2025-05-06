@@ -1,10 +1,22 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSessionProfile } from '@/contexts/session-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { LogOut } from 'lucide-react';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from '@/components/ui/alert-dialog';
+import { useLogout } from '@/hooks/useLogout';
 
 interface SidebarUserProfileProps {
   collapsed: boolean;
@@ -13,10 +25,17 @@ interface SidebarUserProfileProps {
 const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) => {
   const { user, profile, isLoading } = useSessionProfile();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const { logout, isLoggingOut } = useLogout({ redirectUrl: '/' });
   
   // Handle navigation to profile settings
   const handleProfileClick = () => {
     navigate('/user/current/settings');
+  };
+  
+  const handleLogout = async () => {
+    await logout();
+    setShowLogoutConfirm(false);
   };
   
   // Add a cache busting parameter to prevent stale avatar images
@@ -91,41 +110,73 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) =>
   }
   
   return (
-    <div 
-      className={cn(
-        "flex items-center p-4 mt-auto border-t border-zinc-700/50 cursor-pointer hover:bg-zinc-800/50",
-        collapsed ? "justify-center" : "justify-between"
-      )}
-      onClick={handleProfileClick}
-    >
-      <Avatar className="h-8 w-8">
-        {avatarUrl ? (
-          <AvatarImage src={avatarUrl} alt="User avatar" />
-        ) : (
-          <AvatarFallback className="bg-green-700 text-white">
-            {initials || "U"}
-          </AvatarFallback>
+    <>
+      <div 
+        className={cn(
+          "flex items-center p-4 pb-2 mt-auto border-t border-zinc-700/50 cursor-pointer hover:bg-zinc-800/50",
+          collapsed ? "justify-center" : "justify-between"
         )}
-      </Avatar>
-      
-      {!collapsed && (
-        <div className="flex flex-col flex-grow ml-3">
-          <div className="flex items-center gap-2">
-            <p className="text-sm font-medium text-zinc-200 truncate">
-              {firstName || user.email?.split('@')[0] || 'User'}
-            </p>
-            {profile?.role && (
-              <Badge className={`${getRoleBadgeColor(profile.role)} border text-xs px-1.5 py-0.5`}>
-                {profile.role}
-              </Badge>
-            )}
+        onClick={handleProfileClick}
+      >
+        <Avatar className="h-8 w-8">
+          {avatarUrl ? (
+            <AvatarImage src={avatarUrl} alt="User avatar" />
+          ) : (
+            <AvatarFallback className="bg-green-700 text-white">
+              {initials || "U"}
+            </AvatarFallback>
+          )}
+        </Avatar>
+        
+        {!collapsed && (
+          <div className="flex flex-col flex-grow ml-3">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-zinc-200 truncate">
+                {firstName || user.email?.split('@')[0] || 'User'}
+              </p>
+              {profile?.role && (
+                <Badge className={`${getRoleBadgeColor(profile.role)} border text-xs px-1.5 py-0.5`}>
+                  {profile.role}
+                </Badge>
+              )}
+            </div>
+            <span className="text-xs text-zinc-400 truncate">
+              {user.email}
+            </span>
           </div>
-          <span className="text-xs text-zinc-400 truncate">
-            {user.email}
-          </span>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
+      
+      {/* Logout button */}
+      <div 
+        className={cn(
+          "flex items-center px-4 py-2 cursor-pointer hover:bg-zinc-800/50 text-zinc-400 hover:text-red-400 transition-colors",
+          collapsed ? "justify-center" : ""
+        )}
+        onClick={() => setShowLogoutConfirm(true)}
+      >
+        <LogOut className="w-4 h-4 mr-2" />
+        {!collapsed && <span className="text-sm">Logout</span>}
+      </div>
+      
+      {/* Logout Confirmation Dialog */}
+      <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Logout</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to log out of your account?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleLogout} disabled={isLoggingOut}>
+              {isLoggingOut ? 'Logging out...' : 'Log Out'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };
 
