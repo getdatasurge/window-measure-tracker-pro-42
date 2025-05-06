@@ -1,4 +1,8 @@
 
+// Re-export existing form-system types
+export * from '@/components/form-system/types';
+
+// Additional form types specific to this component
 export interface StepSchema {
   title: string;
   description?: string;
@@ -19,6 +23,3 @@ export interface FieldSchema {
   className?: string;
   rows?: number;
 }
-
-// Re-export existing form-system types
-export * from '@/components/form-system/types';

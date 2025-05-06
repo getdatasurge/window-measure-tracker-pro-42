@@ -31,8 +31,10 @@ The following files have been consolidated into `src/contexts/auth/AuthProvider.
 
 ## Phase 4: Type Definitions Cleanup
 
-- [ ] Remove unused type definitions
-- [ ] Consolidate similar interfaces
+- [x] Consolidated similar interfaces in central type files
+- [x] Created dedicated type modules by domain (activity, user, etc.)
+- [x] Moved prompt-history types to central activity.ts
+- [ ] Remove unused type definitions after project-wide analysis
 
 ## Phase 5: Legacy Imports Cleanup
 
@@ -41,4 +43,5 @@ After completing the above phases, we should:
 - [ ] Remove any remaining references to old contexts
 - [ ] Update import statements project-wide
 - [ ] Remove unused files from the index exports
+
 
