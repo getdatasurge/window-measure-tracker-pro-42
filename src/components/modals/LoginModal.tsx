@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import useAuthModalStore from '@/stores/useAuthModalStore';
-import { Github, Mail, Google } from 'lucide-react';
+import { Github, Mail } from 'lucide-react';
 import { toast } from 'react-toastify';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
@@ -111,7 +110,7 @@ const LoginModal = () => {
               onClick={() => handleOAuthLogin('google')}
               disabled={isLoading}
             >
-              <Google size={18} /> Google
+              <Mail size={18} /> Google
             </Button>
             <Button 
               variant="outline" 
