@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
-import { useAuth } from '@/contexts/auth/AuthContext';
+import { useAuth } from '@/contexts/auth';
 import { Spinner } from '@/components/ui/spinner';
 
 interface ProtectedRouteProps {
@@ -19,11 +19,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   children, 
   requireProfile = false 
 }) => {
-  const { user, loading, isAuthenticated, profile, profileNotFound } = useAuth();
+  const { user, isLoading, isAuthenticated, profile, profileNotFound } = useAuth();
   const location = useLocation();
 
   // Show loading spinner while checking authentication status
-  if (loading) {
+  if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Spinner className="w-8 h-8 text-green-500" />

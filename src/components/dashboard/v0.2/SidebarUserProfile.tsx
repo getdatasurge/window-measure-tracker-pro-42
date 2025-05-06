@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useSessionProfile } from '@/contexts/session-profile';
+import { useAuth } from '@/contexts/auth';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -23,7 +23,7 @@ interface SidebarUserProfileProps {
 }
 
 const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) => {
-  const { user, profile, isLoading } = useSessionProfile();
+  const { user, profile, isLoading } = useAuth();
   const navigate = useNavigate();
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const { logout, isLoggingOut } = useLogout({ redirectUrl: '/' });
