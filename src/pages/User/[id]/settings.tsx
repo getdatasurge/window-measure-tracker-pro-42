@@ -22,7 +22,7 @@ const SettingsTabs = [
 const UserSettingsPage = () => {
   const [activeTab, setActiveTab] = useState('account');
   const { id } = useParams<{ id: string }>();
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [profileData, setProfileData] = useState(null);
   const navigate = useNavigate();
@@ -124,6 +124,9 @@ const UserSettingsPage = () => {
         .eq('id', userId);
         
       if (error) throw error;
+      
+      // Refresh the profile in the auth context to update UI across the app
+      await refreshProfile();
       
       toast({
         title: "Profile updated",

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { 
   SettingsTabs,
@@ -31,7 +30,7 @@ const Settings = () => {
     avatarUrl: ''
   });
   
-  const { user, profile } = useAuth();
+  const { user, profile, refreshProfile } = useAuth();
   
   // Load user data when component mounts or when user/profile changes
   useEffect(() => {
@@ -84,6 +83,9 @@ const Settings = () => {
         .eq('id', user.id);
       
       if (error) throw error;
+      
+      // Refresh the profile in the auth context to update UI across the app
+      await refreshProfile();
       
       toast({
         title: "Profile updated",

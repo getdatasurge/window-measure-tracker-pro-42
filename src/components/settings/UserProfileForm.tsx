@@ -5,6 +5,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useAuth } from '@/contexts/auth';
 
 interface UserProfileFormProps {
   userId?: string;
@@ -32,6 +33,7 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const { refreshProfile } = useAuth();
   
   useEffect(() => {
     if (initialData) {
@@ -133,6 +135,9 @@ const UserProfileForm = ({ userId, initialData, isLoading = false, onSave }: Use
         .eq('id', updateUserId);
         
       if (updateError) throw updateError;
+      
+      // Call refreshProfile to update the auth context with the new avatar URL
+      await refreshProfile();
       
       toast({
         title: "Avatar updated",

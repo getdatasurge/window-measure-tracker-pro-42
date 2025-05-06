@@ -40,8 +40,12 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       .substring(0, 2);
   };
 
-  // Default avatar placeholder if no custom avatar is provided
-  const avatarUrl = "/lovable-uploads/75ba837b-8924-4c3d-a163-ab9116a7c9fb.png";
+  // Add cache busting parameter to avatar URL
+  const getAvatarUrl = (url: string | null | undefined) => {
+    if (!url) return null;
+    const cacheBuster = `t=${Date.now()}`;
+    return url.includes('?') ? `${url}&${cacheBuster}` : `${url}?${cacheBuster}`;
+  };
   
   const handleLogout = async () => {
     try {
@@ -62,7 +66,7 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
       <div className="p-4 border-t border-zinc-800/70 flex flex-col items-center gap-2">
         <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
           <Avatar>
-            <AvatarImage src={avatarUrl} alt={profile?.full_name || 'User'} />
+            <AvatarImage src={getAvatarUrl(profile?.avatar_url)} alt={profile?.full_name || 'User'} />
             <AvatarFallback>{profile?.full_name ? getInitials(profile.full_name) : 'U'}</AvatarFallback>
           </Avatar>
         </div>
@@ -111,7 +115,7 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({
         <div className="flex items-center">
           <div className="w-9 h-9 rounded-full bg-zinc-700 flex-shrink-0 overflow-hidden">
             <Avatar>
-              <AvatarImage src={avatarUrl} alt={profile?.full_name || 'User'} />
+              <AvatarImage src={getAvatarUrl(profile?.avatar_url)} alt={profile?.full_name || 'User'} />
               <AvatarFallback>{profile?.full_name ? getInitials(profile.full_name) : 'U'}</AvatarFallback>
             </Avatar>
           </div>
