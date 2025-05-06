@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
@@ -30,33 +29,17 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // Query projects that the current user is assigned to
-      const { data: assignments, error: assignmentsError } = await supabase
-        .from('project_assignments')
-        .select('project_id')
-        .eq('user_id', user?.id);
+      // RLS will handle filtering to only show projects the user has access to
+      // (either as creator or through project_assignments)
+      const { data: projects, error: projectsError } = await supabase
+        .from('projects')
+        .select('*');
 
-      if (assignmentsError) {
-        throw assignmentsError;
+      if (projectsError) {
+        throw projectsError;
       }
 
-      const projectIds = assignments.map(assignment => assignment.project_id);
-      
-      // Get all the projects based on the assignments
-      if (projectIds.length > 0) {
-        const { data: projects, error: projectsError } = await supabase
-          .from('projects')
-          .select('*')
-          .in('id', projectIds);
-
-        if (projectsError) {
-          throw projectsError;
-        }
-
-        return projects;
-      }
-      
-      return [];
+      return projects || [];
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch projects');
       setError(error);
