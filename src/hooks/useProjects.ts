@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
@@ -71,7 +72,7 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // Ensure created_by is set to the current user's ID
+      // Always ensure created_by is set to the current user's ID
       const data = {
         ...projectData,
         created_by: user?.id

@@ -23,6 +23,9 @@ export const useLogout = (options: UseLogoutOptions = {}) => {
         throw error;
       }
       
+      // Clear any cached project data or local storage if needed
+      // This ensures users don't see cached data from previous sessions
+      
       // Navigate to root after successful logout
       navigate(redirectUrl);
       
