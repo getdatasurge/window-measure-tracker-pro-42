@@ -8,7 +8,7 @@ const AuthContext = createContext<AuthContextType>({
   session: null,
   profile: null,
   loading: true,
-  isLoading: true, // Added isLoading property with default value
+  isLoading: true,
   isAuthenticated: false,
   profileNotFound: false,
   error: null,
@@ -17,7 +17,13 @@ const AuthContext = createContext<AuthContextType>({
 });
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const auth = useSessionProfile();
+  const sessionProfile = useSessionProfile();
+  
+  // Create a compatible auth object by mapping sessionProfile properties to AuthContextType
+  const auth: AuthContextType = {
+    ...sessionProfile,
+    loading: sessionProfile.isLoading, // Map isLoading to loading for backward compatibility
+  };
   
   return (
     <AuthContext.Provider value={auth}>
