@@ -3,6 +3,7 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSessionProfile } from '@/contexts/session-profile';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface SidebarUserProfileProps {
@@ -37,6 +38,24 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) =>
       initials += nameParts[nameParts.length - 1].charAt(0).toUpperCase();
     }
   }
+
+  // Function to get role badge color
+  const getRoleBadgeColor = (role?: string) => {
+    if (!role) return "bg-zinc-800 text-zinc-400";
+    
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return "bg-red-900/50 text-red-400 border-red-700/50";
+      case 'installer':
+        return "bg-green-900/50 text-green-400 border-green-700/50";
+      case 'manager':
+        return "bg-blue-900/50 text-blue-400 border-blue-700/50";
+      case 'client':
+        return "bg-yellow-900/50 text-yellow-400 border-yellow-700/50";
+      default:
+        return "bg-zinc-800/50 text-zinc-400 border-zinc-700/50";
+    }
+  };
   
   if (isLoading) {
     return (
@@ -91,11 +110,18 @@ const SidebarUserProfile: React.FC<SidebarUserProfileProps> = ({ collapsed }) =>
       
       {!collapsed && (
         <div className="flex flex-col flex-grow ml-3">
-          <p className="text-sm font-medium text-zinc-200 truncate">
-            {firstName || user.email?.split('@')[0] || 'User'}
-          </p>
+          <div className="flex items-center gap-2">
+            <p className="text-sm font-medium text-zinc-200 truncate">
+              {firstName || user.email?.split('@')[0] || 'User'}
+            </p>
+            {profile?.role && (
+              <Badge className={`${getRoleBadgeColor(profile.role)} border text-xs px-1.5 py-0.5`}>
+                {profile.role}
+              </Badge>
+            )}
+          </div>
           <span className="text-xs text-zinc-400 truncate">
-            {profile?.role || 'User'}
+            {user.email}
           </span>
         </div>
       )}

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -6,6 +5,7 @@ import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export interface ProfileFormData {
   firstName: string;
@@ -52,6 +52,7 @@ const ProfileForm = ({
     }
   }, [initialData]);
   
+  // Handle navigation to profile settings
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (readOnly) return;
     
@@ -231,6 +232,24 @@ const ProfileForm = ({
     ? `${formData.avatarUrl}?t=${new Date().getTime()}` 
     : '';
   
+  // Function to get role badge color
+  const getRoleBadgeColor = (role?: string) => {
+    if (!role) return "bg-zinc-200 text-zinc-700";
+    
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return "bg-red-100 text-red-800 border-red-200";
+      case 'installer':
+        return "bg-green-100 text-green-800 border-green-200";
+      case 'manager':
+        return "bg-blue-100 text-blue-800 border-blue-200";
+      case 'client':
+        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+      default:
+        return "bg-zinc-100 text-zinc-800 border-zinc-200";
+    }
+  };
+  
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-center space-x-4 mb-6">
@@ -267,6 +286,12 @@ const ProfileForm = ({
           <label htmlFor="avatar-upload" className="text-sm text-wintrack-green-dark hover:text-wintrack-green cursor-pointer">
             {isUploading ? "Uploading..." : "Change Photo"}
           </label>
+        )}
+        
+        {formData.role && formData.role !== 'None' && (
+          <Badge className={`${getRoleBadgeColor(formData.role)} border text-xs font-medium px-2.5 py-1`}>
+            {formData.role}
+          </Badge>
         )}
       </div>
       

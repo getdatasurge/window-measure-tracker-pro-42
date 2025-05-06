@@ -3,9 +3,28 @@ import React from 'react';
 import { useSessionProfile } from '@/contexts/session-profile';
 import { Spinner } from '@/components/ui/spinner';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
 
 export const ProfileDisplay = () => {
   const { user, profile, isLoading, error } = useSessionProfile();
+
+  // Function to get role badge color
+  const getRoleBadgeColor = (role?: string) => {
+    if (!role) return "bg-zinc-800 text-zinc-400";
+    
+    switch (role.toLowerCase()) {
+      case 'admin':
+        return "bg-red-900/30 text-red-400 border-red-700/30";
+      case 'installer':
+        return "bg-green-900/30 text-green-400 border-green-700/30";
+      case 'manager':
+        return "bg-blue-900/30 text-blue-400 border-blue-700/30";
+      case 'client':
+        return "bg-yellow-900/30 text-yellow-400 border-yellow-700/30";
+      default:
+        return "bg-zinc-800 text-zinc-300 border-zinc-700/30";
+    }
+  };
 
   if (isLoading) {
     return (
@@ -48,13 +67,17 @@ export const ProfileDisplay = () => {
         </Avatar>
         
         <div>
-          <h2 className="text-xl font-semibold">
-            {profile?.full_name || user.email?.split('@')[0] || 'User'}
-          </h2>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-semibold">
+              {profile?.full_name || user.email?.split('@')[0] || 'User'}
+            </h2>
+            {profile?.role && (
+              <Badge className={`${getRoleBadgeColor(profile.role)} border text-xs`}>
+                {profile.role}
+              </Badge>
+            )}
+          </div>
           <p className="text-sm text-zinc-500">{user.email}</p>
-          {profile?.role && (
-            <p className="text-xs text-zinc-400 mt-1">{profile.role}</p>
-          )}
         </div>
       </div>
     </div>
