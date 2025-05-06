@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { AuthContextType } from './types';
@@ -53,7 +52,7 @@ export const useAuthProvider = (): AuthContextType => {
     await fetchProfile(user.id);
   }, [user?.id, fetchProfile]);
   
-  // Sign out function
+  // Sign out function - updated to not handle navigation
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
@@ -62,6 +61,8 @@ export const useAuthProvider = (): AuthContextType => {
       setProfile(null);
       fetchedIds.clear();
       setError(null);
+      
+      // Navigation is now handled by the useLogout hook
     } catch (error) {
       console.error('Error signing out:', error);
       setError(error instanceof Error ? error : new Error('Failed to sign out'));
@@ -70,6 +71,7 @@ export const useAuthProvider = (): AuthContextType => {
         message: 'There was a problem signing you out.',
         showToast: true
       });
+      throw error; // Re-throw to allow the calling code to handle it
     }
   }, []);
   
@@ -190,7 +192,7 @@ export const useAuthProvider = (): AuthContextType => {
     session,
     profile,
     loading,
-    isLoading, // Added isLoading to return value
+    isLoading,
     isAuthenticated: !!user,
     profileNotFound,
     error,
