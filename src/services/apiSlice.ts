@@ -87,12 +87,11 @@ export const apiSlice = createApi({
             error: err instanceof Error ? err.message : 'An unknown error occurred'
           };
         }
-      },
-      providesTags: ['Measurements']
+      }
     }),
     
     // Similar pattern for projects
-    getProjects: builder.query<any, void>({
+    getProjects: builder.query({
       queryFn: async () => {
         console.log('Fetching projects from Supabase');
         try {
@@ -116,8 +115,7 @@ export const apiSlice = createApi({
             error: err instanceof Error ? err.message : 'An unknown error occurred'
           };
         }
-      },
-      providesTags: ['Projects']
+      }
     })
   })
 });

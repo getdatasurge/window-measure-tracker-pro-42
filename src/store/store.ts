@@ -1,6 +1,7 @@
 
-import { configureStore, combineReducers } from '@reduxjs/toolkit';
+import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
+import { apiSlice } from '@/services/apiSlice';
 import { 
   persistStore, 
   persistReducer,
@@ -9,46 +10,38 @@ import {
   PAUSE,
   PERSIST,
   PURGE,
-  REGISTER
+  REGISTER 
 } from 'redux-persist';
 import storage from 'redux-persist/lib/storage';
-import { apiSlice } from '@/services/apiSlice';
 
-// Configure persistence options
+// Configure Redux persist
 const persistConfig = {
   key: 'root',
-  version: 1,
   storage,
-  blacklist: [apiSlice.reducerPath] // Don't persist API cache to avoid stale data
+  whitelist: ['auth'], // Only persist auth
 };
 
-const rootReducer = combineReducers({
-  // API slice reducer
-  [apiSlice.reducerPath]: apiSlice.reducer,
-  // Add other reducers here as needed
-});
-
-// Create the persisted reducer
-const persistedReducer = persistReducer(persistConfig, rootReducer);
-
-// Configure the store
+// Create the store with middleware
 export const store = configureStore({
-  reducer: persistedReducer,
-  // Add the API middleware to enable caching, invalidation, polling, etc.
+  reducer: {
+    [apiSlice.reducerPath]: apiSlice.reducer,
+    // Add other reducers here
+  },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat(apiSlice.middleware),
+  devTools: process.env.NODE_ENV !== 'production',
 });
 
-// Set up listeners for RTK Query's hooks
+// Configure listeners for auto-refetching
 setupListeners(store.dispatch);
 
-// Create the persistor
+// Export the persistor to use in the Provider
 export const persistor = persistStore(store);
 
-// Export types
+// Infer the `RootState` and `AppDispatch` types from the store
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
