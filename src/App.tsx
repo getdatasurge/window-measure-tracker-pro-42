@@ -10,6 +10,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useEffect } from "react";
 import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
+import { FloatingMeasurementTools } from "./components/measurements/FloatingMeasurementTools";
 import MainLayout from "./components/layout/MainLayout";
 import AppLayout from "./components/layout/AppLayout";
 import LandingPage from "./pages/Landing";
@@ -34,6 +35,7 @@ import SignInPage from "./pages/SignInPage";
 import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
 import AuthCallback from "./pages/AuthCallback";
+
 const queryClient = new QueryClient();
 
 // Only show debug route in development
@@ -65,7 +67,6 @@ const App = () => {
               <Toaster />
               <Sonner />
               <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover theme="dark" />
-              
               
               {/* Global modals */}
               <LoginModal />
@@ -103,6 +104,9 @@ const App = () => {
                 {/* 404 Route */}
                 <Route path="*" element={<NotFound />} />
               </Routes>
+              
+              {/* Add FloatingMeasurementTools at the app root level */}
+              <FloatingMeasurementTools />
             </AuthProvider>
           </BrowserRouter>
         </ThemeProvider>

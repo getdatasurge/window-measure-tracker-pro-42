@@ -1,11 +1,9 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { Outlet } from 'react-router-dom';
 import Sidebar from './Sidebar';
 import Header from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarToggle } from '@/components/ui/SidebarToggle';
-import { FloatingMeasurementTools } from '@/components/measurements/FloatingMeasurementTools';
 
 const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -94,9 +92,6 @@ const MainLayout: React.FC = () => {
           </main>
         </div>
       </div>
-      
-      {/* Add the FloatingMeasurementTools component */}
-      <FloatingMeasurementTools />
     </div>
   );
 };
