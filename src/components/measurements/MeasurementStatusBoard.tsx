@@ -1,10 +1,12 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement } from '@/types/measurement';
+import { useMeasurements } from '@/hooks/useMeasurements';
 import { MeasurementColumns } from './MeasurementColumns';
 import { MeasurementFilter } from './MeasurementFilter';
 import MeasurementEditModalWrapper from './board/MeasurementEditModalWrapper';
 import { useMeasurementUpdate } from '@/hooks/useMeasurementUpdate';
+import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,19 +20,7 @@ interface FilterState {
   dateRange: { from: Date | null; to: Date | null } | null;
 }
 
-interface MeasurementStatusBoardProps {
-  measurements: Measurement[];
-  onRefresh: () => void;
-  isLoading?: boolean;
-  error?: string | null;
-}
-
-const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({ 
-  measurements, 
-  onRefresh,
-  isLoading = false,
-  error = null
-}) => {
+const MeasurementStatusBoard: React.FC = () => {
   const [filter, setFilter] = useState<FilterState>({
     projectId: null,
     location: null,
@@ -43,6 +33,36 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
   
   // Use our custom hook for saving measurements
   const { saveMeasurement, isSaving } = useMeasurementUpdate();
+  
+  // Use our real-time subscription hook
+  const { 
+    measurements, 
+    refreshData,
+    subscriptionState
+  } = useMeasurementSubscription({
+    projectId: filter.projectId || undefined,
+    onInsert: (measurement) => {
+      toast({
+        title: "New measurement added",
+        description: `${measurement.location} has been added.`
+      });
+    },
+    onUpdate: (measurement) => {
+      // Only show toast for significant updates, not just minor edits
+      if (editMeasurement?.id !== measurement.id) { // Don't show toast for our own edits
+        toast({
+          title: "Measurement updated",
+          description: `${measurement.location} has been updated.`
+        });
+      }
+    },
+    onDelete: (id) => {
+      toast({
+        title: "Measurement removed",
+        description: "A measurement has been removed."
+      });
+    }
+  });
   
   // Filter measurements based on search criteria
   const filteredMeasurements = measurements.filter(m => {
@@ -80,7 +100,7 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
   const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
     // Convert MeasurementFormData to Measurement for saveMeasurement function
     const measurementToSave: Measurement = {
-      id: data.id || '', 
+      id: data.id || '', // Ensure id is not undefined
       projectId: data.projectId || '',
       projectName: data.projectName || '',
       location: data.location || '',
@@ -89,9 +109,10 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
       area: data.area || '',
       quantity: data.quantity || 1,
       recordedBy: data.recordedBy || '',
+      // Ensure direction is valid by casting it to Direction type
       direction: (data.direction as Direction) || 'N/A',
       notes: data.notes || '',
-      film_required: data.filmRequired, 
+      film_required: data.filmRequired, // Map filmRequired to film_required
       status: data.status || 'Pending',
       photos: Array.isArray(data.photos) ? data.photos : [],
       updatedAt: data.updatedAt || new Date().toISOString(),
@@ -102,57 +123,36 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
       measurementDate: data.measurementDate || new Date().toISOString()
     };
 
-    try {
-      // The refetch will only happen after the save is complete
-      await saveMeasurement(measurementToSave);
-      
+    // The refetch will only happen after the save is complete
+    await saveMeasurement(measurementToSave, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
-      onRefresh();
+      await refreshData();
       
       // Close the modal
       setEditModalOpen(false);
-    } catch (error) {
-      console.error("Error saving measurement:", error);
+    });
+  }, [saveMeasurement, refreshData]);
+  
+  // Handle manual refresh
+  const handleManualRefresh = useCallback(async () => {
+    const success = await refreshData();
+    if (success) {
       toast({
-        title: "Error",
-        description: "Failed to save measurement",
+        title: "Data refreshed",
+        description: "Measurement data has been updated."
+      });
+    } else {
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh measurement data. Please try again.",
         variant: "destructive"
       });
     }
-  }, [saveMeasurement, onRefresh, toast]);
-  
-  // Handle manual refresh
-  const handleManualRefresh = useCallback(() => {
-    onRefresh();
-    toast({
-      title: "Data refreshed",
-      description: "Measurement data has been updated."
-    });
-  }, [onRefresh, toast]);
+  }, [refreshData, toast]);
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <div className="text-red-400">Error loading measurements: {error}</div>
-        <Button 
-          variant="outline" 
-          onClick={onRefresh}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw size={16} />
-          Try Again
-        </Button>
-      </div>
-    );
+  if (subscriptionState.lastError) {
+    console.error("Subscription error:", subscriptionState.lastError);
   }
 
   return (
@@ -167,6 +167,17 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
         </div>
         
         <div className="flex items-center gap-2">
+          {subscriptionState.isConnected ? (
+            <div className="flex items-center text-green-500 text-xs">
+              <Wifi className="h-4 w-4 mr-1" />
+              <span>Live</span>
+            </div>
+          ) : (
+            <div className="flex items-center text-amber-500 text-xs">
+              <WifiOff className="h-4 w-4 mr-1" />
+              <span>Polling</span>
+            </div>
+          )}
           <Button 
             variant="ghost" 
             size="sm" 

@@ -23,8 +23,8 @@ const DirectionField: React.FC<DirectionFieldProps> = ({ watch, setValue, errors
         </SelectTrigger>
         <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
           {DIRECTION_OPTIONS.map((dir) => (
-            <SelectItem key={dir.value} value={dir.value} className="text-white">
-              {dir.label}
+            <SelectItem key={dir} value={dir} className="text-white">
+              {dir}
             </SelectItem>
           ))}
         </SelectContent>

@@ -1,30 +1,60 @@
 
-import { Measurement } from '@/types/measurement';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 
 /**
- * Formats a raw measurement from the database into a typed Measurement object
+ * Safely formats measurement data from the database, handling missing columns gracefully
  */
-export const formatMeasurement = (rawData: any): Measurement => {
-  return {
-    id: rawData.id,
-    projectId: rawData.project_id,
-    projectName: rawData.projects?.name || 'Unknown Project',
-    measurementDate: rawData.measurement_date || new Date().toISOString(),
-    createdAt: rawData.created_at || new Date().toISOString(),
-    updatedAt: rawData.updated_at || new Date().toISOString(),
-    recordedBy: rawData.recorded_by || '',
-    width: String(rawData.width || ''),
-    height: String(rawData.height || ''),
-    area: String(rawData.area || ''),
-    status: (rawData.status || 'Pending'),
-    location: rawData.location || '',
-    direction: (rawData.direction || 'N/A'),
-    notes: rawData.notes,
-    quantity: rawData.quantity || 1,
-    film_required: rawData.film_required,
-    installationDate: rawData.installation_date,
-    photos: Array.isArray(rawData.photos) ? rawData.photos : [],
-  } as Measurement;
-};
+export const formatMeasurement = (dbMeasurement: any): Measurement => {
+  // Safely get numeric values and format them
+  const safeNumber = (value: any): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(2);
+    }
+    return value?.toString() || '0';
+  };
 
-export default formatMeasurement;
+  // Format status with proper capitalization and type safety
+  const formatStatus = (status: string): MeasurementStatus => {
+    if (!status) return 'Pending';
+    
+    // Capitalize first letter
+    const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    // Ensure it's a valid MeasurementStatus
+    const validStatuses: MeasurementStatus[] = ['Pending', 'Film_Cut', 'Installed', 'Completed'];
+    return validStatuses.includes(formattedStatus as MeasurementStatus) 
+      ? (formattedStatus as MeasurementStatus) 
+      : 'Pending';
+  };
+
+  // Format all measurement values for display
+  const formattedMeasurement: Measurement = {
+    id: dbMeasurement.id,
+    projectId: dbMeasurement.project_id,
+    projectName: dbMeasurement.projects?.name || 'Unknown Project',
+    location: dbMeasurement.location || '',
+    width: safeNumber(dbMeasurement.width),
+    height: safeNumber(dbMeasurement.height),
+    area: dbMeasurement.area ? `${safeNumber(dbMeasurement.area)} ft²` : '0 ft²',
+    quantity: dbMeasurement.quantity || 1,
+    recordedBy: dbMeasurement.recorded_by || '',
+    direction: (dbMeasurement.direction || 'N/A'),
+    notes: dbMeasurement.notes || '',
+    status: formatStatus(dbMeasurement.status),
+    measurementDate: dbMeasurement.measurement_date || new Date().toISOString(),
+    updatedAt: dbMeasurement.updated_at || new Date().toISOString(),
+    updatedBy: dbMeasurement.updated_by || '',
+    photos: dbMeasurement.photos || [],
+    film_required: dbMeasurement.film_required !== false,
+    // Safely handle potentially missing columns
+    input_source: dbMeasurement.input_source || 'manual'
+  };
+
+  // Add depth if it exists in the database but not explicitly in the type
+  if (dbMeasurement.depth !== undefined) {
+    (formattedMeasurement as any).depth = dbMeasurement.depth ? 
+      `${safeNumber(dbMeasurement.depth)}"` : undefined;
+  }
+
+  return formattedMeasurement;
+};

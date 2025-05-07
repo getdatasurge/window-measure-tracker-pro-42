@@ -1,49 +1,105 @@
 
-import React from 'react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { useGetProjectsQuery } from '@/services/apiSlice';
-import { Skeleton } from '@/components/ui/skeleton';
+import React, { useState, useEffect } from 'react';
+import { Card, CardContent } from "@/components/ui/card";
+import ProjectTable from '../projects/ProjectTable';
+import { useToast } from '@/hooks/use-toast';
+import { fetchProjects } from '@/services/projectService';
+import { supabase } from '@/integrations/supabase/client';
 
-const DashboardProjectsSection: React.FC = () => {
-  const { data: projectsResponse, error, isLoading } = useGetProjectsQuery();
+interface DashboardProjectsSectionProps {
+  className?: string;
+}
+
+interface Project {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+  entries_count?: number;
+  deadline?: string;
+}
+
+const DashboardProjectsSection: React.FC<DashboardProjectsSectionProps> = ({ className }) => {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const getProjects = async () => {
+      try {
+        setLoading(true);
+        console.log('Fetching active projects...');
+        
+        // Fetch projects using our service
+        const projectData = await fetchProjects(true);
+        
+        console.log('Projects data received:', projectData);
+        
+        if (!projectData || projectData.length === 0) {
+          console.log('No active projects found');
+          setProjects([]);
+          setLoading(false);
+          return;
+        }
+        
+        // For each project, fetch the count of related entries with proper error handling
+        const projectsWithEntryCounts = await Promise.all(projectData.map(async (project) => {
+          if (!project || !project.id) {
+            // Handle potentially malformed project data
+            return { ...project, entries_count: 0 };
+          }
+          
+          try {
+            const { count, error: countError } = await supabase
+              .from('entries')
+              .select('*', { count: 'exact', head: true })
+              .eq('project_id', project.id);
+              
+            if (countError) {
+              console.error('Error fetching entry count for project:', project.id, countError);
+              return { ...project, entries_count: 0 };
+            }
+            
+            return { ...project, entries_count: count || 0 };
+          } catch (countErr) {
+            console.error('Exception fetching entry count for project:', project.id, countErr);
+            return { ...project, entries_count: 0 };
+          }
+        }));
+        
+        setProjects(projectsWithEntryCounts || []);
+      } catch (error) {
+        console.error('Error fetching projects:', error);
+        toast({
+          title: "Error loading projects",
+          description: "Failed to load active projects. Please try again later.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    getProjects();
+  }, [toast]);
   
+  // Transform the projects data with safe handling of optional properties
+  const formattedProjects = projects.map(project => ({
+    id: project.id || 'unknown-id',
+    name: project.name || 'Untitled Project',
+    client: project.client_name || 'No Client',
+    location: project.location || 'No Location',
+    status: project.status || 'active',
+    entries_count: project.entries_count || 0,
+    deadline: project.deadline || 'Not set'
+  }));
+
   return (
-    <Card className="col-span-1 h-full">
-      <CardHeader className="pb-3">
-        <CardTitle>Active Projects</CardTitle>
-      </CardHeader>
-      <CardContent>
-        {isLoading ? (
-          <>
-            <Skeleton className="h-12 w-full mb-2" />
-            <Skeleton className="h-12 w-full mb-2" />
-            <Skeleton className="h-12 w-full" />
-          </>
-        ) : error ? (
-          <div className="text-sm text-red-500">
-            Error loading projects: {String(error)}
-          </div>
-        ) : projectsResponse?.data?.length ? (
-          <ul className="space-y-2">
-            {projectsResponse.data.slice(0, 5).map((project) => (
-              <li key={project.id} className="p-2 rounded-md hover:bg-zinc-100 dark:hover:bg-zinc-800">
-                <div className="font-medium">{project.name}</div>
-                {project.client_name && (
-                  <div className="text-xs text-zinc-500">{project.client_name}</div>
-                )}
-                {project.status && (
-                  <div className="mt-1">
-                    <span className="text-xs px-2 py-0.5 rounded-full bg-zinc-200 dark:bg-zinc-700">
-                      {project.status}
-                    </span>
-                  </div>
-                )}
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <div className="text-sm text-zinc-500">No active projects found</div>
-        )}
+    <Card className={`bg-zinc-800/50 border border-zinc-700/50 shadow-lg ${className}`}>
+      <CardContent className="p-4">
+        <h2 className="text-lg font-semibold text-white mb-4">Active Projects</h2>
+        <ProjectTable projects={formattedProjects} loading={loading} />
       </CardContent>
     </Card>
   );
