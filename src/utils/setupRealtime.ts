@@ -7,18 +7,13 @@ import { supabase } from '@/integrations/supabase/client';
  */
 export const setupRealtime = async () => {
   try {
-    // Try to execute SQL directly to enable REPLICA IDENTITY FULL
-    const { error: replicaError } = await supabase
-      .from('_rpc')
-      .select('*')
-      .eq('name', 'execute_sql')
-      .select()
-      .maybeSingle()
-      .execute({
-        params: { 
-          sql: `ALTER TABLE public.measurements REPLICA IDENTITY FULL;` 
-        }
-      });
+    // Try to enable REPLICA IDENTITY FULL using the edge function directly
+    const { data: replicaData, error: replicaError } = await supabase.functions.invoke('enable-realtime', {
+      body: { 
+        tableName: 'measurements',
+        operation: 'replica-identity'
+      }
+    });
     
     if (replicaError) {
       console.warn('Could not set REPLICA IDENTITY:', replicaError.message);
@@ -26,18 +21,13 @@ export const setupRealtime = async () => {
       console.log('Successfully set REPLICA IDENTITY FULL on measurements table');
     }
     
-    // Add the table to the realtime publication
-    const { error: pubError } = await supabase
-      .from('_rpc')
-      .select('*')
-      .eq('name', 'execute_sql')
-      .select()
-      .maybeSingle()
-      .execute({
-        params: { 
-          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.measurements;` 
-        }
-      });
+    // Add the table to the realtime publication using edge function
+    const { data: pubData, error: pubError } = await supabase.functions.invoke('enable-realtime', {
+      body: { 
+        tableName: 'measurements',
+        operation: 'add-publication'
+      }
+    });
     
     if (pubError) {
       console.warn('Could not update publication:', pubError.message);
@@ -45,34 +35,14 @@ export const setupRealtime = async () => {
       console.log('Successfully added measurements to realtime publication');
     }
     
-    // Fall back to a function call if available
-    if (replicaError || pubError) {
-      try {
-        const { error: fnError } = await supabase.functions.invoke('enable-realtime', {
-          body: { tableName: 'measurements' }
-        });
-        
-        if (fnError) {
-          console.error('Failed to setup realtime via function:', fnError.message);
-          return false;
-        }
-        
-        console.log('Realtime setup complete via function');
-        return true;
-      } catch (fnError) {
-        console.error('Failed to setup realtime:', fnError);
-        return false;
-      }
-    }
-    
-    console.log('Realtime setup complete for measurements table');
-    return true;
+    // Return success based on operation results
+    return !replicaError && !pubError;
   } catch (error) {
     // This might fail if the user doesn't have admin privileges, but that's ok
-    console.warn('Could not configure realtime with direct SQL:', error);
+    console.warn('Could not configure realtime with direct operations:', error);
     
     try {
-      // Fall back to a function call if available
+      // Fall back to a function call with all operations
       const { error: fnError } = await supabase.functions.invoke('enable-realtime', {
         body: { tableName: 'measurements' }
       });

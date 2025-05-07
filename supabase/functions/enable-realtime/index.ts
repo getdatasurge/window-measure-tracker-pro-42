@@ -19,7 +19,7 @@ serve(async (req) => {
     }
     
     // Parse the request body
-    const { tableName } = await req.json();
+    const { tableName, operation } = await req.json();
     
     if (!tableName) {
       return new Response(
@@ -28,28 +28,55 @@ serve(async (req) => {
       );
     }
     
-    // Execute SQL to enable REPLICA IDENTITY FULL on the table
-    const { data, error } = await supabaseClient.rpc('execute_sql', {
-      sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
-    });
+    let successMessage = '';
     
-    if (error) {
-      throw error;
-    }
-    
-    // Enable the table in the supabase_realtime publication
-    const { data: pubData, error: pubError } = await supabaseClient.rpc('execute_sql', {
-      sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
-    });
-    
-    if (pubError) {
-      throw pubError;
+    // If no specific operation provided, do both operations
+    if (!operation) {
+      try {
+        // First, set REPLICA IDENTITY FULL
+        await supabaseClient.rpc('execute_sql', {
+          sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
+        });
+        
+        // Second, add table to publication
+        await supabaseClient.rpc('execute_sql', {
+          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
+        });
+        
+        successMessage = `Real-time fully enabled on ${tableName}`;
+      } catch (err) {
+        throw new Error(`Failed to enable realtime: ${err.message}`);
+      }
+    } 
+    // Only set REPLICA IDENTITY FULL
+    else if (operation === 'replica-identity') {
+      try {
+        await supabaseClient.rpc('execute_sql', {
+          sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
+        });
+        successMessage = `REPLICA IDENTITY FULL set on ${tableName}`;
+      } catch (err) {
+        throw new Error(`Failed to set REPLICA IDENTITY: ${err.message}`);
+      }
+    } 
+    // Only add to publication
+    else if (operation === 'add-publication') {
+      try {
+        await supabaseClient.rpc('execute_sql', {
+          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
+        });
+        successMessage = `${tableName} added to supabase_realtime publication`;
+      } catch (err) {
+        throw new Error(`Failed to update publication: ${err.message}`);
+      }
+    } else {
+      throw new Error(`Unknown operation: ${operation}`);
     }
     
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Real-time enabled on ${tableName}` 
+        message: successMessage
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
