@@ -114,7 +114,7 @@ export const useMeasurementSubscription = ({
       const realtimeEnabled = await setupRealtime();
       
       if (!realtimeEnabled && retryAttempt < MAX_RETRY_ATTEMPTS) {
-        console.warn(`Failed to enable realtime, retrying (${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS})...`);
+        console.log(`Failed to enable realtime, retrying (${retryAttempt + 1}/${MAX_RETRY_ATTEMPTS})...`);
         setTimeout(() => setupSubscription(retryAttempt + 1), 2000 * Math.pow(1.5, retryAttempt));
         return null;
       }
@@ -234,39 +234,44 @@ export const useMeasurementSubscription = ({
         .subscribe((status) => {
           console.log('Supabase real-time subscription status:', status);
           
-          // Update connection state based on status
-          setSubscriptionState(prevState => ({
-            ...prevState,
-            isConnected: status === 'SUBSCRIBED',
-            isPolling: status !== 'SUBSCRIBED'
-          }));
-          
-          // Show toast for connection issues
-          if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
-            toast({
-              title: "Real-time connection issue",
-              description: "Switching to polling updates. Will try to reconnect automatically.",
-              variant: "destructive",
-            });
+          // Store the current connection state to compare for change detection
+          setSubscriptionState(currentState => {
+            // Update connection state based on status
+            const newState = {
+              ...currentState,
+              isConnected: status === 'SUBSCRIBED',
+              isPolling: status !== 'SUBSCRIBED'
+            };
             
-            // Try to reconnect after a delay
-            if (retryAttempt < MAX_RETRY_ATTEMPTS) {
-              setTimeout(() => setupSubscription(retryAttempt + 1), 5000);
+            // Show toast for connection issues
+            if (status === 'CHANNEL_ERROR' || status === 'CLOSED') {
+              toast({
+                title: "Real-time connection issue",
+                description: "Switching to polling updates. Will try to reconnect automatically.",
+                variant: "destructive",
+              });
+              
+              // Try to reconnect after a delay
+              if (retryAttempt < MAX_RETRY_ATTEMPTS) {
+                setTimeout(() => setupSubscription(retryAttempt + 1), 5000);
+              }
+            } else if (status === 'SUBSCRIBED' && currentState.isPolling) {
+              toast({
+                title: "Real-time connection restored",
+                description: "Now receiving live updates.",
+              });
             }
-          } else if (status === 'SUBSCRIBED' && prevState.isPolling) {
-            toast({
-              title: "Real-time connection restored",
-              description: "Now receiving live updates.",
-            });
-          }
+            
+            return newState;
+          });
         });
       
       return channel;
     } catch (error) {
       console.error('Failed to setup real-time subscription:', error);
       
-      setSubscriptionState(prev => ({
-        ...prev,
+      setSubscriptionState(current => ({
+        ...current,
         lastError: error instanceof Error ? error : new Error('Unknown subscription error'),
         isConnected: false,
         isPolling: true
