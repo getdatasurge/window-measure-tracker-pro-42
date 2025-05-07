@@ -1,8 +1,12 @@
-
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_FILES = 3;
+
+export interface ProjectOption {
+  id: string;
+  name: string;
+}
 
 export interface MeasurementFormData {
   id?: string;
@@ -77,11 +81,6 @@ export interface FormErrors {
   width?: { message?: string };
   height?: { message?: string };
   quantity?: { message?: string };
-}
-
-export interface ProjectOption {
-  id: string;
-  name: string;
 }
 
 export interface PhotoUploadState {

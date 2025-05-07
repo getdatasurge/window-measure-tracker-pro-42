@@ -1,7 +1,7 @@
 
 import { useCallback } from 'react';
 import { useProjectList } from './useProjectList';
-import { ProjectOption } from '@/hooks/measurements/types';
+import { ProjectOption } from './types';
 
 interface UseProjectManagementProps {
   setValue: (field: string, value: any) => void;

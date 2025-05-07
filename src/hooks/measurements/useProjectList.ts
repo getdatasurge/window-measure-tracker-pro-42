@@ -1,10 +1,10 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption } from '@/hooks/measurements/types';
+import { ProjectOption } from './types';
 
 // Define explicit return type to break the circular reference
-interface UseProjectListReturn {
+export interface UseProjectListReturn {
   projectsList: ProjectOption[];
   fetchProjects: () => Promise<void>;
 }
