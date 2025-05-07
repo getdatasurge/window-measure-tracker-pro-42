@@ -1,0 +1,141 @@
+
+import { useState } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import { Measurement } from '@/types/measurement';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
+
+export function useMeasurementSave() {
+  const [isSaving, setIsSaving] = useState(false);
+  const { toast } = useToast();
+  const { user } = useAuth();
+
+  // Helper function to parse numeric values
+  const parseNumericValue = (value: string | undefined): number | null => {
+    if (!value) return null;
+    // Remove any non-numeric characters except decimal point
+    const numericStr = value.replace(/[^0-9.]/g, '');
+    const parsed = parseFloat(numericStr);
+    return isNaN(parsed) ? null : parsed;
+  };
+
+  const saveMeasurement = async (measurement: Measurement, onSuccess?: () => void) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to save measurements.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      console.log("Preparing measurement data for save:", measurement);
+      
+      // Prepare data for database (converting to match DB schema)
+      const measurementData = {
+        project_id: measurement.projectId,
+        location: measurement.location.trim(),
+        width: parseNumericValue(measurement.width),
+        height: parseNumericValue(measurement.height),
+        depth: parseNumericValue(measurement.depth),
+        area: parseNumericValue(measurement.area),
+        quantity: measurement.quantity || 1,
+        recorded_by: user.id,
+        direction: measurement.direction?.toLowerCase() || null,
+        notes: measurement.notes || '',
+        status: measurement.status.toLowerCase(),
+        measurement_date: measurement.measurementDate || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+        photos: Array.isArray(measurement.photos) ? measurement.photos : [],
+        film_required: measurement.film_required === undefined ? true : !!measurement.film_required,
+      };
+      
+      // Validate required fields
+      const requiredFields = ['project_id', 'location', 'width', 'height'];
+      const missingFields = requiredFields.filter(field => !measurementData[field]);
+      
+      if (missingFields.length > 0) {
+        const fieldNames = missingFields.map(f => f.replace('_', ' ')).join(', ');
+        throw new Error(`Required fields missing: ${fieldNames}`);
+      }
+      
+      console.log("Formatted measurement data:", measurementData);
+
+      let result;
+      
+      if (measurement.id) {
+        console.log("Updating existing measurement with ID:", measurement.id);
+        // Update existing measurement
+        const { data, error } = await supabase
+          .from('measurements')
+          .update(measurementData)
+          .eq('id', measurement.id)
+          .select();
+          
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
+        
+        console.log("Update successful:", data);
+        result = data;
+        
+        toast({
+          title: "Measurement updated",
+          description: "The measurement has been successfully updated."
+        });
+      } else {
+        console.log("Creating new measurement");
+        // Create new measurement
+        const { data, error } = await supabase
+          .from('measurements')
+          .insert(measurementData)
+          .select();
+          
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
+        
+        console.log("Insert successful:", data);
+        result = data;
+        
+        toast({
+          title: "Measurement saved",
+          description: "Your measurement has been saved successfully."
+        });
+      }
+      
+      // Save last selected project to localStorage
+      if (measurement.projectId && measurement.projectName) {
+        localStorage.setItem('lastSelectedProject', JSON.stringify({
+          id: measurement.projectId,
+          name: measurement.projectName
+        }));
+      }
+      
+      // Call success callback if provided
+      if (onSuccess) {
+        onSuccess();
+      }
+      
+    } catch (err) {
+      console.error('Error saving measurement:', err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return {
+    saveMeasurement,
+    isSaving
+  };
+}
