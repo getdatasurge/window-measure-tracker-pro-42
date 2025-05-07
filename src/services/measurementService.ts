@@ -155,6 +155,16 @@ export const saveMeasurement = async (measurement: any, userId: string): Promise
     
     console.log('Saving measurement with validated fields:', validDbFields);
     
+    // Make sure we're not trying to insert an empty object
+    if (Object.keys(validDbFields).length === 0) {
+      throw new Error('No valid fields to save. Schema validation failed');
+    }
+    
+    // Ensure required fields are present
+    if (!validDbFields.project_id || !validDbFields.location) {
+      throw new Error('Required fields (project_id, location) are missing or invalid');
+    }
+    
     // Insert or update based on whether id is provided
     if (measurement.id) {
       const { data, error } = await supabase

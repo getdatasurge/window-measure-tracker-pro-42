@@ -38,7 +38,8 @@ export class SafeQueryBuilder {
     
     // If selecting all columns, no validation needed
     if (columns === '*' || columnArray.length === 0) {
-      return supabase.from(this.tableName).select();
+      // Use type assertion to handle dynamic table names
+      return supabase.from(this.tableName as any);
     }
 
     // Validate the requested columns
@@ -55,11 +56,13 @@ export class SafeQueryBuilder {
       if (this.options.continueWithValidColumns) {
         const validColumns = columnArray.filter(col => !validation.invalidColumns.includes(col));
         console.warn(`Continuing with valid columns only: ${validColumns.join(', ')}`);
-        return supabase.from(this.tableName).select(validColumns.join(','));
+        // Use type assertion to handle dynamic table names
+        return supabase.from(this.tableName as any).select(validColumns.join(','));
       }
     }
     
-    return supabase.from(this.tableName).select(columns);
+    // Use type assertion to handle dynamic table names
+    return supabase.from(this.tableName as any).select(columns);
   }
 
   /**
@@ -98,13 +101,15 @@ export class SafeQueryBuilder {
         });
         
         console.warn(`Inserting with only valid columns, removed: ${validation.invalidColumns.join(', ')}`);
-        return supabase.from(this.tableName).insert(sanitizedData);
+        // Use type assertion to handle dynamic table names
+        return supabase.from(this.tableName as any).insert(sanitizedData);
       }
       
       return { data: null, error: new Error(message) };
     }
 
-    return supabase.from(this.tableName).insert(data);
+    // Use type assertion to handle dynamic table names
+    return supabase.from(this.tableName as any).insert(data);
   }
 
   /**
@@ -129,20 +134,23 @@ export class SafeQueryBuilder {
         validation.invalidColumns.forEach(col => delete sanitizedData[col]);
         
         console.warn(`Updating with only valid columns, removed: ${validation.invalidColumns.join(', ')}`);
-        return supabase.from(this.tableName).update(sanitizedData);
+        // Use type assertion to handle dynamic table names
+        return supabase.from(this.tableName as any).update(sanitizedData);
       }
       
       return { data: null, error: new Error(message) };
     }
     
-    return supabase.from(this.tableName).update(data);
+    // Use type assertion to handle dynamic table names
+    return supabase.from(this.tableName as any).update(data);
   }
 
   /**
    * Get a query builder for the table after checking for column existence
    */
   async queryBuilder(): Promise<any> {
-    return supabase.from(this.tableName);
+    // Use type assertion to handle dynamic table names
+    return supabase.from(this.tableName as any);
   }
 
   /**
