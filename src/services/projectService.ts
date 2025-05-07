@@ -1,14 +1,23 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { ProjectOption } from '@/types/project-types';
+
+// Define a simplified project interface directly here to avoid circular dependencies
+interface ProjectBasicData {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+  deadline?: string;
+}
 
 /**
  * Fetch projects with optional filtering
  * @param activeOnly Whether to only fetch active projects
  * @returns Array of projects
  */
-export const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]> => {
+export const fetchProjects = async (activeOnly = true): Promise<ProjectBasicData[]> => {
   try {
     let query = supabase
       .from('projects')
@@ -25,8 +34,8 @@ export const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]>
       throw error;
     }
 
-    // Use explicit type annotation to avoid excessive type instantiation
-    return (data || []) as ProjectOption[];
+    // Return the data with explicit type
+    return (data || []) as ProjectBasicData[];
   } catch (error) {
     console.error('Exception fetching projects:', error);
     toast({

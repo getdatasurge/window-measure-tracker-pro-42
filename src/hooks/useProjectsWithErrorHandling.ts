@@ -2,7 +2,40 @@ import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { tryAsync, withErrorHandling } from '@/utils/error-handling/index';
-import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project-types';
+
+// Define interfaces locally to avoid circular dependencies
+interface ProjectOption {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+  deadline?: string;
+}
+
+interface ProjectDetails extends ProjectOption {
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}
+
+interface ProjectCreateInput {
+  name: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+}
+
+interface ProjectUpdateInput {
+  name?: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+  status?: string;
+}
 
 interface ProjectsHookState {
   loading: boolean;
@@ -109,9 +142,6 @@ export function useProjectsWithErrorHandling() {
     }
   }, []);
   
-  /**
-   * Fetch a project by ID
-   */
   const fetchProjectById = async (id: string): Promise<ProjectDetails | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
