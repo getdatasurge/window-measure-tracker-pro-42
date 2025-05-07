@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
@@ -10,8 +9,7 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-// Initialize Supabase client using environment variables
-// No hard-coded values here - leveraging Deno's environment variable system
+// Initialize Supabase client
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? '',
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ''
@@ -34,15 +32,22 @@ serve(async (req) => {
     }
 
     const rawBody = await req.text();
+    console.log("📦 Raw request body:", rawBody);
+
     let tableName = '';
     let operation = '';
 
     try {
-      const body = JSON.parse(rawBody);
+      const maybeDoubleEncoded = JSON.parse(rawBody);
+      const body = typeof maybeDoubleEncoded === "string"
+        ? JSON.parse(maybeDoubleEncoded) // handle extra string layer
+        : maybeDoubleEncoded;
+
       tableName = body.tableName;
       operation = body.operation;
+      console.log("✅ Parsed body:", { tableName, operation });
     } catch (err) {
-      console.error("Invalid JSON body:", rawBody);
+      console.error("❌ Failed to parse JSON body:", rawBody);
       return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
@@ -58,7 +63,9 @@ serve(async (req) => {
 
     if (!isValidTableName(tableName)) {
       console.error("Invalid table name format:", tableName);
-      return new Response(JSON.stringify({ error: "Invalid table name. Use letters, numbers, underscores only." }), {
+      return new Response(JSON.stringify({
+        error: "Invalid table name. Use letters, numbers, underscores only."
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
@@ -66,7 +73,6 @@ serve(async (req) => {
 
     // Check if the table exists
     const checkSQL = `SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists`;
-
     const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
       sql: checkSQL
     });
@@ -77,7 +83,9 @@ serve(async (req) => {
     }
 
     if (!Array.isArray(existsData) || !existsData[0]?.exists) {
-      return new Response(JSON.stringify({ error: `Table "${tableName}" does not exist` }), {
+      return new Response(JSON.stringify({
+        error: `Table "${tableName}" does not exist`
+      }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" }
       });
@@ -88,7 +96,7 @@ serve(async (req) => {
     // Set REPLICA IDENTITY to FULL
     if (!operation || operation === "replica-identity") {
       const { error } = await supabase.rpc("execute_sql", {
-        sql: `ALTER TABLE public."${tableName}" REPLICA IDENTITY FULL;`
+        sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
       });
       if (error) {
         console.error("REPLICA IDENTITY failed:", error);
@@ -97,7 +105,7 @@ serve(async (req) => {
       messages.push("REPLICA IDENTITY FULL set");
     }
 
-    // Add table to publication if not already present
+    // Add table to publication
     if (!operation || operation === "add-publication") {
       const { data, error } = await supabase
         .from("pg_publication_tables")
@@ -113,7 +121,7 @@ serve(async (req) => {
 
       if (!data || data.length === 0) {
         const { error: pubError } = await supabase.rpc("execute_sql", {
-          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public."${tableName}";`
+          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
         });
         if (pubError) {
           console.error("Failed to add table to publication:", pubError);
@@ -125,7 +133,7 @@ serve(async (req) => {
       }
     }
 
-    console.log("Operation successful:", messages);
+    console.log("✅ Operation successful:", messages);
 
     return new Response(JSON.stringify({ success: true, messages }), {
       status: 200,
@@ -133,7 +141,7 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error("Unhandled error in enable-realtime:", error);
+    console.error("🔥 Unhandled error in enable-realtime:", error);
     return new Response(JSON.stringify({
       error: error?.message ?? "Unknown error"
     }), {
