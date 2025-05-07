@@ -1,36 +1,47 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption } from './types';
 
-/**
- * Hook to fetch and manage the list of projects
- * @returns Object containing project list and fetch function
- */
+// Define the exact shape expected from Supabase query
+type RawProject = {
+  id: string;
+  name: string;
+};
+
 export function useProjectList() {
-  const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);
-  
-  // Fetch projects for dropdown
-  const fetchProjects = useCallback(async () => {
-    try {
+  const [projectsList, setProjectsList] = useState<RawProject[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+
+  useEffect(() => {
+    const fetchProjects = async () => {
+      setIsLoading(true);
+      setError(null);
+
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
         .eq('is_active', true)
         .order('name');
-        
-      if (error) throw error;
-      
-      if (data) {
-        setProjectsList(data as ProjectOption[]);
+
+      if (error) {
+        setError(error);
+        setProjectsList([]);
+        return;
       }
-    } catch (err) {
-      console.error('Error fetching projects:', err);
-    }
+
+      if (data) {
+        setProjectsList(data);
+      }
+
+      setIsLoading(false);
+    };
+
+    fetchProjects();
   }, []);
 
   return {
     projectsList,
-    fetchProjects
+    isLoading,
+    error,
   };
 }
