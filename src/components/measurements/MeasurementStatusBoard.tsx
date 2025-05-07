@@ -1,15 +1,17 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement } from '@/types/measurement';
 import { useMeasurements } from '@/hooks/useMeasurements';
 import { MeasurementColumns } from './MeasurementColumns';
 import { MeasurementFilter } from './MeasurementFilter';
-import EditMeasurementModal from './EditMeasurementModal';
+import MeasurementEditModalWrapper from './board/MeasurementEditModalWrapper';
 import { useMeasurementUpdate } from '@/hooks/useMeasurementUpdate';
 import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MeasurementFormData } from '@/hooks/measurements/types';
+import { Direction } from '@/constants/direction';
 
 interface FilterState {
   projectId: string | null;
@@ -98,17 +100,27 @@ const MeasurementStatusBoard: React.FC = () => {
   const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
     // Convert MeasurementFormData to Measurement for saveMeasurement function
     const measurementToSave: Measurement = {
-      ...data,
       id: data.id || '', // Ensure id is not undefined
       projectId: data.projectId || '',
       projectName: data.projectName || '',
-      film_required: data.filmRequired, // Map filmRequired to film_required
+      location: data.location || '',
+      width: data.width || '',
+      height: data.height || '',
+      area: data.area || '',
+      quantity: data.quantity || 1,
       recordedBy: data.recordedBy || '',
+      // Ensure direction is valid by casting it to Direction type
+      direction: (data.direction as Direction) || 'N/A',
+      notes: data.notes || '',
+      film_required: data.filmRequired, // Map filmRequired to film_required
+      status: data.status || 'Pending',
+      photos: Array.isArray(data.photos) ? data.photos : [],
       updatedAt: data.updatedAt || new Date().toISOString(),
       updatedBy: data.updatedBy || '',
-      status: data.status || 'Pending',
-      measurementDate: data.measurementDate || new Date().toISOString(),
-      area: data.area || ''
+      recorded_by: data.recorded_by,
+      installationDate: data.installationDate || '',
+      input_source: data.input_source || 'manual',
+      measurementDate: data.measurementDate || new Date().toISOString()
     };
 
     // The refetch will only happen after the save is complete
@@ -186,12 +198,11 @@ const MeasurementStatusBoard: React.FC = () => {
       />
       
       {editMeasurement && (
-        <EditMeasurementModal
+        <MeasurementEditModalWrapper
           measurement={editMeasurement}
           isOpen={editModalOpen}
           onOpenChange={setEditModalOpen}
           onSave={handleSaveMeasurement}
-          defaultValues={{}}
         />
       )}
     </div>

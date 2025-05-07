@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Measurement } from '@/types/measurement';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 import { 
   Label,
   Input,
@@ -15,7 +15,7 @@ import {
 import { DIRECTION_OPTIONS, Direction, DEFAULT_DIRECTION } from '@/constants/direction';
 
 interface AttributesTabProps {
-  formData: Measurement;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
 }
 
@@ -68,8 +68,8 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData 
       
       <div className="flex items-center space-x-2">
         <Switch
-          checked={formData.film_required !== false}
-          onCheckedChange={(checked) => updateFormData('film_required', checked)}
+          checked={formData.filmRequired !== false}
+          onCheckedChange={(checked) => updateFormData('filmRequired', checked)}
           id="film-required"
         />
         <Label htmlFor="film-required" className="text-sm text-zinc-400">Film Required</Label>

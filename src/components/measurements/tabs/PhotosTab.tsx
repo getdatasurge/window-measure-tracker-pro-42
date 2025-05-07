@@ -1,155 +1,171 @@
-
-import React, { useState } from 'react';
-import { Trash2, Upload } from 'lucide-react';
+import React, { useState, useCallback } from 'react';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Measurement } from '@/types/measurement';
-import { supabase } from '@/integrations/supabase/client';
+import { Input } from '@/components/ui/input';
+import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import Image from 'next/image';
 
 interface PhotosTabProps {
-  formData: Measurement;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
 }
 
-const MAX_FILES = 3;
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
-
 const PhotosTab: React.FC<PhotosTabProps> = ({ formData, updateFormData }) => {
-  const [isUploading, setIsUploading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
   const { toast } = useToast();
-
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = Array.from(e.target.files || []);
+  
+  // Handle file selection
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
     
-    // Validate number of files
-    if (files.length > MAX_FILES || (formData.photos?.length || 0) + files.length > MAX_FILES) {
+    // Check file size and type
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    const MAX_FILES = 3;
+    const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
+    
+    // Convert FileList to array for easier processing
+    const fileArray = Array.from(files);
+    
+    // Validate files
+    const invalidFiles = fileArray.filter(file => 
+      file.size > MAX_FILE_SIZE || !ALLOWED_TYPES.includes(file.type)
+    );
+    
+    if (invalidFiles.length > 0) {
+      toast({
+        title: "Invalid file(s)",
+        description: "Files must be images under 5MB",
+        variant: "destructive"
+      });
+      return;
+    }
+    
+    // Check if adding these files would exceed the maximum
+    const currentPhotos = formData.photos || [];
+    if (currentPhotos.length + fileArray.length > MAX_FILES) {
       toast({
         title: "Too many files",
-        description: `You can only upload a maximum of ${MAX_FILES} files.`,
+        description: `Maximum ${MAX_FILES} photos allowed`,
         variant: "destructive"
       });
       return;
     }
-
-    // Validate file size
-    const oversizedFiles = files.filter(file => file.size > MAX_FILE_SIZE);
-    if (oversizedFiles.length > 0) {
-      toast({
-        title: "Files too large",
-        description: `Some files exceed the ${MAX_FILE_SIZE / (1024 * 1024)}MB limit.`,
-        variant: "destructive"
-      });
-      return;
-    }
-
-    setIsUploading(true);
-
-    try {
-      // Generate unique folder name based on current time and random string
-      const folderName = `measurements/${new Date().getTime()}-${Math.random().toString(36).substring(2, 15)}`;
-      
-      // Upload each file and collect the URLs
-      const uploadPromises = files.map(async (file) => {
-        const filePath = `${folderName}/${file.name}`;
-        const { data, error } = await supabase.storage
-          .from('measurements')
-          .upload(filePath, file);
-        
-        if (error) throw error;
-        
-        // Get public URL
-        const { data: publicUrlData } = supabase.storage
-          .from('measurements')
-          .getPublicUrl(filePath);
-          
-        return publicUrlData.publicUrl;
-      });
-      
-      const uploadedUrls = await Promise.all(uploadPromises);
-      
-      // Update formData with new photos
-      const currentPhotos = formData.photos || [];
-      updateFormData('photos', [...currentPhotos, ...uploadedUrls]);
-      
-      toast({
-        title: "Files uploaded",
-        description: `Successfully uploaded ${files.length} file(s).`
-      });
-      
-    } catch (error: any) {
-      toast({
-        title: "Upload failed",
-        description: error.message || "There was an error uploading your files.",
-        variant: "destructive"
-      });
-      console.error('Upload error:', error);
-    } finally {
-      setIsUploading(false);
-      // Reset file input
-      e.target.value = '';
-    }
-  };
-
-  const removePhoto = (index: number) => {
-    if (!formData.photos) return;
     
-    const newPhotos = [...formData.photos];
-    newPhotos.splice(index, 1);
-    updateFormData('photos', newPhotos);
-  };
-
+    // Simulate upload process
+    setUploading(true);
+    setUploadProgress(0);
+    
+    // Create object URLs for preview
+    const objectUrls = fileArray.map(file => URL.createObjectURL(file));
+    
+    // Simulate progress
+    const interval = setInterval(() => {
+      setUploadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(interval);
+          setUploading(false);
+          
+          // Update form data with new photos
+          updateFormData('photos', [...currentPhotos, ...objectUrls]);
+          
+          return 0;
+        }
+        return prev + 10;
+      });
+    }, 200);
+    
+    // Clear input value to allow selecting the same file again
+    e.target.value = '';
+  }, [formData.photos, updateFormData, toast]);
+  
+  // Remove a photo
+  const handleRemovePhoto = useCallback((index: number) => {
+    const updatedPhotos = [...(formData.photos || [])];
+    updatedPhotos.splice(index, 1);
+    updateFormData('photos', updatedPhotos);
+  }, [formData.photos, updateFormData]);
+  
   return (
-    <div className="space-y-4">
-      <div className="border border-dashed border-zinc-700 rounded-md p-6 text-center">
-        <Label htmlFor="photo-upload" className="cursor-pointer block">
-          <Upload className="mx-auto h-12 w-12 text-zinc-500 mb-2" />
-          <span className="text-zinc-400 block mb-2">
-            Upload photos (Max {MAX_FILES} files, {MAX_FILE_SIZE / (1024 * 1024)}MB each)
-          </span>
-          <Button 
-            variant="outline" 
-            className="bg-zinc-800 hover:bg-zinc-700"
-            disabled={isUploading || (formData.photos?.length || 0) >= MAX_FILES}
-          >
-            {isUploading ? 'Uploading...' : 'Select Files'}
-          </Button>
-          <input
-            id="photo-upload"
-            type="file"
-            accept="image/*"
-            multiple
-            className="hidden"
-            onChange={handleFileChange}
-            disabled={isUploading || (formData.photos?.length || 0) >= MAX_FILES}
-          />
+    <div className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="photos" className="text-sm text-zinc-400">
+          Photos <span className="text-xs text-zinc-500">(Max 3)</span>
         </Label>
-      </div>
-
-      {formData.photos && formData.photos.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-zinc-400 mb-2">Uploaded Photos</h3>
-          <div className="grid grid-cols-3 gap-3">
-            {formData.photos.map((url, index) => (
-              <div key={index} className="relative group">
-                <img 
-                  src={url} 
-                  alt={`Measurement photo ${index + 1}`} 
-                  className="h-28 w-full object-cover rounded-md border border-zinc-700" 
+        
+        <div className="grid grid-cols-3 gap-4 mt-2">
+          {/* Existing photos */}
+          {(formData.photos || []).map((photo, index) => (
+            <div 
+              key={index} 
+              className="relative aspect-square bg-zinc-800/50 rounded-md overflow-hidden border border-zinc-700"
+            >
+              {typeof photo === 'string' && (
+                <div className="relative w-full h-full">
+                  <Image 
+                    src={photo} 
+                    alt={`Photo ${index + 1}`}
+                    fill
+                    className="object-cover"
+                  />
+                  <Button
+                    variant="destructive"
+                    size="icon"
+                    className="absolute top-1 right-1 h-6 w-6"
+                    onClick={() => handleRemovePhoto(index)}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {/* Upload placeholder */}
+          {(formData.photos || []).length < 3 && (
+            <div className="aspect-square bg-zinc-800/30 rounded-md border border-dashed border-zinc-700 flex flex-col items-center justify-center">
+              <label 
+                htmlFor="photo-upload" 
+                className="cursor-pointer w-full h-full flex flex-col items-center justify-center"
+              >
+                <Upload className="h-6 w-6 text-zinc-500 mb-2" />
+                <span className="text-xs text-zinc-500">Upload</span>
+                <Input
+                  id="photo-upload"
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleFileChange}
+                  multiple={true}
+                  disabled={uploading}
                 />
-                <Button 
-                  size="icon"
-                  variant="destructive"
-                  className="absolute top-1 right-1 h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
-                  onClick={() => removePhoto(index)}
-                >
-                  <Trash2 className="h-3 w-3" />
-                </Button>
-              </div>
-            ))}
-          </div>
+              </label>
+            </div>
+          )}
         </div>
-      )}
+        
+        {/* Upload progress */}
+        {uploading && (
+          <div className="mt-2">
+            <div className="h-1 w-full bg-zinc-800 rounded-full overflow-hidden">
+              <div 
+                className="h-full bg-green-500 transition-all duration-300"
+                style={{ width: `${uploadProgress}%` }}
+              />
+            </div>
+            <p className="text-xs text-zinc-500 mt-1">Uploading... {uploadProgress}%</p>
+          </div>
+        )}
+      </div>
+      
+      <div className="text-xs text-zinc-500">
+        <p>• Photos help installers identify the correct windows</p>
+        <p>• Include any special features or obstacles</p>
+        <p>• Maximum 3 photos, 5MB each</p>
+      </div>
     </div>
   );
 };

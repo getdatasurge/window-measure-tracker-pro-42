@@ -4,6 +4,7 @@ import MeasurementEntryModal from './MeasurementEntryModal';
 import { Measurement } from '@/types/measurement';
 import { MeasurementModalProps } from './modal/types';
 import { MeasurementFormData } from '@/hooks/measurements/types';
+import { Direction } from '@/constants/direction';
 
 type EditMeasurementModalProps = Omit<MeasurementModalProps, 'mode'> & {
   measurement: Measurement | null;
@@ -24,7 +25,7 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
     location: measurement.location || '',
     width: measurement.width || '',
     height: measurement.height || '',
-    direction: measurement.direction || 'N/A',
+    direction: measurement.direction as Direction || 'N/A', // Ensure proper Direction type
     notes: measurement.notes || '',
     filmRequired: measurement.film_required !== false, // Ensure proper boolean conversion
     quantity: measurement.quantity || 1,
@@ -35,7 +36,8 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
     updatedAt: measurement.updatedAt || new Date().toISOString(),
     updatedBy: measurement.updatedBy || '',
     recorded_by: measurement.recorded_by,
-    recordedBy: measurement.recordedBy || ''
+    recordedBy: measurement.recordedBy || '',
+    area: measurement.area || ''
   } as MeasurementFormData : undefined;
 
   return (

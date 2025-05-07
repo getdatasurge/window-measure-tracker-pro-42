@@ -1,22 +1,12 @@
-
-import React, { useState } from 'react';
-import { Label } from '@/components/ui/label';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Measurement } from '@/types/measurement';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Button } from '@/components/ui/button';
-import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import React from 'react';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface StatusWorkflowTabProps {
-  formData: Measurement;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
 }
 
-export default function StatusWorkflowTab({ formData, updateFormData }: StatusWorkflowTabProps) {
+const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateFormData }) => {
   const [date, setDate] = useState<Date | undefined>(
     formData.installationDate ? new Date(formData.installationDate) : undefined
   );
@@ -117,4 +107,6 @@ export default function StatusWorkflowTab({ formData, updateFormData }: StatusWo
       </div>
     </div>
   );
-}
+};
+
+export default StatusWorkflowTab;

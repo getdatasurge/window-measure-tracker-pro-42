@@ -3,6 +3,7 @@ import React from 'react';
 import EditMeasurementModal from '../EditMeasurementModal';
 import { Measurement } from '@/types/measurement';
 import { MeasurementFormData } from '@/hooks/measurements/types';
+import { Direction } from '@/constants/direction';
 
 interface MeasurementEditModalWrapperProps {
   measurement: Measurement | null;
@@ -29,7 +30,10 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     );
   }
 
-  // Convert Measurement to MeasurementFormData format
+  // Ensure direction is a valid Direction type
+  const validDirection = (measurement.direction as Direction) || 'N/A';
+
+  // Convert Measurement to MeasurementFormData format with explicit casting
   const enhancedMeasurement: MeasurementFormData = {
     id: measurement.id, // Ensure id is passed correctly and required
     projectId: measurement.projectId || '',
@@ -37,7 +41,7 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     location: measurement.location || '',
     width: measurement.width || '',
     height: measurement.height || '',
-    direction: measurement.direction || 'N/A',
+    direction: validDirection,
     notes: measurement.notes || '',
     filmRequired: measurement.film_required !== false, // Ensure proper boolean conversion
     quantity: measurement.quantity || 1,
