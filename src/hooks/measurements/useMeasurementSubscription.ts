@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
 import { setupRealtime } from '@/utils/setupRealtime';
+import { formatMeasurement } from '@/utils/formatters/measurementFormatter';
 
 // Define options for measurement subscription
 interface MeasurementSubscriptionOptions {
@@ -10,6 +11,16 @@ interface MeasurementSubscriptionOptions {
   status?: string;
   startDate?: Date;
   endDate?: Date;
+  onInsert?: (measurement: Measurement) => void;
+  onUpdate?: (measurement: Measurement) => void;
+  onDelete?: (id: string) => void;
+}
+
+export interface SubscriptionState {
+  lastError: Error | null;
+  isConnected: boolean;
+  isPolling: boolean;
+  lastSyncTime: Date | null;
 }
 
 /**
@@ -20,20 +31,22 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
   const [measurements, setMeasurements] = useState<Measurement[]>([]);
   
   // State for subscription status
-  const [subscriptionState, setSubscriptionState] = useState<'idle' | 'connected' | 'error'>('idle');
-  
-  // State for polling fallback
-  const [isPolling, setIsPolling] = useState<boolean>(false);
-  
-  // State to track if initial data has been loaded
-  const [initialDataLoaded, setInitialDataLoaded] = useState<boolean>(false);
+  const [subscriptionState, setSubscriptionState] = useState<SubscriptionState>({
+    lastError: null,
+    isConnected: false,
+    isPolling: false,
+    lastSyncTime: null
+  });
   
   /**
    * Fetch measurements data from Supabase
    */
   const fetchMeasurementsData = useCallback(async (): Promise<Measurement[]> => {
     try {
-      let query = supabase.from('measurements').select('*');
+      let query = supabase.from('measurements').select(`
+        *,
+        projects (name)
+      `);
       
       // Apply filters if provided
       if (options.projectId) {
@@ -62,20 +75,31 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
       
       // Transform data to ensure types match Measurement interface
       if (data) {
-        return data.map(item => ({
-          ...item,
-          id: item.id,
-          projectId: item.project_id,
-          measurementDate: item.measurement_date,
-          projectName: item.projectName || '', // Provide default value
-          createdAt: item.created_at,
-          updatedAt: item.updated_at,
-          recordedBy: item.recorded_by || '',
-          width: String(item.width || ''), // Convert to string to match Measurement type
-          height: String(item.height || ''), // Convert to string to match Measurement type
-          area: String(item.area || ''), // Convert to string to match Measurement type
-          status: item.status || 'Pending'
-        } as Measurement));
+        return data.map(item => {
+          // Get the project name from the nested projects object
+          const projectName = item.projects ? item.projects.name : '';
+          
+          return {
+            id: item.id,
+            projectId: item.project_id,
+            measurementDate: item.measurement_date,
+            projectName: projectName || '', // Use the extracted project name
+            createdAt: item.created_at,
+            updatedAt: item.updated_at,
+            recordedBy: item.recorded_by || '',
+            width: String(item.width || ''), // Convert to string to match Measurement type
+            height: String(item.height || ''), // Convert to string to match Measurement type
+            area: String(item.area || ''), // Convert to string to match Measurement type
+            status: item.status || 'Pending',
+            location: item.location || '',
+            direction: item.direction || 'N/A',
+            notes: item.notes || '',
+            quantity: item.quantity || 1,
+            film_required: item.film_required,
+            installationDate: item.installation_date,
+            photos: item.photos || []
+          } as Measurement;
+        });
       }
       
       return [];
@@ -92,11 +116,19 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     try {
       const data = await fetchMeasurementsData();
       setMeasurements(data);
-      setInitialDataLoaded(true);
-      return data;
+      setSubscriptionState(prev => ({
+        ...prev,
+        lastSyncTime: new Date(),
+        lastError: null
+      }));
+      return true;
     } catch (error) {
       console.error('Error in refreshData:', error);
-      return [];
+      setSubscriptionState(prev => ({
+        ...prev,
+        lastError: error instanceof Error ? error : new Error('Unknown fetch error')
+      }));
+      return false;
     }
   }, [fetchMeasurementsData]);
   
@@ -129,23 +161,37 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             
             // Handle the update based on the event type
             switch(payload.eventType) {
-              case 'INSERT':
-                setMeasurements(prev => [payload.new as Measurement, ...prev]);
+              case 'INSERT': {
+                if (options.onInsert && payload.new) {
+                  const newMeasurement = formatMeasurement(payload.new);
+                  options.onInsert(newMeasurement);
+                }
+                setMeasurements(prev => [formatMeasurement(payload.new), ...prev]);
                 break;
+              }
                 
-              case 'UPDATE':
+              case 'UPDATE': {
+                if (options.onUpdate && payload.new) {
+                  const updatedMeasurement = formatMeasurement(payload.new);
+                  options.onUpdate(updatedMeasurement);
+                }
                 setMeasurements(prev => 
                   prev.map(item => 
-                    item.id === payload.new.id ? { ...item, ...payload.new as Partial<Measurement> } : item
+                    item.id === payload.new.id ? formatMeasurement(payload.new) : item
                   )
                 );
                 break;
+              }
                 
-              case 'DELETE':
+              case 'DELETE': {
+                if (options.onDelete && payload.old?.id) {
+                  options.onDelete(payload.old.id);
+                }
                 setMeasurements(prev => 
                   prev.filter(item => item.id !== payload.old?.id)
                 );
                 break;
+              }
                 
               default:
                 break;
@@ -155,7 +201,11 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         .subscribe();
       
       // Set subscription state to connected
-      setSubscriptionState('connected');
+      setSubscriptionState(prev => ({
+        ...prev,
+        isConnected: true,
+        isPolling: false
+      }));
       
       // Return cleanup function
       return () => {
@@ -163,18 +213,21 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
       };
     } catch (error) {
       console.warn('Error setting up realtime, falling back to polling:', error);
-      setSubscriptionState('error');
-      setupPolling();
-      return () => {};
+      setSubscriptionState(prev => ({
+        ...prev,
+        isConnected: false,
+        isPolling: true,
+        lastError: error instanceof Error ? error : new Error('Unknown subscription error')
+      }));
+      return setupPolling();
     }
-  }, []);
+  }, [options.onInsert, options.onUpdate, options.onDelete]);
   
   /**
    * Setup polling as fallback for real-time updates
    */
   const setupPolling = useCallback(() => {
     console.info('Starting polling fallback mechanism');
-    setIsPolling(true);
     
     // Poll for updates every 30 seconds
     const intervalId = setInterval(() => {
@@ -185,7 +238,6 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     // Return cleanup function
     return () => {
       clearInterval(intervalId);
-      setIsPolling(false);
     };
   }, [refreshData]);
   
@@ -210,7 +262,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     measurements,
     refreshData,
     subscriptionState,
-    isPolling,
-    initialDataLoaded
+    isPolling: subscriptionState.isPolling,
+    initialDataLoaded: measurements.length > 0
   };
 }

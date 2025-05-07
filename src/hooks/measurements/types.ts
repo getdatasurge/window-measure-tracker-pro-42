@@ -3,7 +3,7 @@ import { Direction, MeasurementStatus } from '@/types/measurement';
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_FILES = 3;
 
-// Define the project option type directly here instead of importing
+// Define the project option type directly here
 export interface ProjectOption {
   id: string;
   name: string;
