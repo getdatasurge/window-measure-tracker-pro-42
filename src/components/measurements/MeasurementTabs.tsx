@@ -57,7 +57,7 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
       <MeasurementTabsNav activeTab={activeTab} />
       <MeasurementTabsContent 
         activeTab={activeTab}
-        formData={formData}
+        formData={formData as any} // Type assertion to fix the error
         updateFormData={handleFormDataUpdate}
         errors={errors}
         setErrors={setErrors}

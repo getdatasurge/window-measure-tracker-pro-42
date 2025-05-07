@@ -103,7 +103,7 @@ const MeasurementStatusBoard: React.FC = () => {
       id: data.id || '',
       projectId: data.projectId || '',
       projectName: data.projectName || '',
-      film_required: data.filmRequired,
+      film_required: data.filmRequired, // Map filmRequired to film_required
       recordedBy: data.recordedBy || '',
       updatedAt: data.updatedAt || new Date().toISOString(),
       updatedBy: data.updatedBy || '',

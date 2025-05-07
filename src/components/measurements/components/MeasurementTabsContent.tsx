@@ -6,11 +6,11 @@ import DimensionsTab from '../tabs/DimensionsTab';
 import AttributesTab from '../tabs/AttributesTab';
 import PhotosTab from '../tabs/PhotosTab';
 import StatusWorkflowTab from '../tabs/StatusWorkflowTab';
-import { Measurement } from '@/types/measurement';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface MeasurementTabsContentProps {
   activeTab: string;
-  formData: Measurement;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
   errors: {[key: string]: string};
   setErrors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;

@@ -26,7 +26,7 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
     height: measurement.height || '',
     direction: measurement.direction || 'N/A',
     notes: measurement.notes || '',
-    filmRequired: measurement.film_required ?? true,
+    filmRequired: measurement.film_required ?? true, // Convert film_required to filmRequired
     quantity: measurement.quantity || 1,
     status: measurement.status || 'Pending',
     photos: Array.isArray(measurement.photos) ? measurement.photos : [],
