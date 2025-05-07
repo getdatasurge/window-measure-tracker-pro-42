@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
 import { setupRealtime } from '@/utils/setupRealtime';
@@ -18,9 +18,35 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
   const [isRealtime, setIsRealtime] = useState<boolean>(false);
+  const [realtimeChannel, setRealtimeChannel] = useState<any>(null);
+
+  // Format a measurement from the database to our UI format
+  const formatMeasurement = useCallback((item: any): Measurement => {
+    return {
+      id: item.id,
+      projectId: item.project_id,
+      projectName: item.projects?.name || 'Unknown Project',
+      location: item.location || '',
+      width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
+      height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
+      depth: item.depth ? `${item.depth}"` : undefined,
+      area: item.area ? `${item.area} ft²` : '0 ft²',
+      quantity: item.quantity || 1,
+      recordedBy: item.recorded_by || '',
+      direction: (item.direction || 'N/A') as any,
+      notes: item.notes || '',
+      status: (item.status || 'Pending') as any,
+      measurementDate: item.measurement_date || new Date().toISOString(),
+      updatedAt: item.updated_at || new Date().toISOString(),
+      updatedBy: item.updated_by || '',
+      photos: item.photos || [],
+      film_required: item.film_required,
+      reviewComments: '',
+    };
+  }, []);
 
   // Function to fetch measurements with current options
-  const fetchMeasurements = async () => {
+  const fetchMeasurements = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -44,6 +70,7 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
           updated_at,
           updated_by,
           photos,
+          film_required,
           projects (name)
         `)
         .eq('deleted', false)
@@ -82,31 +109,12 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
       console.log(`Fetched ${data?.length || 0} measurements`);
       
       // Transform the data to match our Measurement type
-      const mappedMeasurements = (data || []).map(item => ({
-        id: item.id,
-        projectId: item.project_id,
-        projectName: item.projects?.name || 'Unknown Project',
-        location: item.location || '',
-        width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
-        height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
-        depth: item.depth ? `${item.depth}"` : undefined,
-        area: item.area ? `${item.area} ft²` : '0 ft²',
-        quantity: item.quantity || 1,
-        recordedBy: item.recorded_by || '',
-        direction: (item.direction || 'N/A') as any,
-        notes: item.notes || '',
-        status: (item.status || 'Pending') as any,
-        measurementDate: item.measurement_date || new Date().toISOString(),
-        updatedAt: item.updated_at || new Date().toISOString(),
-        updatedBy: item.updated_by || '',
-        photos: item.photos || [],
-        reviewComments: '',
-      }));
+      const mappedMeasurements = (data || []).map(formatMeasurement);
       
       setMeasurements(mappedMeasurements);
       setError(null);
       
-      // Enable realtime subscriptions
+      // Enable realtime subscriptions if not already set up
       if (!isRealtime) {
         setupRealtimeSubscription();
       }
@@ -116,7 +124,7 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [options, formatMeasurement, isRealtime]);
   
   // Fetch the measurements data on mount and when options change
   useEffect(() => {
@@ -124,11 +132,14 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
     
     // Cleanup function to remove subscriptions
     return () => {
-      if (isRealtime) {
-        supabase.removeAllChannels();
+      if (realtimeChannel) {
+        console.log("Cleaning up realtime subscription");
+        supabase.removeChannel(realtimeChannel);
+        setRealtimeChannel(null);
+        setIsRealtime(false);
       }
     };
-  }, [options.projectId, options.date, options.status]);
+  }, [options.projectId, options.date, options.status, fetchMeasurements]);
   
   // Set up realtime subscription
   const setupRealtimeSubscription = async () => {
@@ -161,15 +172,10 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
         .subscribe((status) => {
           console.log('Realtime subscription status:', status);
         });
-        
+      
+      setRealtimeChannel(channel);  
       console.log('Realtime subscription established for measurements table');
       setIsRealtime(true);
-
-      // Return unsubscribe function
-      return () => {
-        console.log('Unsubscribing from realtime channel');
-        supabase.removeChannel(channel);
-      };
     } catch (error) {
       console.error('Failed to set up realtime subscription:', error);
     }

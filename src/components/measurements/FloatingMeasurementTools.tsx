@@ -9,13 +9,18 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import MeasurementEntryModal from './MeasurementEntryModal';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
+import { Measurement } from '@/types/measurement';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/auth';
 
 export function FloatingMeasurementTools() {
   const [isOpen, setIsOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [showMeasurementModal, setShowMeasurementModal] = useState(false);
   const [showProjectSelector, setShowProjectSelector] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   const handleAddMeasurement = () => {
     setIsOpen(false);
@@ -27,14 +32,98 @@ export function FloatingMeasurementTools() {
     setShowProjectSelector(true);
   };
   
-  const handleMeasurementSave = (measurement) => {
-    toast({
-      title: "Measurement saved",
-      description: "Your measurement has been saved successfully.",
-    });
+  // Save measurement to Supabase
+  const handleMeasurementSave = async (measurement: Measurement) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to save measurements.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      setIsSaving(true);
+      console.log("FloatingTools - Preparing measurement data for save:", measurement);
+      
+      // Parse numeric values to ensure they're saved as numbers
+      const parseNumericValue = (value: string | undefined): number | null => {
+        if (!value) return null;
+        // Remove any non-numeric characters except decimal point
+        const numericStr = value.replace(/[^0-9.]/g, '');
+        const parsed = parseFloat(numericStr);
+        return isNaN(parsed) ? null : parsed;
+      };
+      
+      // Prepare data for database (converting to match DB schema)
+      const measurementData = {
+        project_id: measurement.projectId,
+        location: measurement.location.trim(),
+        width: parseNumericValue(measurement.width),
+        height: parseNumericValue(measurement.height),
+        depth: parseNumericValue(measurement.depth),
+        area: parseNumericValue(measurement.area),
+        quantity: measurement.quantity || 1,
+        recorded_by: user.id,
+        direction: measurement.direction?.toLowerCase() || null,
+        notes: measurement.notes || '',
+        status: measurement.status.toLowerCase(),
+        measurement_date: measurement.measurementDate || new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        updated_by: user.id,
+        photos: Array.isArray(measurement.photos) ? measurement.photos : [],
+        film_required: measurement.film_required === undefined ? true : !!measurement.film_required,
+      };
+      
+      // Validate required fields
+      const requiredFields = ['project_id', 'location', 'width', 'height'];
+      const missingFields = requiredFields.filter(field => !measurementData[field]);
+      
+      if (missingFields.length > 0) {
+        const fieldNames = missingFields.map(f => f.replace('_', ' ')).join(', ');
+        throw new Error(`Required fields missing: ${fieldNames}`);
+      }
+      
+      console.log("FloatingTools - Formatted measurement data:", measurementData);
+
+      // Create new measurement
+      const { data, error } = await supabase
+        .from('measurements')
+        .insert(measurementData)
+        .select();
+        
+      if (error) {
+        console.error("FloatingTools - Supabase insert error:", error);
+        throw error;
+      }
+      
+      console.log("FloatingTools - Insert successful:", data);
+      
+      toast({
+        title: "Measurement saved",
+        description: "Your measurement has been saved successfully.",
+      });
+
+      // Close the modal
+      setShowMeasurementModal(false);
+
+      // Navigate to measurements page to see the newly created measurement
+      navigate('/measurements');
+      
+    } catch (err) {
+      console.error('FloatingTools - Error saving measurement:', err);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
   
-  const handleProjectSelect = (projectId) => {
+  const handleProjectSelect = (projectId: string) => {
     setShowProjectSelector(false);
     navigate(`/measurement-entries?project=${projectId}`);
   };

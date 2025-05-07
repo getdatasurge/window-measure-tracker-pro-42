@@ -28,6 +28,7 @@ const MeasurementStatusBoard: React.FC = () => {
   });
   const [editMeasurement, setEditMeasurement] = useState<Measurement | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
   
@@ -54,26 +55,46 @@ const MeasurementStatusBoard: React.FC = () => {
     }
     
     try {
+      setIsSaving(true);
       console.log("Preparing measurement data for save:", measurement);
+      
+      // Parse numeric values to ensure they're saved as numbers
+      const parseNumericValue = (value: string | undefined): number | null => {
+        if (!value) return null;
+        // Remove any non-numeric characters except decimal point
+        const numericStr = value.replace(/[^0-9.]/g, '');
+        const parsed = parseFloat(numericStr);
+        return isNaN(parsed) ? null : parsed;
+      };
       
       // Prepare data for database (converting to match DB schema)
       const measurementData = {
         project_id: measurement.projectId,
-        location: measurement.location,
-        width: parseFloat(measurement.width.replace('"', '')),
-        height: parseFloat(measurement.height.replace('"', '')),
-        depth: measurement.depth ? parseFloat(measurement.depth.replace('"', '')) : null,
-        area: parseFloat(measurement.area.replace(' ft²', '')),
-        quantity: measurement.quantity,
-        recorded_by: user.id, // Store user ID in recorded_by
-        direction: measurement.direction,
-        notes: measurement.notes,
+        location: measurement.location.trim(),
+        width: parseNumericValue(measurement.width),
+        height: parseNumericValue(measurement.height),
+        depth: parseNumericValue(measurement.depth),
+        area: parseNumericValue(measurement.area),
+        quantity: measurement.quantity || 1,
+        recorded_by: user.id,
+        direction: measurement.direction?.toLowerCase() || null,
+        notes: measurement.notes || '',
         status: measurement.status.toLowerCase(),
-        measurement_date: measurement.measurementDate,
+        measurement_date: measurement.measurementDate || new Date().toISOString(),
         updated_at: new Date().toISOString(),
         updated_by: user.id,
-        photos: measurement.photos || [],
+        photos: Array.isArray(measurement.photos) ? measurement.photos : [],
+        film_required: measurement.film_required === undefined ? true : !!measurement.film_required,
       };
+      
+      // Validate required fields
+      const requiredFields = ['project_id', 'location', 'width', 'height'];
+      const missingFields = requiredFields.filter(field => !measurementData[field]);
+      
+      if (missingFields.length > 0) {
+        const fieldNames = missingFields.map(f => f.replace('_', ' ')).join(', ');
+        throw new Error(`Required fields missing: ${fieldNames}`);
+      }
       
       console.log("Formatted measurement data:", measurementData);
       
@@ -131,6 +152,7 @@ const MeasurementStatusBoard: React.FC = () => {
       }
       
       // Explicitly refetch measurements to update the UI
+      console.log("Refetching measurements after save");
       await refetchMeasurements();
       
       // Close the modal
@@ -139,10 +161,12 @@ const MeasurementStatusBoard: React.FC = () => {
     } catch (err) {
       console.error('Error saving measurement:', err);
       toast({
-        title: "Error",
-        description: err instanceof Error ? err.message : "Failed to save measurement.",
+        title: "Error saving measurement",
+        description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
         variant: "destructive"
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
