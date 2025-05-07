@@ -49,6 +49,10 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     initialProjectId,
     initialProjectName
   });
+
+  const fetchProjects = useCallback(() => {
+  // your fetch logic
+  }, []);
   
   // Reference to first input field for auto-focus
   const locationInputRef = useRef<HTMLInputElement | null>(null);
