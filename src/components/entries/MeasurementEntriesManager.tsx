@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useProjects } from '@/hooks/useProjects';
 import { EntryList } from './EntryList';
@@ -24,25 +23,34 @@ export const MeasurementEntriesManager: React.FC<MeasurementEntriesManagerProps>
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
+
     const fetchProjects = async () => {
-      setLoading(true);
       try {
+        setLoading(true);
         const projectsData = await getProjects();
+
+        if (!isMounted) return;
+
         setProjects(projectsData || []);
-        
-        // If we have projects but no default selected, select the first one
-        if (projectsData.length > 0 && !selectedProjectId) {
+
+        // Auto-select first project only if nothing is selected yet
+        if (!defaultProjectId && projectsData?.length > 0 && !selectedProjectId) {
           setSelectedProjectId(projectsData[0].id);
         }
       } catch (error) {
         console.error('Error fetching projects:', error);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
-    
+
     fetchProjects();
-  }, []);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [getProjects, defaultProjectId, selectedProjectId]);
 
   const selectedProject = projects.find(p => p.id === selectedProjectId);
 
@@ -83,8 +91,8 @@ export const MeasurementEntriesManager: React.FC<MeasurementEntriesManagerProps>
               </div>
 
               {selectedProjectId && (
-                <EntryList 
-                  projectId={selectedProjectId} 
+                <EntryList
+                  projectId={selectedProjectId}
                   projectName={selectedProject?.name}
                 />
               )}

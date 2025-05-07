@@ -1,8 +1,7 @@
-
 import React, { useState, useEffect } from 'react';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { 
+import {
   Select,
   SelectContent,
   SelectGroup,
@@ -32,22 +31,25 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
   const [selectedArea, setSelectedArea] = useState<FeatureArea | ''>('');
   const [selectedType, setSelectedType] = useState('');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [uniqueTypes, setUniqueTypes] = useState<string[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  
-  // Get all unique action types for the filter dropdown
-  useEffect(() => {
-    const types = Array.from(new Set(actions.map(action => action.type)));
-    setUniqueTypes(types);
-  }, [actions]);
-  
-  // Debounced search query to avoid excessive processing
+
   const debouncedQuery = useDebounce(searchQuery, 300);
-  
-  // Perform search when query or filters change
+
+  // ✅ Memoized: avoid state update loops
+  const uniqueTypes = React.useMemo(() => {
+    return Array.from(new Set(actions.map(action => action.type)));
+  }, [actions]);
+
+  const featureAreas = React.useMemo(() => {
+    return Array.from(new Set(actions.map(action =>
+      action.featureArea || 'general'
+    ))) as FeatureArea[];
+  }, [actions]);
+
+  // Search logic with debounce and filters
   useEffect(() => {
     setIsSearching(true);
-    
+
     const performSearch = () => {
       const results = searchActions(actions, debouncedQuery, {
         featureArea: selectedArea as FeatureArea || undefined,
@@ -57,44 +59,30 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
       setSearchResults(results);
       setIsSearching(false);
     };
-    
-    // Small timeout to allow UI to update before search
+
     const timeoutId = setTimeout(performSearch, 10);
-    
-    return () => {
-      clearTimeout(timeoutId);
-    };
+    return () => clearTimeout(timeoutId);
   }, [debouncedQuery, selectedArea, selectedType, actions]);
-  
-  // Get feature areas present in the current actions
-  const featureAreas = React.useMemo(() => {
-    return Array.from(new Set(actions.map(action => 
-      action.featureArea || 'general'
-    ))) as FeatureArea[];
-  }, [actions]);
-  
-  // Clear all filters
+
   const handleClearFilters = () => {
     setSearchQuery('');
     setSelectedArea('');
     setSelectedType('');
   };
 
-  // Type-safe handler for the Select's onValueChange
   const handleAreaChange = (value: string) => {
     setSelectedArea(value as FeatureArea | '');
   };
 
-  // Type-safe handler for the Select's onValueChange
   const handleTypeChange = (value: string) => {
     setSelectedType(value);
   };
-  
+
   return (
     <div className="border rounded-lg bg-white shadow-sm">
       <div className="sticky top-0 z-10 bg-white border-b p-4 shadow-sm">
         <h2 className="text-lg font-medium mb-3">Search Actions</h2>
-        
+
         <div className="flex items-center gap-2 mb-4">
           <div className="relative flex-grow">
             <Input
@@ -108,17 +96,17 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
               <Search size={16} className="text-gray-400" />
             </div>
           </div>
-          
-          <Button 
-            variant="outline" 
-            size="sm" 
+
+          <Button
+            variant="outline"
+            size="sm"
             onClick={handleClearFilters}
             disabled={!searchQuery && !selectedArea && !selectedType}
           >
             Clear
           </Button>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <Select value={selectedArea} onValueChange={handleAreaChange}>
             <SelectTrigger>
@@ -134,7 +122,7 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
               </SelectGroup>
             </SelectContent>
           </Select>
-          
+
           <Select value={selectedType} onValueChange={handleTypeChange}>
             <SelectTrigger>
               <SelectValue placeholder="Filter by action type" />
@@ -151,7 +139,7 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
           </Select>
         </div>
       </div>
-      
+
       <ScrollArea className="p-4" style={{ maxHeight }}>
         {isSearching ? (
           <div className="py-8 text-center text-gray-500">
@@ -170,7 +158,7 @@ const ActionSearchPanel: React.FC<ActionSearchPanelProps> = ({
             <div className="text-sm text-gray-500 mb-2">
               Found {searchResults.length} matching actions
             </div>
-            
+
             {searchResults.map(result => (
               <div key={result.action.id} className="relative">
                 <ActionCard action={{
