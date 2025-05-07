@@ -1,9 +1,9 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { MAX_FILE_SIZE, MAX_FILES } from './types';
+import { MAX_FILE_SIZE, MAX_FILES, PhotoUploadState, PhotoUploadHandlers } from './types';
 
-export function usePhotoUpload() {
+export function usePhotoUpload(): PhotoUploadState & PhotoUploadHandlers {
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoErrors, setPhotoErrors] = useState<string[]>([]);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -48,7 +48,7 @@ export function usePhotoUpload() {
     e.target.value = '';
   }, [photoFiles]);
   
-  const removePhoto = useCallback((index: number) => {
+  const removePhoto = useCallback((index: number): void => {
     setPhotoFiles(prev => prev.filter((_, i) => i !== index));
   }, []);
   
@@ -96,7 +96,7 @@ export function usePhotoUpload() {
     }
   };
   
-  const resetPhotoState = () => {
+  const resetPhotoState = (): void => {
     setPhotoFiles([]);
     setPhotoErrors([]);
     setUploadProgress(0);

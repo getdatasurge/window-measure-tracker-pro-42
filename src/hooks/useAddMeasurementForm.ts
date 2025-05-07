@@ -5,7 +5,7 @@ import { useMeasurements } from '@/hooks/useMeasurements';
 import { usePhotoUpload } from './measurements/usePhotoUpload';
 import { useFormSubmission } from './measurements/useFormSubmission';
 import { useProjectList } from './measurements/useProjectList';
-import { MeasurementFormData, UseAddMeasurementFormProps } from './measurements/types';
+import { MeasurementFormData, UseAddMeasurementFormProps, FormErrors } from './measurements/types';
 import { Direction } from '@/types/measurement';
 
 export { MAX_FILE_SIZE, MAX_FILES } from './measurements/types';
@@ -105,7 +105,7 @@ export const useAddMeasurementForm = ({
     handleSubmit,
     watch,
     setValue,
-    errors,
+    errors: errors as FormErrors,
     isSubmitting,
     projectsList,
     photoFiles,

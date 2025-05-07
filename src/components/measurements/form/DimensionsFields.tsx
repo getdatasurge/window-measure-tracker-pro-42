@@ -2,13 +2,11 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { FormErrors } from '@/hooks/measurements/types';
 
 interface DimensionsFieldsProps {
   register: any;
-  errors: {
-    width?: { message?: string };
-    height?: { message?: string };
-  };
+  errors: FormErrors;
 }
 
 const DimensionsFields: React.FC<DimensionsFieldsProps> = ({ register, errors }) => {
@@ -45,6 +43,9 @@ const DimensionsFields: React.FC<DimensionsFieldsProps> = ({ register, errors })
           placeholder="Depth (optional)"
           {...register('depth')}
         />
+        {errors.depth && (
+          <p className="text-sm text-red-500">{errors.depth.message}</p>
+        )}
       </div>
     </div>
   );

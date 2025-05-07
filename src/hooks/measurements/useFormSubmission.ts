@@ -3,11 +3,11 @@ import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
-import { MeasurementFormData } from './types';
+import { MeasurementFormData, FormSubmissionState, FormSubmissionHandlers } from './types';
 import { Direction } from '@/types/measurement';
 
-export function useFormSubmission() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+export function useFormSubmission(): FormSubmissionState & FormSubmissionHandlers {
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const { toast } = useToast();
   const { user } = useAuth();
   
@@ -15,7 +15,7 @@ export function useFormSubmission() {
     data: MeasurementFormData,
     photoUrls: string[],
     onSuccess?: () => void
-  ) => {
+  ): Promise<any> => {
     if (!user) {
       toast({
         title: "Authentication required",

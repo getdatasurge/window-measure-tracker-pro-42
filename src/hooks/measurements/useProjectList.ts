@@ -1,12 +1,13 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { ProjectOption, ProjectListState, ProjectListHandlers } from './types';
 
-export function useProjectList() {
-  const [projectsList, setProjectsList] = useState<{id: string, name: string}[]>([]);
+export function useProjectList(): ProjectListState & ProjectListHandlers {
+  const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);
   
   // Fetch projects for dropdown
-  const fetchProjects = useCallback(async () => {
+  const fetchProjects = useCallback(async (): Promise<void> => {
     try {
       const { data, error } = await supabase
         .from('projects')
@@ -17,7 +18,7 @@ export function useProjectList() {
       if (error) throw error;
       
       if (data) {
-        setProjectsList(data);
+        setProjectsList(data as ProjectOption[]);
       }
     } catch (err) {
       console.error('Error fetching projects:', err);

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -5,15 +6,13 @@ import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Direction } from '@/types/measurement';
+import { FormErrors } from '@/hooks/measurements/types';
 
 interface AttributesFieldsProps {
   register: any;
   watch: any;
   setValue: any;
-  errors: {
-    quantity?: { message?: string };
-    location?: { message?: string };
-  };
+  errors: FormErrors;
 }
 
 const AttributesFields: React.FC<AttributesFieldsProps> = ({ 
