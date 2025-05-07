@@ -24,7 +24,7 @@ export const fetchProjects = async (activeOnly = true): Promise<ProjectBasicData
       .select('id, name, client_name, location, status, deadline');
 
     if (activeOnly) {
-      query = query.eq('is_active', true);
+      query = query.eq('status', 'active'); // Changed from is_active to status to match the actual column name
     }
 
     const { data, error } = await query;

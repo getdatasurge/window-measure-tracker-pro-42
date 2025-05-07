@@ -1,7 +1,7 @@
 
 // Export custom hooks
 export * from "./use-toast";
-export * from "./useMeasurementSubscription";
+// Remove the duplicate export of useMeasurementSubscription
 export * from "./measurements/useMeasurementSubscription";
 export * from "./useMeasurementUpdate";
 export * from "./useMeasurements";

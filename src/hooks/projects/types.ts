@@ -1,53 +1,34 @@
 
-// Project-related types for the hooks
-export interface ProjectOption {
-  id: string;
-  name: string;
-  client_name?: string;
-  location?: string;
-  status?: string;
-  deadline?: string;
-}
-
-export interface ProjectDetails extends ProjectOption {
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-}
-
-export interface ProjectCreateInput {
-  name: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-}
-
-export interface ProjectUpdateInput {
-  name?: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-  status?: string;
-}
+import { ProjectOption, ProjectDetails } from '@/types/project-types';
 
 export interface ProjectsHookState {
+  projects: ProjectOption[];
   loading: boolean;
   error: Error | null;
-  projects: ProjectOption[];
-  selectedProject: ProjectDetails | null;
 }
 
-export interface ProjectsHookActions {
-  fetchProjects: (activeOnly?: boolean) => Promise<ProjectOption[]>;
-  fetchProjectById: (id: string) => Promise<ProjectDetails | null>;
-  createProject: (projectData: ProjectCreateInput) => Promise<ProjectDetails | null>;
-  updateProject: (id: string, projectData: ProjectUpdateInput) => Promise<ProjectDetails | null>;
-  deleteProject: (id: string) => Promise<boolean>;
+export interface ProjectDetailState {
+  project: ProjectDetails | null;
+  loading: boolean;
+  error: Error | null;
 }
 
-export interface ProjectsHookReturn extends ProjectsHookState, ProjectsHookActions {
-  isLoading: boolean;
+export interface UseFetchProjectsReturn {
+  (activeOnly?: boolean): Promise<ProjectOption[]>;
+}
+
+export interface UseFetchProjectByIdReturn {
+  (id: string): Promise<ProjectDetails | null>;
+}
+
+export interface UseCreateProjectReturn {
+  (projectData: Omit<ProjectOption, 'id'>): Promise<ProjectOption | null>;
+}
+
+export interface UseUpdateProjectReturn {
+  (id: string, projectData: Partial<ProjectOption>): Promise<ProjectOption | null>;
+}
+
+export interface UseDeleteProjectReturn {
+  (id: string): Promise<boolean>;
 }
