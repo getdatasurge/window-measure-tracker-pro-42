@@ -27,9 +27,11 @@ export const useProjectsWithErrorHandling = () => {
   // Hook operations
   const fetchProjects = useFetchProjects(setState);
   const fetchProjectById = useFetchProjectById(setProjectDetailState);
-  const createProject = useCreateProject(setState);
-  const updateProject = useUpdateProject(setState);
-  const deleteProject = useDeleteProject(setState);
+  
+  // Initialize these hooks with the fetchProjects function for refresh functionality
+  const createProject = useCreateProject(setState, fetchProjects);
+  const updateProject = useUpdateProject(setState, fetchProjects);
+  const deleteProject = useDeleteProject(setState, fetchProjects);
 
   return {
     ...state,

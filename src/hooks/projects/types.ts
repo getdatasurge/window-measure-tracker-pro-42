@@ -1,5 +1,5 @@
 
-import { ProjectOption, ProjectDetails } from '@/types/project-types';
+import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project-types';
 
 export interface ProjectsHookState {
   projects: ProjectOption[];
@@ -22,11 +22,11 @@ export interface UseFetchProjectByIdReturn {
 }
 
 export interface UseCreateProjectReturn {
-  (projectData: Omit<ProjectOption, 'id'>): Promise<ProjectOption | null>;
+  (projectData: ProjectCreateInput): Promise<ProjectDetails | null>;
 }
 
 export interface UseUpdateProjectReturn {
-  (id: string, projectData: Partial<ProjectOption>): Promise<ProjectOption | null>;
+  (id: string, projectData: ProjectUpdateInput): Promise<ProjectDetails | null>;
 }
 
 export interface UseDeleteProjectReturn {

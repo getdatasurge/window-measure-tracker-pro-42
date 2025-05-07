@@ -1,7 +1,7 @@
 
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectDetails, ProjectCreateInput } from '../types';
+import { ProjectDetails, ProjectCreateInput } from '@/types/project-types';
 import { withRetry } from '../utils/retry';
 
 /**

@@ -11,41 +11,36 @@ export function useDeleteProject(
   refreshProjects: () => Promise<any>
 ) {
   /**
-   * Delete a project
+   * Delete a project by ID
    */
   const deleteProject = async (id: string): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
     try {
-      const success = await withRetry(async () => {
+      await withRetry(async () => {
         const { error } = await supabase
           .from('projects')
           .delete()
           .eq('id', id);
           
         if (error) throw error;
-        
-        return true;
       });
       
       setState(prev => ({
         ...prev,
         loading: false,
-        selectedProject: prev.selectedProject?.id === id ? null : prev.selectedProject,
         error: null
       }));
       
-      if (success) {
-        toast({
-          title: "Project deleted",
-          description: "Project has been successfully deleted",
-        });
-        
-        // Refresh the projects list
-        refreshProjects();
-      }
+      toast({
+        title: "Project deleted",
+        description: "The project has been successfully deleted.",
+      });
       
-      return success;
+      // Refresh the projects list
+      refreshProjects();
+      
+      return true;
     } catch (error) {
       const errorObj = error instanceof Error ? error : new Error(`Failed to delete project with ID: ${id}`);
       
