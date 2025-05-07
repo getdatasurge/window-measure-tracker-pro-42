@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { Tabs } from '@/components/ui/tabs';
-import { Measurement } from '@/types/measurement';
 import MeasurementTabsNav from './components/MeasurementTabsNav';
 import MeasurementTabsContent from './components/MeasurementTabsContent';
 import { useTabNavigation } from './hooks/useTabNavigation';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface MeasurementTabsProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  formData: Measurement;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
   errors?: {[key: string]: string};
   setErrors?: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;

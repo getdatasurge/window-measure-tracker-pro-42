@@ -116,6 +116,11 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
     }
   };
   
+  // Handle activeTab type casting for the MeasurementModalContent component
+  const handleTabChange = (tab: string) => {
+    setActiveTab(tab as 'details' | 'dimensions' | 'photos');
+  };
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="p-0 overflow-hidden bg-zinc-900 border border-zinc-800 text-white max-w-2xl">
@@ -138,7 +143,7 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
           {/* Scrollable Content Area */}
           <MeasurementModalContent
             activeTab={activeTab}
-            setActiveTab={setActiveTab}
+            setActiveTab={handleTabChange}
             formData={formData}
             updateFormData={updateFormData}
             errors={errors}

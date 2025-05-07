@@ -10,6 +10,7 @@ import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
 import { useToast } from '@/hooks/use-toast';
 import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface FilterState {
   projectId: string | null;
@@ -94,10 +95,24 @@ const MeasurementStatusBoard: React.FC = () => {
     setEditModalOpen(true);
   }, []);
 
-  // Handle saving a measurement with sequential operations
-  const handleSaveMeasurement = useCallback(async (measurement: Measurement) => {
+  // Handle saving a measurement
+  const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
+    // Convert MeasurementFormData to Measurement for saveMeasurement function
+    const measurementToSave = {
+      ...data,
+      id: data.id || '',
+      projectId: data.projectId || '',
+      projectName: data.projectName || '',
+      film_required: data.filmRequired,
+      recordedBy: data.recordedBy || '',
+      updatedAt: data.updatedAt || new Date().toISOString(),
+      updatedBy: data.updatedBy || '',
+      status: data.status || 'Pending',
+      measurementDate: data.measurementDate || new Date().toISOString()
+    } as unknown as Measurement;
+
     // The refetch will only happen after the save is complete
-    await saveMeasurement(measurement, async () => {
+    await saveMeasurement(measurementToSave, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
       await refreshData();

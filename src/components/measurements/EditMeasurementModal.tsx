@@ -16,14 +16,27 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
   onSave,
   defaultValues = {}
 }) => {
-  // Convert Measurement to MeasurementFormData if needed
+  // Convert Measurement to MeasurementFormData
   const formattedMeasurement = measurement ? {
-    ...measurement,
-    photos: Array.isArray(measurement.photos) 
-      ? measurement.photos 
-      : [],
-    filmRequired: measurement.film_required ?? true
-  } as unknown as MeasurementFormData : undefined;
+    id: measurement.id,
+    projectId: measurement.projectId || '',
+    projectName: measurement.projectName || '',
+    location: measurement.location || '',
+    width: measurement.width || '',
+    height: measurement.height || '',
+    direction: measurement.direction || 'N/A',
+    notes: measurement.notes || '',
+    filmRequired: measurement.film_required ?? true,
+    quantity: measurement.quantity || 1,
+    status: measurement.status || 'Pending',
+    photos: Array.isArray(measurement.photos) ? measurement.photos : [],
+    installationDate: measurement.installationDate || '',
+    input_source: measurement.input_source || 'manual',
+    updatedAt: measurement.updatedAt || new Date().toISOString(),
+    updatedBy: measurement.updatedBy || '',
+    recorded_by: measurement.recorded_by,
+    recordedBy: measurement.recordedBy || ''
+  } as MeasurementFormData : undefined;
 
   return (
     <MeasurementEntryModal

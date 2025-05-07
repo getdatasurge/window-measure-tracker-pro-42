@@ -28,6 +28,7 @@ export interface MeasurementFormData {
   recorded_by?: string; // Add for database operations
   film_required?: boolean; // For backwards compatibility
   measurementDate?: string; // Add for compatibility with Measurement type
+  recordedBy?: string; // For UI display
 }
 
 export interface MeasurementFormState {
@@ -51,6 +52,7 @@ export interface MeasurementFormState {
   input_source?: string;
   updatedAt?: string;
   updatedBy?: string;
+  recordedBy?: string;
 }
 
 export function convertFormStateToFormData(state: MeasurementFormState): MeasurementFormData {
