@@ -457,14 +457,13 @@ export type Database = {
           film_required: boolean | null
           frame_type: string | null
           glass_thickness: string | null
+          glass_type: string | null
           height: number | null
           id: string
-          input_source: string | null
           installation_date: string | null
           location: string
           measurement_date: string | null
           notes: string | null
-          photos: string[] | null
           project_id: string
           quantity: number | null
           recorded_by: string | null
@@ -487,14 +486,13 @@ export type Database = {
           film_required?: boolean | null
           frame_type?: string | null
           glass_thickness?: string | null
+          glass_type?: string | null
           height?: number | null
           id?: string
-          input_source?: string | null
           installation_date?: string | null
           location: string
           measurement_date?: string | null
           notes?: string | null
-          photos?: string[] | null
           project_id: string
           quantity?: number | null
           recorded_by?: string | null
@@ -517,14 +515,13 @@ export type Database = {
           film_required?: boolean | null
           frame_type?: string | null
           glass_thickness?: string | null
+          glass_type?: string | null
           height?: number | null
           id?: string
-          input_source?: string | null
           installation_date?: string | null
           location?: string
           measurement_date?: string | null
           notes?: string | null
-          photos?: string[] | null
           project_id?: string
           quantity?: number | null
           recorded_by?: string | null
@@ -611,34 +608,22 @@ export type Database = {
       }
       profiles: {
         Row: {
-          avatar_url: string | null
-          created_at: string | null
           email: string | null
           full_name: string | null
           id: string
-          phone_number: string | null
           role: string | null
-          updated_at: string | null
         }
         Insert: {
-          avatar_url?: string | null
-          created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
-          phone_number?: string | null
           role?: string | null
-          updated_at?: string | null
         }
         Update: {
-          avatar_url?: string | null
-          created_at?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
-          phone_number?: string | null
           role?: string | null
-          updated_at?: string | null
         }
         Relationships: []
       }
@@ -674,39 +659,6 @@ export type Database = {
           },
         ]
       }
-      project_change_logs: {
-        Row: {
-          action: string | null
-          actor_id: string | null
-          changed_at: string | null
-          id: string
-          ip_address: string | null
-          new_data: Json | null
-          old_data: Json | null
-          project_id: string | null
-        }
-        Insert: {
-          action?: string | null
-          actor_id?: string | null
-          changed_at?: string | null
-          id?: string
-          ip_address?: string | null
-          new_data?: Json | null
-          old_data?: Json | null
-          project_id?: string | null
-        }
-        Update: {
-          action?: string | null
-          actor_id?: string | null
-          changed_at?: string | null
-          id?: string
-          ip_address?: string | null
-          new_data?: Json | null
-          old_data?: Json | null
-          project_id?: string | null
-        }
-        Relationships: []
-      }
       projects: {
         Row: {
           client_name: string | null
@@ -716,7 +668,6 @@ export type Database = {
           description: string | null
           Eemail: string | null
           id: string
-          is_active: boolean | null
           location: string | null
           name: string
           status: string | null
@@ -730,7 +681,6 @@ export type Database = {
           description?: string | null
           Eemail?: string | null
           id?: string
-          is_active?: boolean | null
           location?: string | null
           name: string
           status?: string | null
@@ -744,7 +694,6 @@ export type Database = {
           description?: string | null
           Eemail?: string | null
           id?: string
-          is_active?: boolean | null
           location?: string | null
           name?: string
           status?: string | null
@@ -757,18 +706,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      execute_sql: {
-        Args: { sql: string }
-        Returns: undefined
-      }
-      is_project_member: {
-        Args: { project_id: string }
-        Returns: boolean
-      }
-      is_project_member_safe: {
-        Args: { project_id: string; user_id?: string }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

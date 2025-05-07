@@ -1,5 +1,5 @@
 
-import { supabase, safeQuery } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Setup realtime functionality for the measurements table
@@ -15,7 +15,13 @@ export const setupRealtime = async (): Promise<boolean> => {
       .select('id')
       .limit(1);
     
-    const tableExists = Array.isArray(data) && data.length >= 0 && !error;
+    // If there's an error or no data, the table might not exist yet
+    if (error) {
+      console.log('Error checking measurements table:', error.message);
+      return false;
+    }
+    
+    const tableExists = Array.isArray(data) && data.length >= 0;
     
     if (!tableExists) {
       console.log('Measurements table does not exist yet - skipping realtime setup');
