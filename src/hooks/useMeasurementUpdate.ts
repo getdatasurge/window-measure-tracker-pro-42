@@ -1,9 +1,10 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Measurement, Direction } from '@/types/measurement';
+import { Measurement } from '@/types/measurement';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
+import { DEFAULT_DIRECTION } from '@/constants/direction';
 
 export function useMeasurementUpdate() {
   const [isSaving, setIsSaving] = useState(false);
@@ -33,11 +34,8 @@ export function useMeasurementUpdate() {
         return isNaN(parsed) ? null : parsed;
       };
       
-      // Validate direction against allowed values
-      let direction: Direction = 'N/A';
-      if (measurement.direction && ['North', 'South', 'East', 'West', 'N/A'].includes(measurement.direction)) {
-        direction = measurement.direction as Direction;
-      }
+      // Use the direction from measurement or default if not provided
+      const direction = measurement.direction || DEFAULT_DIRECTION;
       
       console.log("Direction being sent to database:", direction);
       
@@ -51,7 +49,7 @@ export function useMeasurementUpdate() {
         area: parseNumericValue(measurement.area),
         quantity: measurement.quantity || 1,
         recorded_by: user.id,
-        direction: direction,
+        direction, // Use the validated direction value
         notes: measurement.notes || '',
         status: measurement.status.toLowerCase(),
         measurement_date: measurement.measurementDate || new Date().toISOString(),

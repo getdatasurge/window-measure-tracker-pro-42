@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Measurement, Direction } from '@/types/measurement';
+import { Measurement } from '@/types/measurement';
 import { 
   Label,
   Input,
@@ -12,6 +12,7 @@ import {
   Switch,
   Textarea
 } from "@/components/ui";
+import { DIRECTION_OPTIONS, Direction, DEFAULT_DIRECTION } from '@/constants/direction';
 
 interface AttributesTabProps {
   formData: Measurement;
@@ -19,9 +20,6 @@ interface AttributesTabProps {
 }
 
 const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData }) => {
-  // Define the valid direction options based on the type definition
-  const directionOptions: Direction[] = ['North', 'South', 'East', 'West', 'N/A'];
-  
   return (
     <div className="space-y-6">
       <div className="space-y-2">
@@ -39,14 +37,14 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData 
         <div className="space-y-2">
           <Label htmlFor="direction" className="text-sm text-zinc-400">Direction</Label>
           <Select
-            value={formData.direction || 'N/A'} 
+            value={formData.direction || DEFAULT_DIRECTION} 
             onValueChange={(value: Direction) => updateFormData('direction', value)}
           >
             <SelectTrigger className="bg-zinc-800/50 border-zinc-700 text-white">
               <SelectValue placeholder="Select direction" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-              {directionOptions.map((direction) => (
+              {DIRECTION_OPTIONS.map((direction) => (
                 <SelectItem key={direction} value={direction} className="text-white">
                   {direction}
                 </SelectItem>

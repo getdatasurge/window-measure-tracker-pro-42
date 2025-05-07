@@ -1,7 +1,9 @@
 
 // Define measurement related types
 export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
-export type Direction = 'North' | 'South' | 'East' | 'West' | 'N/A';
+// Import Direction type from constants instead of defining it here
+import { Direction } from '@/constants/direction';
+export { Direction };
 
 export interface Measurement {
   id: string;

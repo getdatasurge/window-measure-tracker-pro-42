@@ -4,7 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { MeasurementFormData, FormSubmissionState, FormSubmissionHandlers } from './types';
-import { Direction } from '@/types/measurement';
+import { Direction } from '@/constants/direction';
 
 export function useFormSubmission(): FormSubmissionState & FormSubmissionHandlers {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -53,12 +53,8 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         area = (width * height) / 144; // Convert to square feet (from inches)
       }
       
-      // Ensure direction is properly typed and meets constraint requirements
-      // Direction needs to be one of the valid enum values
-      let direction: Direction = 'N/A';
-      if (data.direction && ['North', 'South', 'East', 'West', 'N/A'].includes(data.direction as string)) {
-        direction = data.direction as Direction;
-      }
+      // Ensure we use a valid direction value that matches the database constraint
+      const direction = data.direction || 'N/A'; // Default to N/A if not provided
 
       console.log("Direction being sent to database:", direction);
 
@@ -72,7 +68,7 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         area,
         quantity: data.quantity || 1,
         recorded_by: user.id,
-        direction: direction, // Use the validated direction value
+        direction,
         notes: data.notes || '',
         status: 'pending',
         measurement_date: new Date().toISOString(),

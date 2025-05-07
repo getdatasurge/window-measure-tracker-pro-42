@@ -5,8 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
-import { Direction } from '@/types/measurement';
 import { FormErrors } from '@/hooks/measurements/types';
+import { DIRECTION_OPTIONS, Direction, DEFAULT_DIRECTION } from '@/constants/direction';
 
 interface AttributesFieldsProps {
   register: any;
@@ -21,9 +21,6 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
   setValue,
   errors 
 }) => {
-  // Define the valid direction options based on the database constraint
-  const directionOptions: Direction[] = ['North', 'South', 'East', 'West', 'N/A'];
-
   return (
     <>
       {/* Location */}
@@ -44,14 +41,14 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
         <div className="space-y-2">
           <Label htmlFor="direction">Direction</Label>
           <Select
-            value={watch('direction') || 'N/A'}
+            value={watch('direction') || DEFAULT_DIRECTION}
             onValueChange={(value: Direction) => setValue('direction', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select direction" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-              {directionOptions.map((dir) => (
+              {DIRECTION_OPTIONS.map((dir) => (
                 <SelectItem key={dir} value={dir} className="text-white">
                   {dir}
                 </SelectItem>
