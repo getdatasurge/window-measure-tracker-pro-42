@@ -3,13 +3,13 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabaseClient } from './supabaseClient';
 import { Measurement } from '@/types/measurement';
 
-// Define simpler response types
+// Define simple response types
 interface ApiResponse<T> {
   data: T;
   error: string | null;
 }
 
-// Create the API slice using RTK Query with simpler typing
+// Create the API slice using RTK Query
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fakeBaseQuery(),
@@ -62,9 +62,9 @@ export const apiSlice = createApi({
             area: item.area ? `${item.area} ft²` : '0 ft²',
             quantity: item.quantity || 1,
             recordedBy: item.recorded_by || '',
-            direction: (item.direction || 'N/A') as any,
+            direction: (item.direction || 'N/A'),
             notes: item.notes,
-            status: (item.status || 'Pending') as any,
+            status: (item.status || 'Pending'),
             photos: Array.isArray(item.photos) ? item.photos : [],
             measurementDate: item.measurement_date || new Date().toISOString(),
             updatedAt: item.updated_at || new Date().toISOString(),

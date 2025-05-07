@@ -102,16 +102,25 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
       measurementDate: data.measurementDate || new Date().toISOString()
     };
 
-    // The refetch will only happen after the save is complete
-    await saveMeasurement(measurementToSave, async () => {
+    try {
+      // The refetch will only happen after the save is complete
+      await saveMeasurement(measurementToSave);
+      
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
       onRefresh();
       
       // Close the modal
       setEditModalOpen(false);
-    });
-  }, [saveMeasurement, onRefresh]);
+    } catch (error) {
+      console.error("Error saving measurement:", error);
+      toast({
+        title: "Error",
+        description: "Failed to save measurement",
+        variant: "destructive"
+      });
+    }
+  }, [saveMeasurement, onRefresh, toast]);
   
   // Handle manual refresh
   const handleManualRefresh = useCallback(() => {
