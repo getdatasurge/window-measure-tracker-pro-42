@@ -109,10 +109,10 @@ const MeasurementStatusBoard: React.FC = () => {
       updatedBy: data.updatedBy || '',
       status: data.status || 'Pending',
       measurementDate: data.measurementDate || new Date().toISOString()
-    } as unknown as Measurement;
+    } as Measurement & { film_required: boolean }; // Add film_required to the type
 
     // The refetch will only happen after the save is complete
-    await saveMeasurement(measurementToSave, async () => {
+    await saveMeasurement(measurementToSave as Measurement, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
       await refreshData();
@@ -187,7 +187,7 @@ const MeasurementStatusBoard: React.FC = () => {
       
       {editMeasurement && (
         <EditMeasurementModal
-          measurement={editMeasurement}
+          measurement={editMeasurement as any} // Use type assertion as a temporary fix
           isOpen={editModalOpen}
           onOpenChange={setEditModalOpen}
           onSave={handleSaveMeasurement}

@@ -32,12 +32,13 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
   // Convert Measurement to include filmRequired property
   const enhancedMeasurement = {
     ...measurement,
-    filmRequired: measurement.film_required // Map film_required to filmRequired
+    filmRequired: measurement.film_required !== false, // Ensure proper boolean conversion
+    id: measurement.id // Ensure id is passed correctly
   };
   
   return (
     <EditMeasurementModal
-      measurement={enhancedMeasurement as any} // Type assertion to avoid TypeScript errors
+      measurement={enhancedMeasurement as MeasurementFormData} // Use proper type assertion
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       onSave={onSave}
