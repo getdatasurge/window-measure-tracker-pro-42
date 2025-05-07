@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { CalendarDays, CheckCheck, LayoutDashboard, ListChecks, Users2 } from 'lucide-react';
 import DashboardHeader from '../../../components/dashboard/DashboardHeader';
@@ -6,6 +7,7 @@ import { useGetMeasurementsQuery } from '@/services/apiSlice';
 import DashboardGridRow from '../../../components/layout/DashboardGridRow';
 import DashboardMeasurementSection from '../../../components/dashboard/DashboardMeasurementSection';
 import ActivityFeedCard from '../../../components/dashboard/activity-feed';
+import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
 
 interface DashboardPageProps {
   className?: string;
