@@ -1,44 +1,37 @@
 
-import { useState } from 'react';
-import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption } from '../types';
-import { withRetry } from '../utils/retry';
+import { toast } from '@/components/ui/use-toast';
+import { ProjectsHookState } from '../types';
+import { ProjectOption } from '@/types/project-types';
 
 /**
- * Custom hook for fetching projects with error handling
+ * Hook for fetching projects with proper error handling
  */
-export function useFetchProjects(setState: React.Dispatch<React.SetStateAction<any>>) {
-  /**
-   * Fetch all projects
-   */
-  const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]> => {
-    setState(prev => ({ ...prev, loading: true, error: null }));
+export function useFetchProjects(
+  setState: React.Dispatch<React.SetStateAction<ProjectsHookState>>
+) {
+  return async (activeOnly = true) => {
+    setState(prevState => ({ ...prevState, loading: true, error: null }));
     
     try {
-      const projects = await withRetry(async () => {
-        let query = supabase
-          .from('projects')
-          .select('id, name, client_name, location, status, deadline');
-        
-        if (activeOnly) {
-          // Use is_active if it exists, otherwise filter by status
-          try {
-            query = query.eq('is_active', true);
-          } catch {
-            query = query.neq('status', 'archived');
-          }
-        }
-        
-        const { data, error } = await query;
-        
-        if (error) throw error;
-        
-        return data || [];
-      });
+      let query = supabase
+        .from('projects')
+        .select('id, name, client_name, location, status, deadline');
       
-      setState(prev => ({
-        ...prev,
+      if (activeOnly) {
+        query = query.eq('status', 'active');
+      }
+      
+      const { data, error } = await query;
+      
+      if (error) {
+        throw error;
+      }
+      
+      const projects = (data || []) as ProjectOption[];
+      
+      setState(prevState => ({
+        ...prevState,
         loading: false,
         projects,
         error: null
@@ -46,23 +39,21 @@ export function useFetchProjects(setState: React.Dispatch<React.SetStateAction<a
       
       return projects;
     } catch (error) {
-      const errorObj = error instanceof Error ? error : new Error('Failed to fetch projects');
+      console.error('Error fetching projects:', error);
       
-      setState(prev => ({
-        ...prev,
+      setState(prevState => ({
+        ...prevState,
         loading: false,
-        error: errorObj
+        error: error instanceof Error ? error : new Error('Failed to fetch projects')
       }));
       
       toast({
-        title: "Error loading projects",
-        description: "Failed to load projects. Please try again later.",
-        variant: "destructive"
+        title: 'Error loading projects',
+        description: 'Failed to load projects. Please try again later.',
+        variant: 'destructive'
       });
       
       return [];
     }
   };
-
-  return fetchProjects;
 }
