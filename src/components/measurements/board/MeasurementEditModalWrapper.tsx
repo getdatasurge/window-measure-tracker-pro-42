@@ -29,16 +29,32 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     );
   }
 
-  // Convert Measurement to include filmRequired property
-  const enhancedMeasurement = {
-    ...measurement,
+  // Convert Measurement to MeasurementFormData format
+  const enhancedMeasurement: MeasurementFormData = {
+    id: measurement.id, // Ensure id is passed correctly and required
+    projectId: measurement.projectId || '',
+    projectName: measurement.projectName || '',
+    location: measurement.location || '',
+    width: measurement.width || '',
+    height: measurement.height || '',
+    direction: measurement.direction || 'N/A',
+    notes: measurement.notes || '',
     filmRequired: measurement.film_required !== false, // Ensure proper boolean conversion
-    id: measurement.id // Ensure id is passed correctly
+    quantity: measurement.quantity || 1,
+    status: measurement.status || 'Pending',
+    photos: Array.isArray(measurement.photos) ? measurement.photos : [],
+    installationDate: measurement.installationDate || '',
+    input_source: measurement.input_source || 'manual',
+    updatedAt: measurement.updatedAt || new Date().toISOString(),
+    updatedBy: measurement.updatedBy || '',
+    recorded_by: measurement.recorded_by,
+    recordedBy: measurement.recordedBy || '',
+    area: measurement.area || ''
   };
   
   return (
     <EditMeasurementModal
-      measurement={enhancedMeasurement as MeasurementFormData} // Use proper type assertion
+      measurement={enhancedMeasurement}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       onSave={onSave}

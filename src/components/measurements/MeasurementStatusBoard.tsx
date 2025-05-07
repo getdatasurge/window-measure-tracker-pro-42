@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement } from '@/types/measurement';
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -98,9 +97,9 @@ const MeasurementStatusBoard: React.FC = () => {
   // Handle saving a measurement
   const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
     // Convert MeasurementFormData to Measurement for saveMeasurement function
-    const measurementToSave = {
+    const measurementToSave: Measurement = {
       ...data,
-      id: data.id || '',
+      id: data.id || '', // Ensure id is not undefined
       projectId: data.projectId || '',
       projectName: data.projectName || '',
       film_required: data.filmRequired, // Map filmRequired to film_required
@@ -108,11 +107,12 @@ const MeasurementStatusBoard: React.FC = () => {
       updatedAt: data.updatedAt || new Date().toISOString(),
       updatedBy: data.updatedBy || '',
       status: data.status || 'Pending',
-      measurementDate: data.measurementDate || new Date().toISOString()
-    } as Measurement & { film_required: boolean }; // Add film_required to the type
+      measurementDate: data.measurementDate || new Date().toISOString(),
+      area: data.area || ''
+    };
 
     // The refetch will only happen after the save is complete
-    await saveMeasurement(measurementToSave as Measurement, async () => {
+    await saveMeasurement(measurementToSave, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
       await refreshData();
@@ -187,7 +187,7 @@ const MeasurementStatusBoard: React.FC = () => {
       
       {editMeasurement && (
         <EditMeasurementModal
-          measurement={editMeasurement as any} // Use type assertion as a temporary fix
+          measurement={editMeasurement}
           isOpen={editModalOpen}
           onOpenChange={setEditModalOpen}
           onSave={handleSaveMeasurement}
