@@ -13,6 +13,9 @@ const supabase = createClient(
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ''
 );
 
+// ✅ Regex for valid Postgres identifiers
+const isValidTableName = (name: string) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { status: 204, headers: corsHeaders });
@@ -49,11 +52,18 @@ serve(async (req) => {
       });
     }
 
-    // ✅ Check if table exists
+    if (!isValidTableName(tableName)) {
+      console.error("Invalid table name format:", tableName);
+      return new Response(JSON.stringify({ error: "Invalid table name. Use letters, numbers, underscores only." }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
+    const checkSQL = `SELECT to_regclass('public."${tableName}"') IS NOT NULL AS exists`;
+
     const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
-      sql: `
-        SELECT to_regclass('public."${tableName}"') IS NOT NULL AS exists
-      `
+      sql: checkSQL
     });
 
     if (existsError) {
@@ -72,7 +82,7 @@ serve(async (req) => {
 
     if (!operation || operation === "replica-identity") {
       const { error } = await supabase.rpc("execute_sql", {
-        sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
+        sql: `ALTER TABLE public."${tableName}" REPLICA IDENTITY FULL;`
       });
       if (error) {
         console.error("REPLICA IDENTITY failed:", error);
@@ -96,7 +106,7 @@ serve(async (req) => {
 
       if (!data || data.length === 0) {
         const { error: pubError } = await supabase.rpc("execute_sql", {
-          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
+          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public."${tableName}";`
         });
         if (pubError) {
           console.error("Failed to add table to publication:", pubError);
@@ -108,13 +118,18 @@ serve(async (req) => {
       }
     }
 
+    console.log("Operation successful:", messages);
+
     return new Response(JSON.stringify({ success: true, messages }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
+
   } catch (error) {
     console.error("Unhandled error in enable-realtime:", error);
-    return new Response(JSON.stringify({ error: error?.message ?? "Unknown error" }), {
+    return new Response(JSON.stringify({
+      error: error?.message ?? "Unknown error"
+    }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
