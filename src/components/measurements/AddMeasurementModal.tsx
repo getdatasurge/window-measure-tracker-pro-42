@@ -69,7 +69,9 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
   const quantity = watch('quantity');
   
   useEffect(() => {
-    calculateArea(width, height, quantity);
+    const areaString = calculateArea(width, height, quantity);
+    // Note: The area is returned by calculateArea, but we don't need to explicitly
+    // set it because the hook manages that internal state
   }, [width, height, quantity, calculateArea]);
   
   const handleClose = () => {
