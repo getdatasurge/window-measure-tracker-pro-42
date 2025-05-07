@@ -19,9 +19,13 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
   const [error, setError] = useState<Error | null>(null);
   const [isRealtime, setIsRealtime] = useState<boolean>(false);
   const [realtimeChannel, setRealtimeChannel] = useState<any>(null);
+  const [isSetupInProgress, setIsSetupInProgress] = useState<boolean>(false);
   
   // Function to fetch measurements with current options
   const fetchMeasurements = useCallback(async () => {
+    // If a fetch is already in progress, don't start another one
+    if (isLoading) return;
+    
     try {
       setIsLoading(true);
       
@@ -30,8 +34,8 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
       setMeasurements(mappedMeasurements);
       setError(null);
       
-      // Enable realtime subscriptions if not already set up
-      if (!isRealtime) {
+      // Setup realtime only if not already set up and not in progress
+      if (!isRealtime && !isSetupInProgress) {
         setupRealtimeSubscription();
       }
     } catch (err) {
@@ -40,10 +44,11 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
     } finally {
       setIsLoading(false);
     }
-  }, [options, isRealtime]);
+  }, [options, isRealtime, isSetupInProgress, isLoading]);
   
   // Fetch the measurements data on mount and when options change
   useEffect(() => {
+    setIsLoading(true); // Reset loading state on dependency changes
     fetchMeasurements();
     
     // Cleanup function to remove subscriptions
@@ -54,15 +59,26 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
         setIsRealtime(false);
       }
     };
-  }, [options.projectId, options.date, options.status, fetchMeasurements]);
+  }, [options.projectId, options.date, options.status]);
   
   // Set up realtime subscription
   const setupRealtimeSubscription = async () => {
-    const { channel, cleanup } = await setupMeasurementsSubscription(fetchMeasurements);
+    if (isSetupInProgress) return;
     
-    if (channel) {
-      setRealtimeChannel({ channel, cleanup });
-      setIsRealtime(true);
+    setIsSetupInProgress(true);
+    try {
+      const { channel, cleanup } = await setupMeasurementsSubscription(() => {
+        // Debounce refetch to prevent rapid consecutive calls
+        console.log("Realtime update received, scheduling refetch");
+        setTimeout(fetchMeasurements, 300);
+      });
+      
+      if (channel) {
+        setRealtimeChannel({ channel, cleanup });
+        setIsRealtime(true);
+      }
+    } finally {
+      setIsSetupInProgress(false);
     }
   };
   

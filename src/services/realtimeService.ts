@@ -2,6 +2,10 @@
 import { supabase } from '@/integrations/supabase/client';
 import { setupRealtime } from '@/utils/setupRealtime';
 
+// Track if subscription has been set up to prevent redundant setups
+let subscriptionSetupComplete = false;
+let activeChannel = null;
+
 /**
  * Setup a real-time subscription for the measurements table
  */
@@ -9,8 +13,25 @@ export const setupMeasurementsSubscription = async (
   onUpdate: () => void
 ): Promise<{ channel: any; cleanup: () => void }> => {
   try {
-    console.log("Setting up realtime subscription for measurements");
-    // Enable realtime for the measurements table first
+    // If we already have an active subscription, return it
+    if (subscriptionSetupComplete && activeChannel) {
+      console.log("Reusing existing realtime subscription");
+      return { 
+        channel: activeChannel,
+        cleanup: () => {
+          if (activeChannel) {
+            console.log("Cleaning up realtime subscription");
+            supabase.removeChannel(activeChannel);
+            activeChannel = null;
+            subscriptionSetupComplete = false;
+          }
+        }
+      };
+    }
+    
+    console.log("Setting up new realtime subscription for measurements");
+    
+    // Enable realtime for the measurements table first (this only needs to happen once per session)
     const realtimeStatus = await setupRealtime();
     
     if (!realtimeStatus) {
@@ -43,6 +64,10 @@ export const setupMeasurementsSubscription = async (
     
     console.log('Realtime subscription established for measurements table');
     
+    // Store the active channel for reuse
+    activeChannel = channel;
+    subscriptionSetupComplete = true;
+    
     // Return the channel and cleanup function
     return {
       channel,
@@ -50,6 +75,8 @@ export const setupMeasurementsSubscription = async (
         if (channel) {
           console.log("Cleaning up realtime subscription");
           supabase.removeChannel(channel);
+          activeChannel = null;
+          subscriptionSetupComplete = false;
         }
       }
     };

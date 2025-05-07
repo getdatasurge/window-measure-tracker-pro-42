@@ -39,13 +39,14 @@ const MeasurementStatusBoard: React.FC = () => {
   const { saveMeasurement, isSaving } = useMeasurementUpdate();
   
   // Handle card click to edit measurement
-  const handleCardClick = (measurement: Measurement) => {
+  const handleCardClick = useCallback((measurement: Measurement) => {
     setEditMeasurement(measurement);
     setEditModalOpen(true);
-  };
+  }, []);
 
-  // Handle saving a measurement
-  const handleSaveMeasurement = async (measurement: Measurement) => {
+  // Handle saving a measurement with sequential operations
+  const handleSaveMeasurement = useCallback(async (measurement: Measurement) => {
+    // The refetch will only happen after the save is complete
     await saveMeasurement(measurement, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
@@ -54,7 +55,7 @@ const MeasurementStatusBoard: React.FC = () => {
       // Close the modal
       setEditModalOpen(false);
     });
-  };
+  }, [saveMeasurement, refetchMeasurements]);
 
   // Filter measurements based on search criteria
   const filteredMeasurements = measurements.filter(m => {

@@ -132,7 +132,10 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       setFormSubmitted(true);
   
       // Send back to parent component
-      onSave(updatedMeasurement);
+      // This needs to be awaited to ensure sequential operations
+      await onSave(updatedMeasurement);
+      
+      // Only close modal after save completes
       onOpenChange(false);
     } catch (error) {
       console.error('Error saving measurement:', error);

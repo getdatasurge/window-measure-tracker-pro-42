@@ -119,7 +119,8 @@ export function useMeasurementUpdate() {
       
       // Call success callback if provided
       if (onSuccess) {
-        onSuccess();
+        // Execute onSuccess as a separate step AFTER the database operation completes
+        await onSuccess();
       }
       
     } catch (err) {
