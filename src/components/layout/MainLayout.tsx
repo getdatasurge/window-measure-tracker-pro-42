@@ -92,11 +92,11 @@ const MainLayout: React.FC = () => {
               <Outlet />
             </div>
           </main>
-          
-          {/* Add the FloatingMeasurementTools component */}
-          <FloatingMeasurementTools />
         </div>
       </div>
+      
+      {/* Add the FloatingMeasurementTools component */}
+      <FloatingMeasurementTools />
     </div>
   );
 };
