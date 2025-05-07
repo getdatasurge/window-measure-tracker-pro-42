@@ -28,9 +28,6 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
   // Track the last field that was modified in each tab
   const [lastModifiedFields, setLastModifiedFields] = useState<{[key: string]: string}>({});
   
-  // Track form validation errors
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  
   // Define the last field for each tab
   const tabLastFields = {
     details: 'recordedBy',

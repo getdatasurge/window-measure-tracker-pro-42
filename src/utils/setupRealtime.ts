@@ -60,5 +60,3 @@ export const setupRealtime = async () => {
     }
   }
 };
-
-export default setupRealtime;
