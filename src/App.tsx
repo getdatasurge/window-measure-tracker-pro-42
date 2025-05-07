@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,15 +10,14 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useEffect } from "react";
 import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
-
 import MainLayout from "./components/layout/MainLayout";
-import AppLayout from "./components/layout/AppLayout"; 
+import AppLayout from "./components/layout/AppLayout";
 import LandingPage from "./pages/Landing";
 import DashboardV2 from "./pages/dashboard/v0.2";
 import Projects from "./pages/Projects";
 import ProjectsNew from "./pages/ProjectsNew";
 import Teams from "./pages/Teams";
-import SchedulePage from "./pages/SchedulePage"; 
+import SchedulePage from "./pages/SchedulePage";
 import ReportsNew from "./pages/ReportsNew";
 import Reports from "./pages/Reports";
 import Settings from "./pages/Settings";
@@ -27,41 +25,38 @@ import UserSettingsPage from "./pages/User/[id]/settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
 import PromptHistoryViewer from "./components/prompt-history";
-import DebugPage from "./pages/__debug"; 
-import Overview from "./pages/Overview"; 
-import TeamManagement from "./pages/TeamManagement"; 
-import Measurements from "./pages/Measurements"; 
+import DebugPage from "./pages/__debug";
+import Overview from "./pages/Overview";
+import TeamManagement from "./pages/TeamManagement";
+import Measurements from "./pages/Measurements";
 import MeasurementEntries from "./pages/MeasurementEntries";
 import SignInPage from "./pages/SignInPage";
 import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
 import AuthCallback from "./pages/AuthCallback";
-
 const queryClient = new QueryClient();
 
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
-
 const App = () => {
   // Initialize the feedbucket patch when the app mounts
   useEffect(() => {
     const feedbucketCleanup = enableFeedbucketInteraction();
-    
+
     // Setup console error tracker
     const errorTrackerCleanup = setupConsoleErrorTracker({
-      timeWindow: 30000, // 30 seconds
-      maxErrors: 15,     // Maximum errors before showing toast
-      showOnce: true     // Only show the toast once per session
+      timeWindow: 30000,
+      // 30 seconds
+      maxErrors: 15,
+      // Maximum errors before showing toast
+      showOnce: true // Only show the toast once per session
     });
-    
     return () => {
       feedbucketCleanup();
       errorTrackerCleanup();
     };
   }, []);
-
-  return (
-    <QueryClientProvider client={queryClient}>
+  return <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
           <BrowserRouter>
@@ -69,20 +64,8 @@ const App = () => {
             <AuthProvider>
               <Toaster />
               <Sonner />
-              <ToastContainer
-                position="top-center"
-                autoClose={3000}
-                hideProgressBar={false}
-                newestOnTop
-                closeOnClick
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme="dark"
-              />
-              <div className="fixed bottom-4 right-4 z-50">
-                <PromptHistoryViewer variant="dialog" />
-              </div>
+              <ToastContainer position="top-center" autoClose={3000} hideProgressBar={false} newestOnTop closeOnClick pauseOnFocusLoss draggable pauseOnHover theme="dark" />
+              
               
               {/* Global modals */}
               <LoginModal />
@@ -124,8 +107,6 @@ const App = () => {
           </BrowserRouter>
         </ThemeProvider>
       </TooltipProvider>
-    </QueryClientProvider>
-  );
+    </QueryClientProvider>;
 };
-
 export default App;
