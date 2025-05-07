@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -38,7 +39,7 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     handleProjectChange,
     handleFileChange,
     removePhoto,
-    fetchProjects, // Using this from the hook, not redefining it
+    fetchProjects,
     reset,
     formState,
     calculateArea,

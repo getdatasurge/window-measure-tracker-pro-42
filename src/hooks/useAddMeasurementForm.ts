@@ -1,3 +1,4 @@
+
 import { useEffect, useCallback, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -54,5 +55,74 @@ export const useAddMeasurementForm = ({
 
   const {
     projectsList,
-    fetchProjects: rawFetchProjects,
-    handleProject
+    fetchProjects,
+    handleProjectChange
+  } = useProjectManagement({ setValue });
+  
+  // Save form data on change
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name && type === 'change') {
+        saveFormData(value as MeasurementFormData);
+      }
+    });
+    
+    return () => subscription.unsubscribe();
+  }, [watch, saveFormData]);
+  
+  // Fetch projects when component mounts
+  useEffect(() => {
+    fetchProjects();
+  }, [fetchProjects]);
+  
+  // Form submission handler
+  const onSubmit = useCallback(async (data: MeasurementFormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      // Upload photos if any
+      const photoUrls = await uploadPhotos();
+      
+      // Call the submission handler from the form submission hook
+      const result = await handleSubmission(data, photoUrls, onSuccess);
+      
+      // Clear saved form data on successful submission
+      if (result) {
+        clearSavedForm();
+        resetPhotoState();
+        refetchMeasurements();
+      }
+      
+      return result;
+    } catch (error) {
+      console.error('Error submitting measurement form:', error);
+      throw error;
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [uploadPhotos, handleSubmission, onSuccess, clearSavedForm, resetPhotoState, refetchMeasurements, setIsSubmitting]);
+  
+  // Return everything needed by the component
+  return {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    errors: formState.errors,
+    isSubmitting,
+    projectsList,
+    photoFiles,
+    photoErrors,
+    uploadProgress,
+    onSubmit,
+    handleProjectChange,
+    handleFileChange,
+    removePhoto,
+    fetchProjects,
+    reset,
+    formState,
+    calculateArea,
+    hasSavedDraft,
+    clearSavedForm
+  };
+};
