@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAddMeasurementForm } from '@/hooks/useAddMeasurementForm';
@@ -37,19 +37,40 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     handleFileChange,
     removePhoto,
     fetchProjects,
-    reset
+    reset,
+    formState,
+    calculateArea
   } = useAddMeasurementForm({
     onSuccess: () => onOpenChange(false),
     initialProjectId,
     initialProjectName
   });
   
-  // Fetch projects on modal open
+  // Reference to first input field for auto-focus
+  const locationInputRef = useRef<HTMLInputElement | null>(null);
+  
+  // Fetch projects on modal open and focus the first field
   useEffect(() => {
     if (open) {
       fetchProjects();
+      
+      // Set focus to the location input after a short delay to ensure the modal has rendered
+      setTimeout(() => {
+        if (locationInputRef.current) {
+          locationInputRef.current.focus();
+        }
+      }, 100);
     }
   }, [open, fetchProjects]);
+  
+  // Calculate area whenever width, height, or quantity changes
+  const width = watch('width');
+  const height = watch('height');
+  const quantity = watch('quantity');
+  
+  useEffect(() => {
+    calculateArea(width, height, quantity);
+  }, [width, height, quantity, calculateArea]);
   
   const handleClose = () => {
     reset();
@@ -58,9 +79,17 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent 
+        className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto"
+        onKeyDown={(e) => {
+          if (e.key === 'Escape') {
+            handleClose();
+          }
+        }}
+        aria-labelledby="add-measurement-title"
+      >
         <DialogHeader>
-          <DialogTitle className="text-xl">Add New Measurement</DialogTitle>
+          <DialogTitle id="add-measurement-title" className="text-xl">Add New Measurement</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
@@ -79,11 +108,14 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
               watch={watch}
               setValue={setValue}
               errors={errors}
+              ref={locationInputRef}
             />
             
             {/* Dimensions */}
             <DimensionsFields 
               register={register}
+              watch={watch}
+              setValue={setValue}
               errors={errors}
             />
             

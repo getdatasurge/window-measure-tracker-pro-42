@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -6,6 +7,7 @@ import { useFormSubmission } from './measurements/useFormSubmission';
 import { useProjectList } from './measurements/useProjectList';
 import { MeasurementFormData, UseAddMeasurementFormProps, FormErrors } from './measurements/types';
 import { Direction } from '@/types/measurement';
+import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 
 export { MAX_FILE_SIZE, MAX_FILES } from './measurements/types';
 
@@ -21,7 +23,16 @@ export const useAddMeasurementForm = ({
   const { isSubmitting, setIsSubmitting, handleSubmission } = useFormSubmission();
   const { projectsList, fetchProjects } = useProjectList();
   
-  // Set up default values based on edit mode or new measurement
+  // Set up session recovery through localStorage
+  const { saveFormData, initialFormData, clearSavedForm } = useMeasurementFormStorage();
+  
+  // Derived area state
+  const [calculatedArea, setCalculatedArea] = useState<string>('');
+  
+  // Session recovery prompt state
+  const [hasSavedDraft, setHasSavedDraft] = useState<boolean>(false);
+  
+  // Set up default values based on edit mode, saved draft, or new measurement
   const defaultValues = editMode && measurementToEdit 
     ? {
         projectId: measurementToEdit.projectId || '',
@@ -37,6 +48,13 @@ export const useAddMeasurementForm = ({
         installationDate: measurementToEdit.installationDate || '',
         input_source: measurementToEdit.input_source || 'manual'
       }
+    : initialFormData 
+    ? {
+        ...initialFormData,
+        projectId: initialProjectId || initialFormData.projectId || '',
+        projectName: initialProjectName || initialFormData.projectName || '',
+        input_source: 'manual'
+      }
     : {
         projectId: initialProjectId || '',
         projectName: initialProjectName || '',
@@ -51,9 +69,26 @@ export const useAddMeasurementForm = ({
         input_source: 'manual'
       };
   
-  const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<MeasurementFormData>({
+  const { register, handleSubmit, setValue, watch, reset, formState } = useForm<MeasurementFormData>({
     defaultValues
   });
+  
+  // Check if there's a saved draft
+  useEffect(() => {
+    if (initialFormData && !editMode) {
+      setHasSavedDraft(true);
+    }
+  }, [initialFormData, editMode]);
+  
+  // Auto-save form data as user types
+  const formValues = watch();
+  useEffect(() => {
+    // Don't save empty forms or when editing
+    if (editMode || !formValues.location) return;
+    
+    // Save form data to localStorage
+    saveFormData(formValues);
+  }, [formValues, saveFormData, editMode]);
   
   // Load photos if editing existing measurement
   useEffect(() => {
@@ -72,6 +107,11 @@ export const useAddMeasurementForm = ({
       setValue('projectId', initialProjectId);
       setValue('projectName', initialProjectName);
     } 
+    // Use saved draft if available
+    else if (initialFormData?.projectId && initialFormData?.projectName) {
+      setValue('projectId', initialFormData.projectId);
+      setValue('projectName', initialFormData.projectName);
+    }
     // Set last used project if available
     else {
       const lastProject = localStorage.getItem('lastSelectedProject');
@@ -85,7 +125,7 @@ export const useAddMeasurementForm = ({
         }
       }
     }
-  }, [initialProjectId, initialProjectName, setValue, editMode, measurementToEdit]);
+  }, [initialProjectId, initialProjectName, setValue, editMode, measurementToEdit, initialFormData]);
   
   // Load last used fractional values from localStorage
   useEffect(() => {
@@ -104,6 +144,57 @@ export const useAddMeasurementForm = ({
       });
     }
   }, []);
+  
+  // Calculate area based on dimensions
+  const calculateArea = useCallback((width: string, height: string, quantity: number = 1) => {
+    if (!width || !height) {
+      setCalculatedArea('');
+      return;
+    }
+    
+    // Parse numeric values
+    const parseNumericValue = (value: string): number | null => {
+      if (!value) return null;
+      const numericStr = value.replace(/[^0-9.\/]/g, '');
+      // Handle fractions like "36 1/2"
+      if (numericStr.includes('/')) {
+        const parts = numericStr.split('/');
+        if (parts.length === 2) {
+          return parseFloat(parts[0]) / parseFloat(parts[1]);
+        }
+        
+        // Handle mixed numbers like "36 1/2"
+        const spaceParts = numericStr.split(' ');
+        if (spaceParts.length === 2) {
+          const whole = parseFloat(spaceParts[0]);
+          const fractionParts = spaceParts[1].split('/');
+          if (fractionParts.length === 2) {
+            return whole + (parseFloat(fractionParts[0]) / parseFloat(fractionParts[1]));
+          }
+        }
+      }
+      
+      const parsed = parseFloat(numericStr);
+      return isNaN(parsed) ? null : parsed;
+    };
+    
+    const widthValue = parseNumericValue(width);
+    const heightValue = parseNumericValue(height);
+    
+    if (widthValue && heightValue) {
+      // Calculate area in square feet (converting from inches)
+      const areaSqFt = (widthValue * heightValue * quantity) / 144;
+      const formattedArea = `${areaSqFt.toFixed(2)} ft²`;
+      
+      // Update the calculated area state
+      setCalculatedArea(formattedArea);
+      
+      // Set the area field value
+      setValue('area', formattedArea);
+    } else {
+      setCalculatedArea('');
+    }
+  }, [setValue]);
   
   const handleProjectChange = (projectId: string) => {
     const selectedProject = projectsList.find(p => p.id === projectId);
@@ -146,6 +237,9 @@ export const useAddMeasurementForm = ({
           // Refetch measurements to update UI
           await refetchMeasurements();
           
+          // Clear saved form data as it has been successfully submitted
+          clearSavedForm();
+          
           // Reset form and close modal
           reset();
           onSuccess();
@@ -163,7 +257,7 @@ export const useAddMeasurementForm = ({
     handleSubmit,
     watch,
     setValue,
-    errors: errors as FormErrors,
+    errors: formState.errors as FormErrors,
     isSubmitting,
     projectsList,
     photoFiles,
@@ -174,6 +268,10 @@ export const useAddMeasurementForm = ({
     handleFileChange,
     removePhoto,
     fetchProjects,
-    reset
+    reset,
+    formState,
+    calculateArea,
+    calculatedArea,
+    hasSavedDraft
   };
 };

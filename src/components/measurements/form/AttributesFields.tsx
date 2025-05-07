@@ -1,47 +1,70 @@
 
-import React from 'react';
-import { FormErrors } from '@/hooks/measurements/types';
-import LocationField from './fields/LocationField';
+import React, { forwardRef } from 'react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Textarea } from '@/components/ui/textarea';
 import DirectionField from './fields/DirectionField';
-import QuantityField from './fields/QuantityField';
 import FilmRequiredField from './fields/FilmRequiredField';
-import NotesField from './fields/NotesField';
-import InputSourceField from './fields/InputSourceField';
 
 interface AttributesFieldsProps {
   register: any;
   watch: any;
   setValue: any;
-  errors: FormErrors;
+  errors: any;
 }
 
-const AttributesFields: React.FC<AttributesFieldsProps> = ({ 
+const AttributesFields = forwardRef<HTMLInputElement, AttributesFieldsProps>(({ 
   register, 
   watch, 
-  setValue,
+  setValue, 
   errors 
-}) => {
+}, ref) => {
   return (
     <>
-      {/* Location */}
-      <LocationField register={register} errors={errors} />
-      
-      {/* Direction and Quantity */}
-      <div className="grid grid-cols-2 gap-4">
-        <DirectionField watch={watch} setValue={setValue} />
-        <QuantityField register={register} errors={errors} />
+      <div className="space-y-2">
+        <Label htmlFor="location" className="text-sm font-medium">
+          Location <span className="text-red-500">*</span>
+        </Label>
+        <Input
+          id="location"
+          placeholder="e.g. Living Room - North Wall"
+          className={`${errors.location ? 'border-red-500' : ''}`}
+          {...register('location', {
+            required: 'Location is required'
+          })}
+          ref={ref}
+          aria-invalid={errors.location ? 'true' : 'false'}
+          aria-describedby="location-error"
+        />
+        {errors.location && (
+          <p id="location-error" className="text-xs text-red-500 mt-1">{errors.location.message}</p>
+        )}
       </div>
-      
-      {/* Film Required */}
-      <FilmRequiredField watch={watch} setValue={setValue} />
-      
-      {/* Notes */}
-      <NotesField register={register} />
-      
-      {/* Input Source - Hidden field that defaults to 'manual' */}
-      <InputSourceField register={register} />
+
+      <DirectionField
+        watch={watch}
+        setValue={setValue}
+        errors={errors}
+      />
+
+      <FilmRequiredField 
+        register={register}
+        errors={errors}
+      />
+
+      <div className="space-y-2">
+        <Label htmlFor="notes" className="text-sm font-medium">Notes</Label>
+        <Textarea
+          id="notes"
+          placeholder="Any additional information..."
+          {...register('notes')}
+        />
+      </div>
     </>
   );
-};
+});
+
+AttributesFields.displayName = 'AttributesFields';
 
 export default AttributesFields;

@@ -235,10 +235,10 @@ export const useMeasurementSubscription = ({
           console.log('Supabase real-time subscription status:', status);
           
           // Store the current connection state to compare for change detection
-          setSubscriptionState(currentState => {
+          setSubscriptionState(prevState => {
             // Update connection state based on status
             const newState = {
-              ...currentState,
+              ...prevState,
               isConnected: status === 'SUBSCRIBED',
               isPolling: status !== 'SUBSCRIBED'
             };
@@ -255,7 +255,7 @@ export const useMeasurementSubscription = ({
               if (retryAttempt < MAX_RETRY_ATTEMPTS) {
                 setTimeout(() => setupSubscription(retryAttempt + 1), 5000);
               }
-            } else if (status === 'SUBSCRIBED' && currentState.isPolling) {
+            } else if (status === 'SUBSCRIBED' && prevState.isPolling) {
               toast({
                 title: "Real-time connection restored",
                 description: "Now receiving live updates.",
