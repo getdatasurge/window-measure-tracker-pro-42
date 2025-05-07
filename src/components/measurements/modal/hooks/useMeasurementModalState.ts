@@ -1,161 +1,96 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
-import { generateNewMeasurement } from '@/utils/measurementUtils';
-import { MeasurementFormState } from '../types';
-import { Measurement } from '@/types/measurement';
-import { Direction } from '@/constants/direction';
+import { useProfile } from '@/contexts/profile';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface UseMeasurementModalStateProps {
   isOpen: boolean;
-  measurement?: Measurement;
-  defaultValues?: Partial<Measurement>;
+  measurement?: MeasurementFormData;
+  defaultValues?: Partial<MeasurementFormData>;
 }
 
-export function useMeasurementModalState({
+export const useMeasurementModalState = ({
   isOpen,
   measurement,
-  defaultValues = {}
-}: UseMeasurementModalStateProps) {
-  const [activeTab, setActiveTab] = useState('details');
-  const [formData, setFormData] = useState<MeasurementFormState>({} as MeasurementFormState);
+  defaultValues
+}: UseMeasurementModalStateProps) => {
+  const { user } = useAuth();
+  const { profile } = useProfile();
+  
+  const TOTAL_STEPS = 3;
+  const [currentStep, setCurrentStep] = useState(1);
+  const [activeTab, setActiveTab] = useState<'details' | 'dimensions' | 'photos'>('details');
+  const [formData, setFormData] = useState<MeasurementFormData>({
+    id: measurement?.id || '',
+    projectId: measurement?.projectId || '',
+    projectName: measurement?.projectName || '',
+    location: measurement?.location || '',
+    width: measurement?.width || '',
+    height: measurement?.height || '',
+    direction: measurement?.direction || 'N/A',
+    notes: measurement?.notes || '',
+    filmRequired: measurement?.filmRequired !== false,
+    quantity: measurement?.quantity || 1,
+    status: measurement?.status || 'pending',
+    photos: measurement?.photos || [],
+    installationDate: measurement?.installationDate || '',
+    input_source: measurement?.input_source || 'manual',
+    ...defaultValues
+  });
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [currentStep, setCurrentStep] = useState(1);
-  const { user, profile } = useAuth();
+  const [errors, setErrors] = useState<{ [key: string]: string }>({});
   
-  const TOTAL_STEPS = 5;
-
-  // Use our custom hook for localStorage management without parameters
-  const {
-    initialFormData,
-    saveFormData
-  } = useMeasurementFormStorage();
-
-  // Load initial data when modal opens
   useEffect(() => {
-    if (isOpen) {
-      if (measurement) {
-        // If editing an existing measurement, use that
-        setFormData(measurement as MeasurementFormState);
-      } else if (Object.keys(defaultValues).length > 0) {
-        // If we have default values from context, use those
-        const newMeasurement = generateNewMeasurement({
-          ...defaultValues,
-          recordedBy: profile?.full_name || 'Unknown User'
-        });
-        setFormData(newMeasurement as MeasurementFormState);
-      } else if (initialFormData) {
-        // If we have data from localStorage, use that
-        const recordedBy = profile?.full_name || 
-                         (initialFormData as any).recordedBy || 
-                         'Unknown User';
-                         
-        const measurementWithDefaults = {
-          ...generateNewMeasurement(),
-          ...initialFormData,
-          recordedBy
-        };
-        
-        // Ensure direction is a valid Direction type
-        if (typeof measurementWithDefaults.direction === 'string' && 
-            !['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest', 'N/A'].includes(measurementWithDefaults.direction)) {
-          measurementWithDefaults.direction = 'N/A' as Direction;
-        }
-        
-        setFormData(measurementWithDefaults as MeasurementFormState);
-      } else {
-        // Start fresh
-        const newMeasurement = generateNewMeasurement({
-          recordedBy: profile?.full_name || 'Unknown User'
-        });
-        setFormData(newMeasurement as MeasurementFormState);
-      }
-
-      // Reset the form submission state
-      setFormSubmitted(false);
-      // Always start at the first tab when opening the modal
-      setActiveTab('details');
-      setCurrentStep(1);
-      setErrors({});
+    if (measurement) {
+      setFormData({
+        id: measurement.id || '',
+        projectId: measurement.projectId || '',
+        projectName: measurement.projectName || '',
+        location: measurement.location || '',
+        width: measurement.width || '',
+        height: measurement.height || '',
+        direction: measurement.direction || 'N/A',
+        notes: measurement.notes || '',
+        filmRequired: measurement.film_required !== false,
+        quantity: measurement.quantity || 1,
+        status: measurement.status || 'pending',
+        photos: measurement.photos || [],
+        installationDate: measurement.installationDate || '',
+        input_source: measurement.input_source || 'manual',
+        ...defaultValues
+      });
+    } else if (defaultValues) {
+      setFormData(prev => ({
+        ...prev,
+        ...defaultValues
+      }));
     }
-  }, [isOpen, measurement, defaultValues, initialFormData, profile]);
-
-  const updateFormData = (field: string, value: any) => {
+  }, [measurement, defaultValues]);
+  
+  const updateFormData = useCallback((key: keyof MeasurementFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [key]: value
     }));
-  };
-
-  // Navigation functions
+  }, []);
+  
   const handleNextStep = () => {
-    // Basic validation for current step
-    if (currentStep === 1) {
-      // Validate location
-      if (!formData.location?.trim()) {
-        setErrors({...errors, location: 'Location is required'});
-        return;
-      }
-      
-      // Validate project
-      if (!formData.projectId) {
-        setErrors({...errors, projectId: 'Project is required'});
-        return;
-      }
-    }
-    
-    // If validation passes, go to next step
-    if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(prev => prev + 1);
-      
-      // Map steps to tabs
-      switch(currentStep + 1) {
-        case 2:
-          setActiveTab('dimensions');
-          break;
-        case 3:
-          setActiveTab('status');
-          break;
-        case 4:
-          setActiveTab('attributes');
-          break;
-        case 5:
-          setActiveTab('photos');
-          break;
-      }
-    }
+    setCurrentStep(prev => Math.min(prev + 1, TOTAL_STEPS));
   };
-
+  
   const handlePreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-      
-      // Map steps to tabs
-      switch(currentStep - 1) {
-        case 1:
-          setActiveTab('details');
-          break;
-        case 2:
-          setActiveTab('dimensions');
-          break;
-        case 3:
-          setActiveTab('status');
-          break;
-        case 4:
-          setActiveTab('attributes');
-          break;
-      }
-    }
+    setCurrentStep(prev => Math.max(prev - 1, 1));
   };
-
+  
+  const saveFormData = (data: MeasurementFormData) => {
+    localStorage.setItem('measurementFormData', JSON.stringify(data));
+  };
+  
   return {
     activeTab,
     setActiveTab,
     formData,
-    setFormData,
     updateFormData,
     formSubmitted,
     setFormSubmitted,
@@ -171,4 +106,4 @@ export function useMeasurementModalState({
     profile,
     saveFormData
   };
-}
+};

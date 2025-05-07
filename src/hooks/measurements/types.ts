@@ -1,4 +1,3 @@
-
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -25,6 +24,35 @@ export interface MeasurementFormData {
   isValid?: boolean;
   // Add input source field
   input_source?: string;
+}
+
+export interface MeasurementFormState {
+  id?: string;
+  projectId: string;
+  projectName: string;
+  location: string;
+  width: string;
+  height: string;
+  direction?: Direction | string;
+  notes?: string;
+  filmRequired: boolean; // Ensure this exists
+  quantity: number;
+  status?: MeasurementStatus;
+  photos: string[]; // Note: this is string[] while MeasurementFormData uses File[]
+  installationDate?: string;
+  reviewComments?: string;
+  area?: string;
+  tempId?: string;
+  isValid?: boolean;
+  input_source?: string;
+}
+
+export function convertFormStateToFormData(state: MeasurementFormState): MeasurementFormData {
+  return {
+    ...state,
+    photos: [], // Convert string[] to File[] as needed
+    filmRequired: state.filmRequired ?? true
+  };
 }
 
 export interface UseAddMeasurementFormProps {

@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -39,7 +38,7 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     handleProjectChange,
     handleFileChange,
     removePhoto,
-    fetchProjects,
+    fetchProjects, // Using this from the hook, not redefining it
     reset,
     formState,
     calculateArea,
@@ -49,10 +48,6 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     initialProjectId,
     initialProjectName
   });
-
-  const fetchProjects = useCallback(() => {
-  // your fetch logic
-  }, []);
   
   // Reference to first input field for auto-focus
   const locationInputRef = useRef<HTMLInputElement | null>(null);

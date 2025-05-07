@@ -80,9 +80,11 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
       const updatedMeasurement = {
         ...formData,
         updatedAt: new Date().toISOString(),
-        updatedBy: profile?.full_name || 'Unknown User'
-      };
-
+        updatedBy: profile?.full_name || 'Unknown User',
+        filmRequired: formData.filmRequired || true, // Ensure filmRequired is included
+        photos: Array.isArray(formData.photos) ? formData.photos : [] // Ensure photos is properly formatted
+      } as MeasurementFormData; // Add explicit type assertion
+    
       // If we have a user ID, save it in recorded_by for database
       if (user?.id) {
         // This is separated from updatedMeasurement to avoid including in the UI form data
