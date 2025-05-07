@@ -459,6 +459,7 @@ export type Database = {
           glass_thickness: string | null
           height: number | null
           id: string
+          input_source: string | null
           installation_date: string | null
           location: string
           measurement_date: string | null
@@ -488,6 +489,7 @@ export type Database = {
           glass_thickness?: string | null
           height?: number | null
           id?: string
+          input_source?: string | null
           installation_date?: string | null
           location: string
           measurement_date?: string | null
@@ -517,6 +519,7 @@ export type Database = {
           glass_thickness?: string | null
           height?: number | null
           id?: string
+          input_source?: string | null
           installation_date?: string | null
           location?: string
           measurement_date?: string | null

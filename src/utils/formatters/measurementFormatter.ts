@@ -1,16 +1,53 @@
 
-import { Measurement } from '@/types/measurement';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 
-export const formatMeasurement = (measurement: Measurement): Measurement => {
+/**
+ * Safely formats measurement data from the database, handling missing columns gracefully
+ */
+export const formatMeasurement = (dbMeasurement: any): Measurement => {
+  // Safely get numeric values and format them
+  const safeNumber = (value: any): string => {
+    if (typeof value === 'number') {
+      return value.toFixed(2);
+    }
+    return value?.toString() || '0';
+  };
+
+  // Format status with proper capitalization and type safety
+  const formatStatus = (status: string): MeasurementStatus => {
+    if (!status) return 'Pending';
+    
+    // Capitalize first letter
+    const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
+    
+    // Ensure it's a valid MeasurementStatus
+    const validStatuses: MeasurementStatus[] = ['Pending', 'Film_Cut', 'Installed', 'Completed'];
+    return validStatuses.includes(formattedStatus as MeasurementStatus) 
+      ? (formattedStatus as MeasurementStatus) 
+      : 'Pending';
+  };
+
   // Format all measurement values for display
   return {
-    ...measurement,
-    width: typeof measurement.width === 'number' ? measurement.width.toFixed(2) : measurement.width,
-    height: typeof measurement.height === 'number' ? measurement.height.toFixed(2) : measurement.height,
-    area: typeof measurement.area === 'number' ? `${measurement.area.toFixed(2)} ft²` : measurement.area,
-    quantity: measurement.quantity || 1,
-    status: measurement.status ? measurement.status.charAt(0).toUpperCase() + measurement.status.slice(1) : 'Pending',
-    installationDate: measurement.installationDate || '',
-    film_required: measurement.film_required !== false
+    id: dbMeasurement.id,
+    projectId: dbMeasurement.project_id,
+    projectName: dbMeasurement.projects?.name || 'Unknown Project',
+    location: dbMeasurement.location || '',
+    width: safeNumber(dbMeasurement.width),
+    height: safeNumber(dbMeasurement.height),
+    depth: dbMeasurement.depth ? `${safeNumber(dbMeasurement.depth)}"` : undefined,
+    area: dbMeasurement.area ? `${safeNumber(dbMeasurement.area)} ft²` : '0 ft²',
+    quantity: dbMeasurement.quantity || 1,
+    recordedBy: dbMeasurement.recorded_by || '',
+    direction: (dbMeasurement.direction || 'N/A'),
+    notes: dbMeasurement.notes || '',
+    status: formatStatus(dbMeasurement.status),
+    measurementDate: dbMeasurement.measurement_date || new Date().toISOString(),
+    updatedAt: dbMeasurement.updated_at || new Date().toISOString(),
+    updatedBy: dbMeasurement.updated_by || '',
+    photos: dbMeasurement.photos || [],
+    film_required: dbMeasurement.film_required !== false,
+    // Safely handle potentially missing columns
+    input_source: dbMeasurement.input_source || 'manual'
   };
 };
