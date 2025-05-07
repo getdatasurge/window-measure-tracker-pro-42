@@ -24,6 +24,9 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
   // Track the last field that was modified in each tab
   const [lastModifiedFields, setLastModifiedFields] = useState<{[key: string]: string}>({});
   
+  // Track form validation errors
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  
   // Define the last field for each tab
   const tabLastFields = {
     details: 'recordedBy',
@@ -41,7 +44,7 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
       currentTab = 'details';
     } else if (['width', 'height', 'area', 'quantity'].includes(field)) {
       currentTab = 'dimensions';
-    } else if (['direction', 'notes'].includes(field)) {
+    } else if (['notes'].includes(field)) { // Removed 'direction' since we're removing Orientation field
       currentTab = 'attributes';
     } else if (['photos'].includes(field)) {
       currentTab = 'photos';
@@ -60,17 +63,28 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
       const isValidForAutoAdvance = isFieldValid(field, value);
       
       if (isValidForAutoAdvance) {
-        // Determine next tab
-        if (currentTab === 'details') {
-          setTimeout(() => setActiveTab('dimensions'), 300);
-        } else if (currentTab === 'dimensions') {
-          setTimeout(() => setActiveTab('attributes'), 300);
-        } else if (currentTab === 'attributes') {
-          setTimeout(() => setActiveTab('photos'), 300);
-        } else if (currentTab === 'photos') {
-          setTimeout(() => setActiveTab('status'), 300);
-        }
+        validateBeforeAdvance(currentTab);
       }
+    }
+  };
+  
+  // New validation function before advancing tabs
+  const validateBeforeAdvance = (currentTab: string) => {
+    // Validate required fields based on the current tab
+    if (currentTab === 'details') {
+      if (!formData.location || formData.location.trim() === '') {
+        setErrors(prev => ({...prev, location: 'Location is required'}));
+        return;
+      }
+      
+      // If validation passes, advance to next tab
+      setTimeout(() => setActiveTab('dimensions'), 300);
+    } else if (currentTab === 'dimensions') {
+      setTimeout(() => setActiveTab('attributes'), 300);
+    } else if (currentTab === 'attributes') {
+      setTimeout(() => setActiveTab('photos'), 300);
+    } else if (currentTab === 'photos') {
+      setTimeout(() => setActiveTab('status'), 300);
     }
   };
   
@@ -134,7 +148,9 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
         <TabsContent value="details" className="m-0">
           <MeasurementDetailsTab 
             formData={formData} 
-            updateFormData={enhancedUpdateFormData} 
+            updateFormData={enhancedUpdateFormData}
+            errors={errors}
+            setErrors={setErrors}
           />
         </TabsContent>
         <TabsContent value="dimensions" className="m-0">

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Dialog, DialogContent, DialogClose } from '@/components/ui/dialog';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Measurement } from '@/types/measurement';
@@ -9,7 +9,6 @@ import MeasurementTabs from './MeasurementTabs';
 import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
 import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
 type MeasurementEntryModalProps = {
@@ -154,9 +153,12 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
                   ID: {formData.id} | Project: {formData.projectName}
                 </p>}
               </div>
-              <DialogClose className="p-1 rounded-md hover:bg-zinc-800">
+              <button 
+                className="p-1 rounded-md hover:bg-zinc-800"
+                onClick={() => onOpenChange(false)}
+              >
                 <X className="h-4 w-4" />
-              </DialogClose>
+              </button>
             </div>
           </div>
           
@@ -189,7 +191,7 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
                   onClick={handleSave}
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Saving...' : 'Save Changes'}
+                  {isSaving ? 'Saving...' : mode === 'edit' ? 'Save Changes' : 'Submit Measurement'}
                 </Button>
               </div>
             </div>

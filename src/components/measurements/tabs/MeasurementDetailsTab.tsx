@@ -8,11 +8,15 @@ import { useAuth } from '@/contexts/auth';
 interface MeasurementDetailsTabProps {
   formData: Measurement;
   updateFormData: (field: string, value: any) => void;
+  errors?: {[key: string]: string};
+  setErrors?: (errors: {[key: string]: string}) => void;
 }
 
 const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ 
   formData, 
-  updateFormData 
+  updateFormData,
+  errors = {},
+  setErrors = () => {}
 }) => {
   const { profile } = useAuth();
   
@@ -23,19 +27,35 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({
     }
   }, [profile, formData.recordedBy, updateFormData]);
 
+  const handleLocationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    updateFormData('location', value);
+    
+    // Clear error when user starts typing
+    if (value && errors.location) {
+      const newErrors = {...errors};
+      delete newErrors.location;
+      setErrors(newErrors);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="location" className="text-sm text-zinc-400">
-          Location
+          Location <span className="text-red-500">*</span>
         </Label>
         <Input
           id="location"
           value={formData.location}
-          onChange={(e) => updateFormData('location', e.target.value)}
-          className="bg-zinc-800/50 border-zinc-700 text-white"
-          placeholder="Enter location"
+          onChange={handleLocationChange}
+          className={`bg-zinc-800/50 border-zinc-700 text-white ${errors.location ? 'border-red-500' : ''}`}
+          placeholder="Enter location (required)"
+          required
         />
+        {errors.location && (
+          <p className="text-red-500 text-xs mt-1">{errors.location}</p>
+        )}
       </div>
       
       <div className="space-y-2">
