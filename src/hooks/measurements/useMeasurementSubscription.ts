@@ -98,7 +98,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             quantity: item.quantity || 1,
             film_required: item.film_required,
             installationDate: item.installation_date,
-            photos: item.photos || [] // Ensure photos is always an array
+            photos: Array.isArray(item.photos) ? item.photos : [] // Ensure photos is always an array
           } as Measurement;
         });
       }
@@ -238,7 +238,11 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         isPolling: true,
         lastError: error instanceof Error ? error : new Error('Unknown subscription error')
       }));
-      return setupPolling();
+      
+      // Instead of calling setupPolling() and returning its result directly,
+      // we properly implement polling and return the cleanup function
+      const cleanup = setupPolling();
+      return cleanup;
     }
   }, [options.onInsert, options.onUpdate, options.onDelete, setupPolling]);
   

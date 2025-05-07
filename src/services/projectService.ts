@@ -1,15 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-
-// Define ProjectOption interface here to avoid circular dependencies
-interface ProjectOption {
-  id: string;
-  name: string;
-  client_name?: string;
-  location?: string;
-  status?: string;
-}
+import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project';
 
 /**
  * Fetch projects with optional filtering
@@ -50,7 +42,7 @@ export const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]>
  * @param id Project ID
  * @returns Project or null if not found
  */
-export const fetchProjectById = async (id: string) => {
+export const fetchProjectById = async (id: string): Promise<ProjectDetails | null> => {
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -75,7 +67,7 @@ export const fetchProjectById = async (id: string) => {
  * @param projectData Project data
  * @returns Created project or null on error
  */
-export const createProject = async (projectData: any) => {
+export const createProject = async (projectData: ProjectCreateInput): Promise<ProjectDetails | null> => {
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -100,7 +92,7 @@ export const createProject = async (projectData: any) => {
  * @param projectData Project data to update
  * @returns Updated project or null on error
  */
-export const updateProject = async (id: string, projectData: any) => {
+export const updateProject = async (id: string, projectData: ProjectUpdateInput): Promise<ProjectDetails | null> => {
   try {
     const { data, error } = await supabase
       .from('projects')
@@ -125,7 +117,7 @@ export const updateProject = async (id: string, projectData: any) => {
  * @param id Project ID
  * @returns Success boolean
  */
-export const deleteProject = async (id: string) => {
+export const deleteProject = async (id: string): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('projects')

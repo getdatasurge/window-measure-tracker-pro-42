@@ -1,4 +1,5 @@
 
+
 # Knowledge Build Document
 
 This document serves as an auto-maintained knowledge base for our project, tracking architectural decisions, integrations, and changes over time.
@@ -10,8 +11,8 @@ This document serves as an auto-maintained knowledge base for our project, track
 - **State Management**: React Context API, React Query
 - **Database**: Supabase PostgreSQL
 - **Real-time**: Supabase Realtime
-- **Error Handling**: Multi-level error boundaries, structured error logging
-- **API Integration**: Type-safe request utilities with retry logic
+- **Error Handling**: Multi-level error boundaries, structured error logging, retry logic
+- **API Integration**: Type-safe request utilities with retry logic and fallbacks
 
 ## API Integrations
 
@@ -34,6 +35,8 @@ This document serves as an auto-maintained knowledge base for our project, track
 - **logError**: Structured error logging with sensitive data protection
 - **tryAsync**: Type-safe async error handling utility
 - **withErrorHandling**: Function wrapper for automatic error handling
+- **ApiFallback**: Reusable UI component for API error states with retrying
+- **NoDataFallback**: Component for empty states with action prompts
 
 ## Deployment & Environment
 
