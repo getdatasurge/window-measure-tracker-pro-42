@@ -116,10 +116,10 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
     // Cleanup function to remove subscriptions
     return () => {
       if (isRealtime) {
-        supabase.removeChannel('measurements_changes');
+        supabase.removeAllChannels();
       }
     };
-  }, [options.projectId, options.date, options.status]);
+  }, [options.projectId, options.date, options.status, isRealtime]);
   
   // Set up realtime subscription
   const setupRealtimeSubscription = async () => {
@@ -149,10 +149,6 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
         
       console.log('Realtime subscription established for measurements table');
       setIsRealtime(true);
-      
-      return () => {
-        supabase.removeChannel(channel);
-      };
     } catch (error) {
       console.error('Failed to set up realtime subscription:', error);
     }
