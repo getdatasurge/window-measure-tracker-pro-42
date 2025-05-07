@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Image, X } from 'lucide-react';
-import { MAX_FILES } from '@/hooks/useAddMeasurementForm';
+import { MAX_FILES } from '@/hooks/measurements/types';
 
 interface PhotoUploaderProps {
   photoFiles: File[];

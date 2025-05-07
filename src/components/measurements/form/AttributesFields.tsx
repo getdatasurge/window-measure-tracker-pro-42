@@ -1,10 +1,10 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { Direction } from '@/types/measurement';
 
 interface AttributesFieldsProps {
   register: any;
@@ -43,7 +43,7 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
           <Label htmlFor="direction">Direction</Label>
           <Select
             value={watch('direction')}
-            onValueChange={(value) => setValue('direction', value)}
+            onValueChange={(value: Direction) => setValue('direction', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select direction" />

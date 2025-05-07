@@ -38,11 +38,11 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     removePhoto,
     fetchProjects,
     reset
-  } = useAddMeasurementForm(
-    () => onOpenChange(false),
+  } = useAddMeasurementForm({
+    onSuccess: () => onOpenChange(false),
     initialProjectId,
     initialProjectName
-  );
+  });
   
   // Fetch projects on modal open
   useEffect(() => {
