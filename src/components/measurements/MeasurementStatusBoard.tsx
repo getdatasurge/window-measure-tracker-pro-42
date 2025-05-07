@@ -1,11 +1,15 @@
 
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement } from '@/types/measurement';
 import { useMeasurements } from '@/hooks/useMeasurements';
 import { MeasurementColumns } from './MeasurementColumns';
 import { MeasurementFilter } from './MeasurementFilter';
 import EditMeasurementModal from './EditMeasurementModal';
 import { useMeasurementUpdate } from '@/hooks/useMeasurementUpdate';
+import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
+import { useToast } from '@/hooks/use-toast';
+import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface FilterState {
   projectId: string | null;
@@ -23,20 +27,66 @@ const MeasurementStatusBoard: React.FC = () => {
   });
   const [editMeasurement, setEditMeasurement] = useState<Measurement | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
+  const { toast } = useToast();
   
-  // Use our centralized hook for fetching measurements
-  const { 
-    measurements, 
-    isLoading: loading, 
-    error, 
-    refetchMeasurements 
-  } = useMeasurements({
-    ...(filter.projectId ? { projectId: filter.projectId } : {}),
-    ...(filter.dateRange?.from && filter.dateRange?.to ? { date: filter.dateRange.from } : {}),
-  });
-
   // Use our custom hook for saving measurements
   const { saveMeasurement, isSaving } = useMeasurementUpdate();
+  
+  // Use our real-time subscription hook
+  const { 
+    measurements, 
+    refreshData,
+    subscriptionState
+  } = useMeasurementSubscription({
+    projectId: filter.projectId || undefined,
+    onInsert: (measurement) => {
+      toast({
+        title: "New measurement added",
+        description: `${measurement.location} has been added.`
+      });
+    },
+    onUpdate: (measurement) => {
+      // Only show toast for significant updates, not just minor edits
+      if (editMeasurement?.id !== measurement.id) { // Don't show toast for our own edits
+        toast({
+          title: "Measurement updated",
+          description: `${measurement.location} has been updated.`
+        });
+      }
+    },
+    onDelete: (id) => {
+      toast({
+        title: "Measurement removed",
+        description: "A measurement has been removed."
+      });
+    }
+  });
+  
+  // Filter measurements based on search criteria
+  const filteredMeasurements = measurements.filter(m => {
+    // Filter by location if specified
+    if (filter.location && !m.location.toLowerCase().includes(filter.location.toLowerCase())) {
+      return false;
+    }
+    
+    // Filter by status if specified
+    if (filter.status && m.status !== filter.status) {
+      return false;
+    }
+    
+    // Filter by date range if specified
+    if (filter.dateRange?.from && filter.dateRange?.to) {
+      const measurementDate = new Date(m.measurementDate);
+      const fromDate = filter.dateRange.from;
+      const toDate = filter.dateRange.to;
+      
+      if (measurementDate < fromDate || measurementDate > toDate) {
+        return false;
+      }
+    }
+    
+    return true;
+  });
   
   // Handle card click to edit measurement
   const handleCardClick = useCallback((measurement: Measurement) => {
@@ -50,44 +100,67 @@ const MeasurementStatusBoard: React.FC = () => {
     await saveMeasurement(measurement, async () => {
       // Explicitly refetch measurements to update the UI
       console.log("Refetching measurements after save");
-      await refetchMeasurements();
+      await refreshData();
       
       // Close the modal
       setEditModalOpen(false);
     });
-  }, [saveMeasurement, refetchMeasurements]);
-
-  // Filter measurements based on search criteria
-  const filteredMeasurements = measurements.filter(m => {
-    // Filter by location if specified
-    if (filter.location && !m.location.toLowerCase().includes(filter.location.toLowerCase())) {
-      return false;
+  }, [saveMeasurement, refreshData]);
+  
+  // Handle manual refresh
+  const handleManualRefresh = useCallback(async () => {
+    const success = await refreshData();
+    if (success) {
+      toast({
+        title: "Data refreshed",
+        description: "Measurement data has been updated."
+      });
+    } else {
+      toast({
+        title: "Refresh failed",
+        description: "Could not refresh measurement data. Please try again.",
+        variant: "destructive"
+      });
     }
-    
-    // Filter by status if specified
-    if (filter.status && m.status !== filter.status) {
-      return false;
-    }
-    
-    return true;
-  });
+  }, [refreshData, toast]);
 
-  if (error) {
-    return (
-      <div className="text-center p-8">
-        <p className="text-red-500">Error loading measurements: {error.message}</p>
-      </div>
-    );
+  if (subscriptionState.lastError) {
+    console.error("Subscription error:", subscriptionState.lastError);
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Measurements</h1>
-        <p className="text-sm text-zinc-400">
-          Manage and track window measurements, monitor installation progress, and
-          schedule tasks.
-        </p>
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Measurements</h1>
+          <p className="text-sm text-zinc-400">
+            Manage and track window measurements, monitor installation progress, and
+            schedule tasks.
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          {subscriptionState.isConnected ? (
+            <div className="flex items-center text-green-500 text-xs">
+              <Wifi className="h-4 w-4 mr-1" />
+              <span>Live</span>
+            </div>
+          ) : (
+            <div className="flex items-center text-amber-500 text-xs">
+              <WifiOff className="h-4 w-4 mr-1" />
+              <span>Polling</span>
+            </div>
+          )}
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={handleManualRefresh} 
+            className="flex items-center"
+          >
+            <RefreshCw className="h-4 w-4 mr-1" />
+            Refresh
+          </Button>
+        </div>
       </div>
       
       <MeasurementFilter onFilterChange={setFilter} />

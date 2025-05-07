@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
@@ -54,4 +55,25 @@ serve(async (req) => {
 
       if (error) throw new Error(`Failed to check publication: ${error.message}`);
 
-      if (!data
+      if (!data || data.length === 0) {
+        await supabaseClient.rpc("execute_sql", {
+          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
+        });
+        messages.push(`Table ${tableName} added to publication`);
+      } else {
+        messages.push(`Table ${tableName} already in publication`);
+      }
+    }
+
+    return new Response(JSON.stringify({ success: true, messages }), {
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  } catch (error) {
+    console.error("Error in enabling realtime:", error);
+    return new Response(JSON.stringify({ error: error.message }), {
+      status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" }
+    });
+  }
+});

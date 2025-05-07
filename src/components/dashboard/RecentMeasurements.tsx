@@ -1,11 +1,12 @@
 
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { useMeasurements } from '@/hooks/useMeasurements';
+import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
+import { Wifi, WifiOff } from 'lucide-react';
 
 const RecentMeasurements: React.FC = () => {
-  // Use our centralized hook to fetch measurements with real-time updates
-  const { measurements, isLoading: loading } = useMeasurements({});
+  // Use our real-time subscription hook instead of the basic fetch hook
+  const { measurements, subscriptionState } = useMeasurementSubscription({});
   
   // Take only the 5 most recent measurements
   const recentMeasurements = measurements.slice(0, 5);
@@ -34,7 +35,7 @@ const RecentMeasurements: React.FC = () => {
     }
   };
 
-  if (loading) {
+  if (subscriptionState.isConnected === false && !recentMeasurements.length) {
     return (
       <div className="flex justify-center items-center h-full">
         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
@@ -52,6 +53,21 @@ const RecentMeasurements: React.FC = () => {
 
   return (
     <div className="space-y-4">
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="text-sm font-medium text-white">Recent Measurements</h3>
+        {subscriptionState.isConnected ? (
+          <div className="flex items-center text-green-500 text-xs">
+            <Wifi className="h-3 w-3 mr-1" />
+            <span>Live</span>
+          </div>
+        ) : (
+          <div className="flex items-center text-amber-500 text-xs">
+            <WifiOff className="h-3 w-3 mr-1" />
+            <span>Polling</span>
+          </div>
+        )}
+      </div>
+      
       {recentMeasurements.map((measurement) => (
         <div key={measurement.id} className="border-b border-zinc-700/50 pb-3 last:border-0">
           <div className="flex justify-between items-start mb-1">

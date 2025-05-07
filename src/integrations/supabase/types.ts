@@ -724,6 +724,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      execute_sql: {
+        Args: { sql: string }
+        Returns: undefined
+      }
       is_project_member: {
         Args: { project_id: string }
         Returns: boolean
