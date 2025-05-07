@@ -250,23 +250,18 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     // Fetch initial data
     refreshData();
     
-    // Setup real-time subscription
-    const cleanupSubscription = setupSubscription();
+    // Setup real-time subscription - must call it and store result
+    const subscriptionPromise = setupSubscription();
     
     // Cleanup function
     return () => {
-      if (typeof cleanupSubscription === 'function') {
-        cleanupSubscription();
-      } else if (cleanupSubscription instanceof Promise) {
-        // Handle the promise case
-        cleanupSubscription.then(cleanup => {
-          if (typeof cleanup === 'function') {
-            cleanup();
-          }
-        }).catch(err => {
-          console.error('Error cleaning up subscription:', err);
-        });
-      }
+      subscriptionPromise.then(cleanup => {
+        if (typeof cleanup === 'function') {
+          cleanup();
+        }
+      }).catch(err => {
+        console.error('Error cleaning up subscription:', err);
+      });
     };
   }, [refreshData, setupSubscription]);
   

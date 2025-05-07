@@ -1,10 +1,42 @@
-
 import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project';
 import { tryAsync, withErrorHandling } from '@/utils/error-handling';
 import { recordUtility, addHistoryEntry } from '@/utils/knowledgeBase';
+
+// Define interfaces directly in this file to avoid circular dependencies
+interface ProjectOption {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+}
+
+interface ProjectDetails extends ProjectOption {
+  deadline?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}
+
+interface ProjectCreateInput {
+  name: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+}
+
+interface ProjectUpdateInput {
+  name?: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+  status?: string;
+}
 
 interface ProjectsHookState {
   loading: boolean;

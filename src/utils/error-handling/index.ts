@@ -4,6 +4,8 @@
  */
 
 import { toast } from '@/components/ui/use-toast';
+export { logError } from './errorLogger';
+export * from './errorBoundary';
 
 // Define standard error types for consistent handling
 export type ApiErrorType = 

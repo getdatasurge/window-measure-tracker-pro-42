@@ -1,7 +1,40 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project';
+
+// Define interfaces directly to avoid circular dependencies
+interface ProjectOption {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+}
+
+interface ProjectDetails extends ProjectOption {
+  deadline?: string;
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}
+
+interface ProjectCreateInput {
+  name: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+}
+
+interface ProjectUpdateInput {
+  name?: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+  status?: string;
+}
 
 /**
  * Fetch projects with optional filtering

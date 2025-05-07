@@ -1,3 +1,4 @@
+
 export interface ProjectOption {
   id: string;
   name: string;
@@ -30,3 +31,6 @@ export interface ProjectUpdateInput {
   deadline?: string;
   status?: string;
 }
+
+// Export existing Project-related types
+export * from './project';
