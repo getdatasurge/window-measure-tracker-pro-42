@@ -135,6 +135,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
   
   /**
    * Setup polling as fallback for real-time updates
+   * This function actually returns the cleanup function
    */
   const setupPolling = useCallback(() => {
     console.info('Starting polling fallback mechanism');
@@ -239,10 +240,8 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         lastError: error instanceof Error ? error : new Error('Unknown subscription error')
       }));
       
-      // Instead of calling setupPolling() and returning its result directly,
-      // we properly implement polling and return the cleanup function
-      const cleanup = setupPolling();
-      return cleanup;
+      // Return the cleanup function from setupPolling
+      return setupPolling();
     }
   }, [options.onInsert, options.onUpdate, options.onDelete, setupPolling]);
   
@@ -252,12 +251,21 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     refreshData();
     
     // Setup real-time subscription
-    const cleanup = setupSubscription();
+    const cleanupSubscription = setupSubscription();
     
     // Cleanup function
     return () => {
-      if (typeof cleanup === 'function') {
-        cleanup();
+      if (typeof cleanupSubscription === 'function') {
+        cleanupSubscription();
+      } else if (cleanupSubscription instanceof Promise) {
+        // Handle the promise case
+        cleanupSubscription.then(cleanup => {
+          if (typeof cleanup === 'function') {
+            cleanup();
+          }
+        }).catch(err => {
+          console.error('Error cleaning up subscription:', err);
+        });
       }
     };
   }, [refreshData, setupSubscription]);

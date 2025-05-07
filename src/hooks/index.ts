@@ -1,3 +1,4 @@
+
 // Export custom hooks
 export * from "./use-toast";
 export * from "./useMeasurementSubscription";
@@ -8,4 +9,5 @@ export * from "./useDebounce";
 // Other hooks will be added here
 
 // Export from error handling utilities
-export { tryAsync, withErrorHandling } from '@/utils/error-handling';
+export { tryAsync, withErrorHandling } from '@/utils/error-handling/index';
+

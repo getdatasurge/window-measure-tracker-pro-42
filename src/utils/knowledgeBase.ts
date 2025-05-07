@@ -110,3 +110,6 @@ export function recordPackage(name: string, version: string, purpose: string): v
   recordKnowledgeBaseEntry('Plugins & Tools', entry);
   addHistoryEntry(`Added ${name} v${version}`);
 }
+
+// Record this fix in the knowledge base
+addHistoryEntry('Fixed TypeScript type issues and circular dependencies across project');
