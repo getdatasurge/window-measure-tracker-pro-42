@@ -1,12 +1,12 @@
 
 import React from 'react';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Textarea } from '@/components/ui/textarea';
 import { FormErrors } from '@/hooks/measurements/types';
-import { DIRECTION_OPTIONS, Direction, DEFAULT_DIRECTION } from '@/constants/direction';
+import LocationField from './fields/LocationField';
+import DirectionField from './fields/DirectionField';
+import QuantityField from './fields/QuantityField';
+import FilmRequiredField from './fields/FilmRequiredField';
+import NotesField from './fields/NotesField';
+import InputSourceField from './fields/InputSourceField';
 
 interface AttributesFieldsProps {
   register: any;
@@ -15,7 +15,7 @@ interface AttributesFieldsProps {
   errors: FormErrors;
 }
 
-const AttributesFieldsProps: React.FC<AttributesFieldsProps> = ({ 
+const AttributesFields: React.FC<AttributesFieldsProps> = ({ 
   register, 
   watch, 
   setValue,
@@ -24,84 +24,24 @@ const AttributesFieldsProps: React.FC<AttributesFieldsProps> = ({
   return (
     <>
       {/* Location */}
-      <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          placeholder="e.g. Living Room Window"
-          {...register('location', { required: "Location is required" })}
-        />
-        {errors.location && (
-          <p className="text-sm text-red-500">{errors.location.message}</p>
-        )}
-      </div>
+      <LocationField register={register} errors={errors} />
       
       {/* Direction and Quantity */}
       <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="direction">Direction</Label>
-          <Select
-            value={watch('direction') || DEFAULT_DIRECTION}
-            onValueChange={(value: Direction) => setValue('direction', value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select direction" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-              {DIRECTION_OPTIONS.map((dir) => (
-                <SelectItem key={dir} value={dir} className="text-white">
-                  {dir}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="space-y-2">
-          <Label htmlFor="quantity">Quantity</Label>
-          <Input
-            id="quantity"
-            type="number"
-            min={1}
-            {...register('quantity', { 
-              required: "Quantity is required",
-              min: { value: 1, message: "Minimum quantity is 1" }
-            })}
-          />
-          {errors.quantity && (
-            <p className="text-sm text-red-500">{errors.quantity.message}</p>
-          )}
-        </div>
+        <DirectionField watch={watch} setValue={setValue} />
+        <QuantityField register={register} errors={errors} />
       </div>
       
       {/* Film Required */}
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="filmRequired"
-          checked={watch('filmRequired') !== false}
-          onCheckedChange={(checked) => setValue('filmRequired', checked)}
-        />
-        <Label htmlFor="filmRequired">Film Required</Label>
-      </div>
+      <FilmRequiredField watch={watch} setValue={setValue} />
       
       {/* Notes */}
-      <div className="space-y-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Textarea
-          id="notes"
-          placeholder="Additional notes or comments"
-          {...register('notes')}
-        />
-      </div>
-
+      <NotesField register={register} />
+      
       {/* Input Source - Hidden field that defaults to 'manual' */}
-      <input 
-        type="hidden" 
-        {...register('input_source')} 
-        value="manual" 
-      />
+      <InputSourceField register={register} />
     </>
   );
 };
 
-export default AttributesFieldsProps;
+export default AttributesFields;

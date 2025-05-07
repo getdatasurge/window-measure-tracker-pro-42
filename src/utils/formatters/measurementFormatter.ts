@@ -1,28 +1,16 @@
 
 import { Measurement } from '@/types/measurement';
 
-/**
- * Format a database measurement record to match the frontend Measurement interface
- */
-export const formatMeasurement = (item: any): Measurement => {
+export const formatMeasurement = (measurement: Measurement): Measurement => {
+  // Format all measurement values for display
   return {
-    id: item.id,
-    projectId: item.project_id,
-    projectName: item.projects?.name || 'Unknown Project',
-    location: item.location || '',
-    width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
-    height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
-    depth: item.depth ? `${item.depth}"` : undefined,
-    area: item.area ? `${item.area} ft²` : '0 ft²',
-    quantity: item.quantity || 1,
-    recordedBy: item.recorded_by || '',
-    direction: (item.direction || 'N/A') as any,
-    notes: item.notes,
-    status: (item.status || 'Pending') as any,
-    measurementDate: item.measurement_date || new Date().toISOString(),
-    updatedAt: item.updated_at || new Date().toISOString(),
-    updatedBy: item.updated_by,
-    film_required: item.film_required,
-    photos: Array.isArray(item.photos) ? item.photos : [],
+    ...measurement,
+    width: typeof measurement.width === 'number' ? measurement.width.toFixed(2) : measurement.width,
+    height: typeof measurement.height === 'number' ? measurement.height.toFixed(2) : measurement.height,
+    area: typeof measurement.area === 'number' ? `${measurement.area.toFixed(2)} ft²` : measurement.area,
+    quantity: measurement.quantity || 1,
+    status: measurement.status ? measurement.status.charAt(0).toUpperCase() + measurement.status.slice(1) : 'Pending',
+    installationDate: measurement.installationDate || '',
+    film_required: measurement.film_required !== false
   };
 };
