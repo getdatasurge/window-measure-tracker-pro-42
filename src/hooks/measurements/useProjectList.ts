@@ -1,12 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-
-// Define the project option type
-export type ProjectOption = {
-  id: string;
-  name: string;
-};
+import { ProjectOption } from './types';
 
 export function useProjectList() {
   const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);

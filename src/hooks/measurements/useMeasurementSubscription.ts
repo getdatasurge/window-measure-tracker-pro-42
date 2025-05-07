@@ -60,18 +60,22 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         throw error;
       }
       
-      // Transform data if needed and set state
+      // Transform data to ensure types match Measurement interface
       if (data) {
         return data.map(item => ({
           ...item,
           id: item.id,
           projectId: item.project_id,
           measurementDate: item.measurement_date,
-          projectName: '', // This would normally come from a join or separate query
+          projectName: item.projectName || '', // Provide default value
           createdAt: item.created_at,
           updatedAt: item.updated_at,
-          recordedBy: item.recorded_by
-        }));
+          recordedBy: item.recorded_by || '',
+          width: String(item.width || ''), // Convert to string to match Measurement type
+          height: String(item.height || ''), // Convert to string to match Measurement type
+          area: String(item.area || ''), // Convert to string to match Measurement type
+          status: item.status || 'Pending'
+        } as Measurement));
       }
       
       return [];
@@ -104,7 +108,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
       console.info('Setting up realtime for measurements table...');
       
       // Try to enable real-time for the table
-      const isRealtimeEnabled = await setupRealtime('measurements');
+      const isRealtimeEnabled = await setupRealtime();
       
       if (!isRealtimeEnabled) {
         throw new Error('Failed to enable realtime');
@@ -132,14 +136,14 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
               case 'UPDATE':
                 setMeasurements(prev => 
                   prev.map(item => 
-                    item.id === payload.new.id ? { ...item, ...payload.new } : item
+                    item.id === payload.new.id ? { ...item, ...payload.new as Partial<Measurement> } : item
                   )
                 );
                 break;
                 
               case 'DELETE':
                 setMeasurements(prev => 
-                  prev.filter(item => item.id !== payload.old.id)
+                  prev.filter(item => item.id !== payload.old?.id)
                 );
                 break;
                 
@@ -173,9 +177,9 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     setIsPolling(true);
     
     // Poll for updates every 30 seconds
-    const intervalId = setInterval(async () => {
+    const intervalId = setInterval(() => {
       console.info('Polling for measurement updates...');
-      await refreshData();
+      refreshData();
     }, 30000);
     
     // Return cleanup function
@@ -191,7 +195,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     refreshData();
     
     // Setup real-time subscription
-    let cleanup = setupSubscription();
+    const cleanup = setupSubscription();
     
     // Cleanup function
     return () => {
