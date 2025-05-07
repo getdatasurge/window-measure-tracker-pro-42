@@ -10,14 +10,15 @@ export const setupRealtime = async (): Promise<boolean> => {
     console.log('Setting up realtime for measurements table...');
     
     // First, check if the table exists to avoid errors
-    const { data: tableExists } = await safeQuery(() => 
+    const { data: tableData, error: tableError } = await safeQuery(() => 
       supabase.from('measurements')
       .select('id')
       .limit(1)
-      .then(res => ({ exists: !res.error }))
     );
     
-    if (!tableExists?.exists) {
+    const tableExists = tableData !== null && !tableError;
+    
+    if (!tableExists) {
       console.log('Measurements table does not exist yet - skipping realtime setup');
       return false;
     }
