@@ -4,7 +4,6 @@ import { setupListeners } from '@reduxjs/toolkit/query';
 import { apiSlice } from '@/services/apiSlice';
 import { 
   persistStore, 
-  persistReducer,
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -12,14 +11,6 @@ import {
   PURGE,
   REGISTER 
 } from 'redux-persist';
-import storage from 'redux-persist/lib/storage';
-
-// Configure Redux persist
-const persistConfig = {
-  key: 'root',
-  storage,
-  whitelist: ['auth'], // Only persist auth
-};
 
 // Create the store with middleware
 export const store = configureStore({
