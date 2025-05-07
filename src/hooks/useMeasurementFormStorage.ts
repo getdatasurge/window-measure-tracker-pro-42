@@ -11,7 +11,7 @@ type StoredFormData = {
   timestamp: number;
 };
 
-export const useMeasurementFormStorage = () => {
+export const useMeasurementFormStorage = (isOpen?: boolean, defaultValues?: Partial<Measurement>) => {
   const [initialFormData, setInitialFormData] = useState<Partial<Measurement> | MeasurementFormData | null>(null);
 
   // Load stored data when hook initializes

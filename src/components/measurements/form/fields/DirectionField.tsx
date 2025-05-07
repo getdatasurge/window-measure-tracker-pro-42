@@ -4,12 +4,13 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { DIRECTION_OPTIONS, Direction, DEFAULT_DIRECTION } from '@/constants/direction';
 
-interface DirectionFieldProps {
+export interface DirectionFieldProps {
   watch: any;
   setValue: any;
+  errors?: any; // Make errors optional to match AttributesFields usage
 }
 
-const DirectionField: React.FC<DirectionFieldProps> = ({ watch, setValue }) => {
+const DirectionField: React.FC<DirectionFieldProps> = ({ watch, setValue, errors }) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="direction">Direction</Label>
@@ -28,6 +29,9 @@ const DirectionField: React.FC<DirectionFieldProps> = ({ watch, setValue }) => {
           ))}
         </SelectContent>
       </Select>
+      {errors?.direction && (
+        <p className="text-xs text-red-500 mt-1">{errors.direction.message}</p>
+      )}
     </div>
   );
 };

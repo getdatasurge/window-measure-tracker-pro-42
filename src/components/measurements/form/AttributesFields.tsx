@@ -2,7 +2,6 @@
 import React, { forwardRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Textarea } from '@/components/ui/textarea';
 import DirectionField from './fields/DirectionField';
 import FilmRequiredField from './fields/FilmRequiredField';
@@ -49,7 +48,8 @@ const AttributesFields = forwardRef<HTMLInputElement, AttributesFieldsProps>(({
       />
 
       <FilmRequiredField 
-        register={register}
+        watch={watch}
+        setValue={setValue}
         errors={errors}
       />
 

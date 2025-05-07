@@ -5,6 +5,7 @@ import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
 import { MeasurementFormState } from '../types';
 import { Measurement } from '@/types/measurement';
+import { Direction } from '@/constants/direction';
 
 interface UseMeasurementModalStateProps {
   isOpen: boolean;
@@ -27,36 +28,50 @@ export function useMeasurementModalState({
   
   const TOTAL_STEPS = 5;
 
-  // Use our custom hook for localStorage management
+  // Use our custom hook for localStorage management without parameters
   const {
     initialFormData,
     saveFormData
-  } = useMeasurementFormStorage(isOpen, defaultValues);
+  } = useMeasurementFormStorage();
 
   // Load initial data when modal opens
   useEffect(() => {
     if (isOpen) {
       if (measurement) {
         // If editing an existing measurement, use that
-        setFormData(measurement);
+        setFormData(measurement as MeasurementFormState);
       } else if (Object.keys(defaultValues).length > 0) {
         // If we have default values from context, use those
-        setFormData(generateNewMeasurement({
+        const newMeasurement = generateNewMeasurement({
           ...defaultValues,
           recordedBy: profile?.full_name || 'Unknown User'
-        }));
+        });
+        setFormData(newMeasurement as MeasurementFormState);
       } else if (initialFormData) {
         // If we have data from localStorage, use that
-        setFormData({
+        const recordedBy = profile?.full_name || 
+                         (initialFormData as any).recordedBy || 
+                         'Unknown User';
+                         
+        const measurementWithDefaults = {
           ...generateNewMeasurement(),
           ...initialFormData,
-          recordedBy: profile?.full_name || initialFormData.recordedBy || 'Unknown User'
-        });
+          recordedBy
+        };
+        
+        // Ensure direction is a valid Direction type
+        if (typeof measurementWithDefaults.direction === 'string' && 
+            !['North', 'South', 'East', 'West', 'Northeast', 'Northwest', 'Southeast', 'Southwest', 'N/A'].includes(measurementWithDefaults.direction)) {
+          measurementWithDefaults.direction = 'N/A' as Direction;
+        }
+        
+        setFormData(measurementWithDefaults as MeasurementFormState);
       } else {
         // Start fresh
-        setFormData(generateNewMeasurement({
+        const newMeasurement = generateNewMeasurement({
           recordedBy: profile?.full_name || 'Unknown User'
-        }));
+        });
+        setFormData(newMeasurement as MeasurementFormState);
       }
 
       // Reset the form submission state

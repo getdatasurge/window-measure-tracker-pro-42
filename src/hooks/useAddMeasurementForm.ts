@@ -33,41 +33,51 @@ export const useAddMeasurementForm = ({
   const [hasSavedDraft, setHasSavedDraft] = useState<boolean>(false);
   
   // Set up default values based on edit mode, saved draft, or new measurement
-  const defaultValues = editMode && measurementToEdit 
-    ? {
-        projectId: measurementToEdit.projectId || '',
-        projectName: measurementToEdit.projectName || '',
-        location: measurementToEdit.location || '',
-        width: measurementToEdit.width || '',
-        height: measurementToEdit.height || '',
-        direction: measurementToEdit.direction || ('N/A' as Direction),
-        notes: measurementToEdit.notes || '',
-        filmRequired: measurementToEdit.film_required !== false, // Default to true if undefined
-        quantity: measurementToEdit.quantity || 1,
-        photos: [],
-        installationDate: measurementToEdit.installationDate || '',
-        input_source: measurementToEdit.input_source || 'manual'
-      }
-    : initialFormData 
-    ? {
-        ...initialFormData,
-        projectId: initialProjectId || initialFormData.projectId || '',
-        projectName: initialProjectName || initialFormData.projectName || '',
-        input_source: 'manual'
-      }
-    : {
-        projectId: initialProjectId || '',
-        projectName: initialProjectName || '',
-        location: '',
-        width: '',
-        height: '',
-        direction: 'N/A' as Direction,
-        notes: '',
-        filmRequired: true,
-        quantity: 1,
-        photos: [],
-        input_source: 'manual'
-      };
+  let defaultValues: Partial<MeasurementFormData> = {};
+  
+  if (editMode && measurementToEdit) {
+    defaultValues = {
+      projectId: measurementToEdit.projectId || '',
+      projectName: measurementToEdit.projectName || '',
+      location: measurementToEdit.location || '',
+      width: measurementToEdit.width || '',
+      height: measurementToEdit.height || '',
+      direction: measurementToEdit.direction || 'N/A' as Direction,
+      notes: measurementToEdit.notes || '',
+      filmRequired: measurementToEdit.film_required !== false, // Default to true if undefined
+      quantity: measurementToEdit.quantity || 1,
+      photos: [],
+      installationDate: measurementToEdit.installationDate || '',
+      input_source: measurementToEdit.input_source || 'manual'
+    };
+  } else if (initialFormData) {
+    // Convert string[] photos if needed
+    const formPhotos = Array.isArray((initialFormData as any).photos) 
+      ? (initialFormData as any).photos.filter((p: any) => p instanceof File) 
+      : [];
+      
+    defaultValues = {
+      ...initialFormData as Partial<MeasurementFormData>,
+      projectId: initialProjectId || (initialFormData as any).projectId || '',
+      projectName: initialProjectName || (initialFormData as any).projectName || '',
+      photos: formPhotos,
+      input_source: 'manual'
+    };
+  } else {
+    defaultValues = {
+      projectId: initialProjectId || '',
+      projectName: initialProjectName || '',
+      location: '',
+      width: '',
+      height: '',
+      direction: 'N/A' as Direction,
+      notes: '',
+      filmRequired: true,
+      quantity: 1,
+      photos: [],
+      input_source: 'manual'
+    };
+  }
   
   const { register, handleSubmit, setValue, watch, reset, formState } = useForm<MeasurementFormData>({
     defaultValues
@@ -108,9 +118,9 @@ export const useAddMeasurementForm = ({
       setValue('projectName', initialProjectName);
     } 
     // Use saved draft if available
-    else if (initialFormData?.projectId && initialFormData?.projectName) {
-      setValue('projectId', initialFormData.projectId);
-      setValue('projectName', initialFormData.projectName);
+    else if (initialFormData && (initialFormData as any).projectId && (initialFormData as any).projectName) {
+      setValue('projectId', (initialFormData as any).projectId);
+      setValue('projectName', (initialFormData as any).projectName);
     }
     // Set last used project if available
     else {
@@ -189,7 +199,7 @@ export const useAddMeasurementForm = ({
       // Update the calculated area state
       setCalculatedArea(formattedArea);
       
-      // Set the area field value
+      // Set the area field value - update to use string value instead of number
       setValue('area', formattedArea);
     } else {
       setCalculatedArea('');
