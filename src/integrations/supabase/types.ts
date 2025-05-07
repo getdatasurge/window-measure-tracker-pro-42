@@ -464,6 +464,7 @@ export type Database = {
           location: string
           measurement_date: string | null
           notes: string | null
+          photos: string[] | null
           project_id: string
           quantity: number | null
           recorded_by: string | null
@@ -493,6 +494,7 @@ export type Database = {
           location: string
           measurement_date?: string | null
           notes?: string | null
+          photos?: string[] | null
           project_id: string
           quantity?: number | null
           recorded_by?: string | null
@@ -522,6 +524,7 @@ export type Database = {
           location?: string
           measurement_date?: string | null
           notes?: string | null
+          photos?: string[] | null
           project_id?: string
           quantity?: number | null
           recorded_by?: string | null

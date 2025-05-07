@@ -1,10 +1,9 @@
-
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_FILES = 3;
 
-// Import ProjectOption from useProjectList.ts to avoid circular imports
+// Use the ProjectOption from useProjectList
 import { ProjectOption } from './useProjectList';
 // Re-export for backward compatibility
 export type { ProjectOption };

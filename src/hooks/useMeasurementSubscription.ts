@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -75,7 +76,20 @@ export const useMeasurementSubscription = ({
 
       if (error) throw error;
 
-      const formattedData = (data || []).map(item => formatMeasurement(item));
+      // Transform the data to match our Measurement type
+      // Make sure to handle missing fields and type conversions
+      const formattedData = (data || []).map(item => {
+        // Use the formatMeasurement utility, but ensure it handles all needed conversions
+        const measurement = formatMeasurement(item);
+        
+        // Ensure we have photos array (might be missing in some records)
+        if (!measurement.photos) {
+          measurement.photos = [];
+        }
+        
+        return measurement;
+      });
+      
       setMeasurements(formattedData);
       setSubscriptionState(prev => ({
         ...prev,
@@ -103,7 +117,7 @@ export const useMeasurementSubscription = ({
     return intervalId;
   }, [fetchMeasurements]);
 
-  const setupSubscription: (retryAttempt?: number) => Promise<any> = useCallback(
+  const setupSubscription = useCallback(
     async (retryAttempt = 0) => {
       try {
         const realtimeEnabled = await setupRealtime();
