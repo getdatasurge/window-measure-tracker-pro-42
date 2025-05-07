@@ -3,7 +3,7 @@
 export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
 // Import Direction type from constants instead of defining it here
 import { Direction } from '@/constants/direction';
-export { Direction };
+export type { Direction }; // Changed to "export type" to fix the isolatedModules error
 
 export interface Measurement {
   id: string;
