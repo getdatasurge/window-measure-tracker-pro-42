@@ -674,6 +674,39 @@ export type Database = {
           },
         ]
       }
+      project_change_logs: {
+        Row: {
+          action: string | null
+          actor_id: string | null
+          changed_at: string | null
+          id: string
+          ip_address: string | null
+          new_data: Json | null
+          old_data: Json | null
+          project_id: string | null
+        }
+        Insert: {
+          action?: string | null
+          actor_id?: string | null
+          changed_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          project_id?: string | null
+        }
+        Update: {
+          action?: string | null
+          actor_id?: string | null
+          changed_at?: string | null
+          id?: string
+          ip_address?: string | null
+          new_data?: Json | null
+          old_data?: Json | null
+          project_id?: string | null
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           client_name: string | null

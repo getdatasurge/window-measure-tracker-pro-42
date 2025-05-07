@@ -10,3 +10,6 @@ project_id = "bvipslspkgbjovgztubb"
 [functions]
 [functions.backfill-profiles]
 verify_jwt = true
+
+[functions.enable-realtime]
+verify_jwt = true

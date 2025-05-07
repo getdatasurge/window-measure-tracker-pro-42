@@ -1,3 +1,4 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
@@ -9,7 +10,8 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-// Initialize Supabase client
+// Initialize Supabase client using environment variables
+// No hard-coded values here - leveraging Deno's environment variable system
 const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? '',
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ''
