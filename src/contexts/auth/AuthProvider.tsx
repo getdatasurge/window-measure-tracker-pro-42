@@ -1,21 +1,26 @@
-
-import { createContext, useContext, useState, useEffect, useCallback, ReactNode } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+  ReactNode,
+  useRef
+} from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { useToast } from '@/hooks/use-toast';
 import { handleError } from '@/utils/error-handling';
 
-// Define the Profile type
 export interface Profile {
   id: string;
   full_name?: string;
   email?: string;
   role?: string;
   avatar_url?: string;
-  [key: string]: any; // For additional profile fields
+  [key: string]: any;
 }
 
-// Define the context value type
 export interface AuthContextValue {
   user: User | null;
   session: Session | null;
@@ -28,10 +33,8 @@ export interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-// Create the context with a default value
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
-// Create a hook to use the auth context
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (context === undefined) {
@@ -40,14 +43,12 @@ export const useAuth = () => {
   return context;
 };
 
-// For backwards compatibility
 export const useUser = useAuth;
 
 interface AuthProviderProps {
   children: ReactNode;
 }
 
-// Main provider component
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -56,113 +57,106 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [profileNotFound, setProfileNotFound] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   const { toast } = useToast();
-  
-  // Cache fetched profile IDs to avoid redundant fetches
-  const fetchedIds = new Set<string>();
 
-  // Fetch user profile from Supabase
+  const fetchedIds = useRef<Set<string>>(new Set());
+  const isMounted = useRef(true);
+
   const fetchProfile = useCallback(async (userId: string) => {
-    if (!userId || fetchedIds.has(userId)) return;
-    
-    console.log(`[Auth] Fetching profile for user ${userId}`);
-    fetchedIds.add(userId);
-    
+    if (!userId || fetchedIds.current.has(userId)) return;
+
+    console.debug(`[Auth] Fetching profile for user ${userId}`);
+    fetchedIds.current.add(userId);
+
     try {
       const { data, error } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-        
+
       if (error) throw error;
-      
-      setProfile(data);
-      setProfileNotFound(!data);
-    } catch (error) {
-      console.error('Error fetching profile:', error);
-      setProfileNotFound(true);
-      setError(error instanceof Error ? error : new Error('Failed to fetch profile'));
-      handleError(error, { 
-        title: 'Profile Error',
-        message: 'Failed to load your profile. Some features may be limited.',
-        showToast: true
-      });
+
+      if (isMounted.current) {
+        setProfile(data);
+        setProfileNotFound(!data);
+      }
+    } catch (err) {
+      console.error('Error fetching profile:', err);
+      if (isMounted.current) {
+        setProfileNotFound(true);
+        setError(err instanceof Error ? err : new Error('Failed to fetch profile'));
+        handleError(err, {
+          title: 'Profile Error',
+          message: 'Failed to load your profile. Some features may be limited.',
+          showToast: true
+        });
+      }
     }
   }, []);
-  
-  // Refresh profile data
+
   const refreshProfile = useCallback(async () => {
-    if (!user?.id) return;
-    fetchedIds.delete(user.id);
-    await fetchProfile(user.id);
+    if (user?.id) {
+      fetchedIds.current.delete(user.id);
+      await fetchProfile(user.id);
+    }
   }, [user?.id, fetchProfile]);
-  
-  // Sign out function
+
   const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setProfile(null);
-      fetchedIds.clear();
+      fetchedIds.current.clear();
       setError(null);
-    } catch (error) {
-      console.error('Error signing out:', error);
-      setError(error instanceof Error ? error : new Error('Failed to sign out'));
-      handleError(error, {
-        title: 'Sign Out Error',
-        message: 'There was a problem signing you out.',
-        showToast: true
-      });
-      throw error; // Re-throw to allow the calling code to handle it
+    } catch (err) {
+      console.error('Error signing out:', err);
+      if (isMounted.current) {
+        setError(err instanceof Error ? err : new Error('Failed to sign out'));
+        handleError(err, {
+          title: 'Sign Out Error',
+          message: 'There was a problem signing you out.',
+          showToast: true
+        });
+      }
+      throw err;
     }
   }, []);
-  
-  // Set up auth listener and initial session
+
   useEffect(() => {
-    let isMounted = true;
-    let retryCount = 0;
+    isMounted.current = true;
     const MAX_RETRIES = 3;
     const RETRY_DELAY = 800;
-    
-    // Check for session with retries for eventual consistency
+    let retryCount = 0;
+
     const checkSession = async () => {
       try {
         setIsLoading(true);
-        
         const { data: { session: currentSession }, error } = await supabase.auth.getSession();
-        
         if (error) throw error;
-        
+
         if (currentSession) {
-          if (isMounted) {
-            setSession(currentSession);
-            setUser(currentSession.user);
-            
-            // Fetch profile asynchronously
+          setSession(currentSession);
+          setUser(currentSession.user);
+
+          queueMicrotask(() => {
             if (currentSession.user?.id) {
-              setTimeout(() => {
-                if (isMounted) fetchProfile(currentSession.user.id);
-              }, 0);
+              fetchProfile(currentSession.user.id);
             }
-            
-            setIsLoading(false);
-          }
+          });
+
+          setIsLoading(false);
         } else if (retryCount < MAX_RETRIES) {
-          // Retry for eventual consistency after auth redirects
           retryCount++;
           setTimeout(checkSession, RETRY_DELAY);
         } else {
-          // No session after retries
-          if (isMounted) {
-            setSession(null);
-            setUser(null);
-            setIsLoading(false);
-          }
+          setSession(null);
+          setUser(null);
+          setIsLoading(false);
         }
       } catch (err) {
         console.error('Auth initialization error:', err);
-        if (isMounted) {
+        if (isMounted.current) {
           setIsLoading(false);
           setError(err instanceof Error ? err : new Error('Authentication error'));
           handleError(err, {
@@ -173,58 +167,46 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         }
       }
     };
-    
-    // Set up auth change listener
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
-      if (!isMounted) return;
-      
-      console.log(`[Auth] Auth state changed: ${event}`);
+      if (!isMounted.current) return;
+      console.debug(`[Auth] Auth state changed: ${event}`);
+
       setSession(currentSession);
-      
-      const currentUser = currentSession?.user || null;
-      setUser(currentUser);
-      
-      // Reset profile when user changes
-      if (currentUser?.id !== user?.id) {
+      const newUser = currentSession?.user ?? null;
+      setUser(newUser);
+
+      if (newUser?.id !== user?.id) {
         setProfile(null);
         setProfileNotFound(false);
-        
-        // Fetch profile for new user
-        if (currentUser?.id) {
-          // Use setTimeout to break potential deadlock
-          setTimeout(() => {
-            if (isMounted) fetchProfile(currentUser.id);
-          }, 0);
-        }
+        queueMicrotask(() => {
+          fetchProfile(newUser?.id!);
+        });
       }
-      
-      // Ensure loading completes even during auth changes
+
       setIsLoading(false);
       setError(null);
     });
-    
-    // Start the session check
+
     checkSession();
-    
+
     return () => {
-      isMounted = false;
+      isMounted.current = false;
       subscription.unsubscribe();
     };
   }, [fetchProfile, user?.id]);
-  
-  // Force loading to complete after 5 seconds as a safety mechanism
+
+  // Safety timeout to forcibly resolve loading state
   useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      if (isLoading) {
+    const timeout = setTimeout(() => {
+      if (isLoading && isMounted.current) {
         console.warn('[Auth] Force completing loading state due to timeout');
         setIsLoading(false);
       }
     }, 5000);
-    
-    return () => clearTimeout(timeoutId);
+    return () => clearTimeout(timeout);
   }, [isLoading]);
-  
-  // Build the context value
+
   const contextValue: AuthContextValue = {
     user,
     session,

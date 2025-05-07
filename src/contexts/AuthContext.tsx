@@ -1,85 +1,77 @@
+// src/contexts/auth-context.tsx
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import {
+  createContext,
+  useContext,
+  useCallback,
+  useState,
+  useEffect,
+  ReactNode,
+} from 'react';
+import { useSessionContext, useSupabaseClient, Session } from '@supabase/auth-helpers-react';
+import { User } from '@supabase/supabase-js';
+import { useToast } from '@/hooks/use-toast';
+import { handleError } from '@/utils/error-handling';
 
-// Define the auth context state type
 interface AuthContextState {
   isAuthenticated: boolean;
-  user: any | null;
+  user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
+  session: Session | null;
 }
 
-// Create the context with default values
-const AuthContext = createContext<AuthContextState>({
-  isAuthenticated: false,
-  user: null,
-  loading: true,
-  login: async () => {},
-  logout: async () => {},
-});
+const AuthContext = createContext<AuthContextState | undefined>(undefined);
 
-// Create a provider component
-export const AuthProvider: React.FC<{children: React.ReactNode}> = ({ children }) => {
-  const [user, setUser] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  
-  // Check if the user is authenticated on mount
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        // Placeholder for actual auth check logic
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-          setUser(JSON.parse(storedUser));
-        }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    checkAuth();
-  }, []);
-  
-  const login = async (email: string, password: string) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const { session, isLoading: sessionLoading } = useSessionContext();
+  const supabase = useSupabaseClient();
+  const toast = useToast();
+
+  const [loading, setLoading] = useState(false);
+  const user = session?.user || null;
+
+  const login = useCallback(async (email: string, password: string) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // Placeholder for actual login logic
-      const userData = { id: '1', email, name: 'User' };
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+    } catch (err) {
+      handleError(err, {
+        title: 'Login Failed',
+        message: 'Invalid credentials or network error.',
+        showToast: true,
+      });
     } finally {
       setLoading(false);
     }
-  };
-  
-  const logout = async () => {
+  }, [supabase]);
+
+  const logout = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      // Placeholder for actual logout logic
-      localStorage.removeItem('user');
-      setUser(null);
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+    } catch (err) {
+      handleError(err, {
+        title: 'Logout Failed',
+        message: 'There was an error signing out.',
+        showToast: true,
+      });
     } finally {
       setLoading(false);
     }
+  }, [supabase]);
+
+  const value: AuthContextState = {
+    isAuthenticated: !!user,
+    user,
+    session,
+    loading: loading || sessionLoading,
+    login,
+    logout,
   };
-  
+
   return (
-    <AuthContext.Provider 
-      value={{
-        isAuthenticated: !!user,
-        user,
-        loading,
-        login,
-        logout,
-      }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-// Create a hook for easy access to the auth context
-export const useAuth = () => useContext(AuthContext);
+    <AuthContext.Provider value={val
