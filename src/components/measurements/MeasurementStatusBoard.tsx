@@ -1,14 +1,15 @@
 
-import React, { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { Measurement } from '@/types/measurement';
+import React, { useState, useCallback } from 'react';
 import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/hooks/use-toast';
+import { Measurement } from '@/types/measurement';
 import StatusColumn from './StatusColumn';
 import MeasurementFilterBar from './MeasurementFilterBar';
 import WeeklyNavBar from './WeeklyNavBar';
 import EditMeasurementModal from './EditMeasurementModal';
 import { AnimatePresence } from 'framer-motion';
+import { useMeasurements } from '@/hooks/useMeasurements';
+import { supabase } from '@/integrations/supabase/client';
 
 interface FilterState {
   projectId: string | null;
@@ -25,90 +26,17 @@ const MeasurementStatusBoard: React.FC = () => {
     status: null,
     dateRange: null,
   });
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [filteredMeasurements, setFilteredMeasurements] = useState<Measurement[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
   const [editMeasurement, setEditMeasurement] = useState<Measurement | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const { user } = useAuth();
   const { toast } = useToast();
-
-  // Fetch measurements from Supabase
-  const fetchMeasurements = useCallback(async () => {
-    if (!user) return;
-    
-    try {
-      setLoading(true);
-      setError(null);
-      
-      const { data, error } = await supabase
-        .from('measurements')
-        .select(`
-          *,
-          projects:project_id (name)
-        `)
-        .eq('deleted', false)
-        .order('updated_at', { ascending: false });
-      
-      if (error) throw error;
-      
-      // Process the data to match our frontend schema
-      const processedData: Measurement[] = data.map(item => ({
-        id: item.id,
-        projectId: item.project_id,
-        projectName: item.projects?.name || 'Unknown Project',
-        location: item.location || '',
-        width: typeof item.width === 'number' ? `${item.width}"` : (item.width || '0"'),
-        height: typeof item.height === 'number' ? `${item.height}"` : (item.height || '0"'),
-        depth: item.depth ? `${item.depth}"` : undefined,
-        area: item.area ? `${item.area} ft²` : '0 ft²',
-        quantity: item.quantity || 1,
-        recordedBy: item.recorded_by || '',
-        direction: (item.direction || 'N/A') as any,
-        notes: item.notes,
-        status: (item.status || 'Pending') as any,
-        measurementDate: item.measurement_date || new Date().toISOString(),
-        updatedAt: item.updated_at || new Date().toISOString(),
-        updatedBy: item.updated_by,
-        photos: item.photos || [],
-      }));
-      
-      setMeasurements(processedData);
-      setFilteredMeasurements(processedData);
-    } catch (err) {
-      console.error('Error fetching measurements:', err);
-      setError(err instanceof Error ? err : new Error('Failed to load measurements'));
-      toast({
-        title: "Error",
-        description: "Failed to load measurements. Please try again.",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [user, toast]);
-
-  useEffect(() => {
-    fetchMeasurements();
-    
-    // Set up real-time subscription for measurements changes
-    const channel = supabase
-      .channel('public:measurements')
-      .on('postgres_changes', 
-        { event: '*', schema: 'public', table: 'measurements' }, 
-        (payload) => {
-          console.log('Measurement change detected:', payload);
-          fetchMeasurements(); // Refresh all measurements
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [fetchMeasurements]);
-
+  
+  // Use our centralized hook for fetching measurements
+  const { measurements, isLoading: loading, error } = useMeasurements({
+    ...(filter.projectId ? { projectId: filter.projectId } : {}),
+    ...(filter.dateRange?.from && filter.dateRange?.to ? { date: filter.dateRange.from } : {}),
+  });
+  
   // Save measurement to Supabase
   const handleSaveMeasurement = async (measurement: Measurement) => {
     if (!user) {
@@ -181,8 +109,8 @@ const MeasurementStatusBoard: React.FC = () => {
         }));
       }
       
-      // Refresh measurements
-      fetchMeasurements();
+      // Close the modal
+      setEditModalOpen(false);
       
     } catch (err) {
       console.error('Error saving measurement:', err);
@@ -214,36 +142,20 @@ const MeasurementStatusBoard: React.FC = () => {
     setFilter(prev => ({ ...prev, ...newFilter }));
   };
 
-  useEffect(() => {
-    // Apply filters to measurements
-    let filtered = [...measurements];
-
-    if (filter.projectId) {
-      filtered = filtered.filter(m => m.projectId === filter.projectId);
+  // Filter measurements based on search criteria
+  const filteredMeasurements = measurements.filter(m => {
+    // Filter by location if specified
+    if (filter.location && !m.location.toLowerCase().includes(filter.location.toLowerCase())) {
+      return false;
     }
-
-    if (filter.location) {
-      filtered = filtered.filter(m =>
-        m.location.toLowerCase().includes(filter.location!.toLowerCase())
-      );
+    
+    // Filter by status if specified
+    if (filter.status && m.status !== filter.status) {
+      return false;
     }
-
-    if (filter.status) {
-      filtered = filtered.filter(m => m.status === filter.status);
-    }
-
-    if (filter.dateRange?.from && filter.dateRange?.to) {
-      filtered = filtered.filter(m => {
-        const measurementDate = new Date(m.measurementDate);
-        return (
-          measurementDate >= filter.dateRange!.from! &&
-          measurementDate <= filter.dateRange!.to!
-        );
-      });
-    }
-
-    setFilteredMeasurements(filtered);
-  }, [measurements, filter]);
+    
+    return true;
+  });
 
   // Helper function to determine which column a measurement belongs to
   const getMeasurementsForColumn = (columnName: string) => {
@@ -265,6 +177,14 @@ const MeasurementStatusBoard: React.FC = () => {
         return [];
     }
   };
+
+  if (error) {
+    return (
+      <div className="text-center p-8">
+        <p className="text-red-500">Error loading measurements: {error.message}</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

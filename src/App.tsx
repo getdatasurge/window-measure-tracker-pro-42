@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { useEffect } from "react";
 import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
+import { setupRealtime } from "./utils/setupRealtime";
 import { FloatingMeasurementTools } from "./components/measurements/FloatingMeasurementTools";
 import MainLayout from "./components/layout/MainLayout";
 import AppLayout from "./components/layout/AppLayout";
@@ -36,7 +38,16 @@ import LoginModal from "./components/modals/LoginModal";
 import SignupModal from "./components/modals/SignupModal";
 import AuthCallback from "./pages/AuthCallback";
 
-const queryClient = new QueryClient();
+// Create a new QueryClient instance with custom options for better invalidation handling
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: 1,
+      refetchOnWindowFocus: true,
+    },
+  },
+});
 
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
@@ -53,11 +64,22 @@ const App = () => {
       // Maximum errors before showing toast
       showOnce: true // Only show the toast once per session
     });
+    
+    // Setup realtime subscriptions
+    setupRealtime().then(success => {
+      if (success) {
+        console.log('Realtime enabled successfully');
+      } else {
+        console.warn('Realtime setup may not be complete');
+      }
+    });
+    
     return () => {
       feedbucketCleanup();
       errorTrackerCleanup();
     };
   }, []);
+  
   return <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>

@@ -1,75 +1,25 @@
 
-import React, { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-
-interface Measurement {
-  id: string;
-  projectName: string;
-  location: string;
-  width: string;
-  height: string;
-  status: string;
-  updatedAt: string;
-}
+import { useMeasurements } from '@/hooks/useMeasurements';
 
 const RecentMeasurements: React.FC = () => {
-  const [measurements, setMeasurements] = useState<Measurement[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const fetchRecentMeasurements = async () => {
-      try {
-        setLoading(true);
-        const { data, error } = await supabase
-          .from('measurements')
-          .select(`
-            id,
-            location,
-            width,
-            height,
-            status,
-            updated_at,
-            project_id,
-            projects (name)
-          `)
-          .order('updated_at', { ascending: false })
-          .limit(5);
-
-        if (error) throw error;
-
-        if (data) {
-          const formattedMeasurements: Measurement[] = data.map(item => ({
-            id: item.id,
-            projectName: item.projects?.name || 'Unknown Project',
-            location: item.location || 'No location specified',
-            width: item.width ? `${item.width}"` : 'N/A',
-            height: item.height ? `${item.height}"` : 'N/A',
-            status: item.status || 'pending',
-            updatedAt: item.updated_at || new Date().toISOString()
-          }));
-          setMeasurements(formattedMeasurements);
-        }
-      } catch (err) {
-        console.error('Error fetching recent measurements:', err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchRecentMeasurements();
-  }, []);
+  // Use our centralized hook to fetch measurements with real-time updates
+  const { measurements, isLoading: loading } = useMeasurements({});
+  
+  // Take only the 5 most recent measurements
+  const recentMeasurements = measurements.slice(0, 5);
 
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'completed':
         return 'bg-green-500/20 text-green-300';
       case 'in progress':
-      case 'film cut':
+      case 'film_cut':
         return 'bg-blue-500/20 text-blue-300';
       case 'pending':
         return 'bg-yellow-500/20 text-yellow-300';
-      case 'under review':
+      case 'under_review':
         return 'bg-purple-500/20 text-purple-300';
       default:
         return 'bg-gray-500/20 text-gray-300';
@@ -92,7 +42,7 @@ const RecentMeasurements: React.FC = () => {
     );
   }
 
-  if (measurements.length === 0) {
+  if (recentMeasurements.length === 0) {
     return (
       <div className="text-center text-zinc-500 p-4">
         No recent measurements found.
@@ -102,7 +52,7 @@ const RecentMeasurements: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      {measurements.map((measurement) => (
+      {recentMeasurements.map((measurement) => (
         <div key={measurement.id} className="border-b border-zinc-700/50 pb-3 last:border-0">
           <div className="flex justify-between items-start mb-1">
             <span className="text-white font-medium">{measurement.projectName}</span>
