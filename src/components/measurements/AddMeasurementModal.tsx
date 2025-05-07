@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useAddMeasurementForm } from '@/hooks/useAddMeasurementForm';
@@ -7,6 +7,7 @@ import ProjectSelector from './form/ProjectSelector';
 import AttributesFields from './form/AttributesFields';
 import DimensionsFields from './form/DimensionsFields';
 import PhotoUploader from './PhotoUploader';
+import DraftPrompt from '../projects/DraftPrompt';
 
 interface AddMeasurementModalProps {
   open: boolean;
@@ -21,6 +22,8 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
   projectId: initialProjectId,
   projectName: initialProjectName
 }) => {
+  const [showDraftPrompt, setShowDraftPrompt] = useState<boolean>(false);
+  
   const {
     register,
     handleSubmit,
@@ -39,7 +42,8 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     fetchProjects,
     reset,
     formState,
-    calculateArea
+    calculateArea,
+    hasSavedDraft
   } = useAddMeasurementForm({
     onSuccess: () => onOpenChange(false),
     initialProjectId,
@@ -49,19 +53,42 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
   // Reference to first input field for auto-focus
   const locationInputRef = useRef<HTMLInputElement | null>(null);
   
-  // Fetch projects on modal open and focus the first field
+  // Check for saved draft when modal opens
   useEffect(() => {
     if (open) {
-      fetchProjects();
-      
-      // Set focus to the location input after a short delay to ensure the modal has rendered
-      setTimeout(() => {
-        if (locationInputRef.current) {
-          locationInputRef.current.focus();
-        }
-      }, 100);
+      if (hasSavedDraft) {
+        setShowDraftPrompt(true);
+      } else {
+        // No saved draft, proceed with normal form
+        fetchProjects();
+        focusFirstField();
+      }
     }
-  }, [open, fetchProjects]);
+  }, [open, hasSavedDraft, fetchProjects]);
+  
+  // Function to focus on first field after a short delay
+  const focusFirstField = () => {
+    setTimeout(() => {
+      if (locationInputRef.current) {
+        locationInputRef.current.focus();
+      }
+    }, 100);
+  };
+  
+  // Resume draft handler
+  const handleResumeDraft = () => {
+    setShowDraftPrompt(false);
+    fetchProjects();
+    focusFirstField();
+  };
+  
+  // Discard draft handler
+  const handleDiscardDraft = () => {
+    reset(); // Reset the form to clear draft data
+    setShowDraftPrompt(false);
+    fetchProjects();
+    focusFirstField();
+  };
   
   // Calculate area whenever width, height, or quantity changes
   const width = watch('width');
@@ -94,54 +121,61 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
           <DialogTitle id="add-measurement-title" className="text-xl">Add New Measurement</DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
-          <div className="grid grid-cols-1 gap-4">
-            {/* Project Selection */}
-            <ProjectSelector
-              projectId={watch('projectId')}
-              projects={projectsList}
-              onProjectChange={handleProjectChange}
-              error={errors.projectId?.message}
-            />
-            
-            {/* Location, Direction, Film Required, Notes */}
-            <AttributesFields 
-              register={register}
-              watch={watch}
-              setValue={setValue}
-              errors={errors}
-              ref={locationInputRef}
-            />
-            
-            {/* Dimensions */}
-            <DimensionsFields 
-              register={register}
-              watch={watch}
-              setValue={setValue}
-              errors={errors}
-            />
-            
-            {/* Photo Upload */}
-            <div className="space-y-2">
-              <PhotoUploader
-                photoFiles={photoFiles}
-                photoErrors={photoErrors}
-                uploadProgress={uploadProgress}
-                onFileChange={handleFileChange}
-                onRemovePhoto={removePhoto}
+        {showDraftPrompt ? (
+          <DraftPrompt 
+            onResume={handleResumeDraft} 
+            onDiscard={handleDiscardDraft} 
+          />
+        ) : (
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 py-4">
+            <div className="grid grid-cols-1 gap-4">
+              {/* Project Selection */}
+              <ProjectSelector
+                projectId={watch('projectId')}
+                projects={projectsList}
+                onProjectChange={handleProjectChange}
+                error={errors.projectId?.message}
               />
+              
+              {/* Location, Direction, Film Required, Notes */}
+              <AttributesFields 
+                register={register}
+                watch={watch}
+                setValue={setValue}
+                errors={errors}
+                ref={locationInputRef}
+              />
+              
+              {/* Dimensions */}
+              <DimensionsFields 
+                register={register}
+                watch={watch}
+                setValue={setValue}
+                errors={errors}
+              />
+              
+              {/* Photo Upload */}
+              <div className="space-y-2">
+                <PhotoUploader
+                  photoFiles={photoFiles}
+                  photoErrors={photoErrors}
+                  uploadProgress={uploadProgress}
+                  onFileChange={handleFileChange}
+                  onRemovePhoto={removePhoto}
+                />
+              </div>
             </div>
-          </div>
-          
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={handleClose}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? 'Saving...' : 'Save Measurement'}
-            </Button>
-          </DialogFooter>
-        </form>
+            
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleClose}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Saving...' : 'Save Measurement'}
+              </Button>
+            </DialogFooter>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
   );

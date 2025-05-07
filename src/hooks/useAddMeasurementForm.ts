@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -22,10 +23,10 @@ export const useAddMeasurementForm = ({
   const { photoFiles, photoErrors, uploadProgress, handleFileChange, removePhoto, uploadPhotos, resetPhotoState, setInitialPhotos } = usePhotoUpload();
   const { isSubmitting, setIsSubmitting, handleSubmission } = useFormSubmission();
   const { calculatedArea, calculateArea } = useAreaCalculation();
-  const { saveFormData, initialFormData, clearSavedForm } = useMeasurementFormStorage();
+  const { saveFormData, initialFormData, clearSavedForm, hasSavedDraft } = useMeasurementFormStorage();
   
   // Get form initialization helpers
-  const { hasSavedDraft, getDefaultValues } = useFormInitialization({
+  const { getDefaultValues } = useFormInitialization({
     editMode,
     measurementToEdit,
     initialFormData,
