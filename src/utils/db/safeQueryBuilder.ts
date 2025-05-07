@@ -61,8 +61,11 @@ export class SafeQueryBuilder {
       }
     }
     
+    // Convert array of columns to comma-separated string for Supabase
+    const selectString = typeof columns === 'string' ? columns : columns.join(',');
+    
     // Use type assertion to handle dynamic table names
-    return supabase.from(this.tableName as any).select(columns);
+    return supabase.from(this.tableName as any).select(selectString);
   }
 
   /**

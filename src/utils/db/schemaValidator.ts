@@ -26,8 +26,8 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
   try {
     console.log(`Fetching schema for table: ${tableName}`);
     
-    // Query the PostgreSQL information_schema to get column details
-    // Using a raw query instead of RPC since 'get_table_columns' is not recognized in type definitions
+    // Use as any to bypass TypeScript's strict typing for RPC calls
+    // This is necessary because we can't modify the automatically generated types
     const { data, error } = await supabase.rpc('get_table_columns', { 
       table_name: tableName 
     } as any);
@@ -55,7 +55,12 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
     }
 
     // Transform the data to our ColumnInfo format
-    return ((data as any[]) || []).map(col => ({
+    if (!data || !Array.isArray(data)) {
+      console.error('Unexpected response format from get_table_columns:', data);
+      return [];
+    }
+    
+    return data.map(col => ({
       name: col.column_name,
       type: col.data_type,
       isNullable: col.is_nullable === 'YES'
@@ -141,7 +146,7 @@ export async function getAvailableColumns(tableName: string): Promise<string[]> 
 // Create a stored procedure to get table columns if it doesn't exist
 export async function setupSchemaValidator(): Promise<void> {
   try {
-    // Use as any to bypass TypeScript's RPC validation
+    // Use as any to bypass TypeScript's strict typing for RPC calls
     const { error } = await supabase.rpc('get_table_columns', { 
       table_name: 'measurements' 
     } as any);

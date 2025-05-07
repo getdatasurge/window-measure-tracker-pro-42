@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { validateColumn } from '@/utils/db/schemaValidator';
 
 interface InputSourceFieldProps {
@@ -8,7 +8,7 @@ interface InputSourceFieldProps {
 }
 
 const InputSourceField: React.FC<InputSourceFieldProps> = ({ register, value = 'manual' }) => {
-  const [columnExists, setColumnExists] = React.useState<boolean>(false);
+  const [columnExists, setColumnExists] = useState<boolean>(false);
   
   // Check if the column exists in the database
   useEffect(() => {
