@@ -1,17 +1,11 @@
-
 import React from 'react';
 import { CalendarDays, CheckCheck, LayoutDashboard, ListChecks, Users2 } from 'lucide-react';
 import DashboardHeader from '../../../components/dashboard/DashboardHeader';
 import DashboardShell from '../../../components/layout/DashboardShell';
-import { Card, CardContent } from '../../../components/ui/card';
-import { Badge } from '../../../components/ui/badge';
-import { Button } from '../../../components/ui/button';
-import RecentMeasurements from '../../../components/dashboard/RecentMeasurements';
-import MeasurementOverview from '../../../components/dashboard/MeasurementOverview';
-import DashboardProjectsSection from '../../../components/dashboard/DashboardProjectsSection';
-import ActivityFeedCard from '../../../components/dashboard/activity-feed';
+import { useGetMeasurementsQuery } from '@/services/apiSlice';
 import DashboardGridRow from '../../../components/layout/DashboardGridRow';
 import DashboardMeasurementSection from '../../../components/dashboard/DashboardMeasurementSection';
+import ActivityFeedCard from '../../../components/dashboard/activity-feed';
 
 interface DashboardPageProps {
   className?: string;
@@ -95,10 +89,42 @@ const RecentSales = () => <div className="space-y-4">
 const DashboardPage: React.FC<DashboardPageProps> = ({
   className
 }) => {
+  // Use our RTK Query hook for measurements
+  const { 
+    data: measurementsResponse, 
+    error: measurementsError, 
+    isLoading: isMeasurementsLoading,
+    refetch: refetchMeasurements
+  } = useGetMeasurementsQuery();
+  
+  // Log information about the query status
+  React.useEffect(() => {
+    console.log('Dashboard RTK Query status:', { 
+      isLoading: isMeasurementsLoading,
+      hasData: !!measurementsResponse?.data,
+      errorMessage: measurementsError || measurementsResponse?.error,
+    });
+    
+    // If there's an error, schedule a single retry after 5 seconds
+    if (measurementsError || measurementsResponse?.error) {
+      const timer = setTimeout(() => {
+        console.log('Attempting to refetch measurements after error');
+        refetchMeasurements();
+      }, 5000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [measurementsResponse, measurementsError, isMeasurementsLoading, refetchMeasurements]);
+  
   return <DashboardShell>
       <div className="grid gap-4">
-        {/* New Measurement Section added at the top */}
-        <DashboardMeasurementSection />
+        {/* Pass the measurement data to the MeasurementSection */}
+        <DashboardMeasurementSection 
+          measurements={measurementsResponse?.data || []}
+          isLoading={isMeasurementsLoading}
+          error={measurementsError || measurementsResponse?.error || null}
+          onRefresh={refetchMeasurements}
+        />
         
         {/* Team Activity and Active Projects Section using the reusable DashboardGridRow */}
         <DashboardGridRow>

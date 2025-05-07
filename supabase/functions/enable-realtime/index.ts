@@ -1,11 +1,12 @@
+
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
-// Define CORS headers
+// Define comprehensive CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*", // Replace '*' with your frontend origin in production
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-requested-with",
+  "Access-Control-Allow-Methods": "POST, GET, OPTIONS",
   "Access-Control-Max-Age": "86400",
   "Content-Type": "application/json"
 };
@@ -20,9 +21,12 @@ const supabase = createClient(
 const isValidTableName = (name: string) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
 
 serve(async (req) => {
-  // Handle CORS preflight
+  console.log(`Request received: ${req.method} ${new URL(req.url).pathname}`);
+
+  // Handle CORS preflight requests - this is critical for browser compatibility
   if (req.method === "OPTIONS") {
-    return new Response("ok", {
+    console.log("Handling OPTIONS preflight request");
+    return new Response("OK", {
       status: 200,
       headers: corsHeaders
     });
@@ -30,6 +34,7 @@ serve(async (req) => {
 
   try {
     if (req.method !== "POST") {
+      console.log(`Method not allowed: ${req.method}`);
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
         headers: corsHeaders
@@ -52,14 +57,18 @@ serve(async (req) => {
       operation = body.operation;
       console.log("✅ Parsed body:", { tableName, operation });
     } catch (err) {
-      console.error("❌ Failed to parse JSON body:", rawBody);
-      return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
+      console.error("❌ Failed to parse JSON body:", rawBody, err);
+      return new Response(JSON.stringify({ 
+        error: "Invalid JSON format",
+        details: err instanceof Error ? err.message : "Unknown parsing error"
+      }), {
         status: 400,
         headers: corsHeaders
       });
     }
 
     if (!tableName) {
+      console.log("Table name is required but was not provided");
       return new Response(JSON.stringify({ error: "Table name is required" }), {
         status: 400,
         headers: corsHeaders
@@ -76,21 +85,30 @@ serve(async (req) => {
       });
     }
 
-    const checkSQL = `SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists`;
-    const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
-      sql: checkSQL
-    });
+    // Check if the table exists
+    try {
+      console.log(`Checking if table '${tableName}' exists`);
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .limit(1);
 
-    if (existsError) {
-      console.error("Failed to check if table exists:", existsError);
-      throw existsError;
-    }
-
-    if (!Array.isArray(existsData) || !existsData[0]?.exists) {
+      if (error) {
+        console.error(`Error checking if table exists: ${error.message}`);
+        return new Response(JSON.stringify({
+          error: `Table "${tableName}" may not exist or is not accessible: ${error.message}`
+        }), {
+          status: 400,
+          headers: corsHeaders
+        });
+      }
+      console.log(`Table ${tableName} exists, proceeding with operation`);
+    } catch (error) {
+      console.error(`Error checking table existence: ${error}`);
       return new Response(JSON.stringify({
-        error: `Table "${tableName}" does not exist`
+        error: `Failed to verify table "${tableName}": ${error instanceof Error ? error.message : "Unknown error"}`
       }), {
-        status: 400,
+        status: 500,
         headers: corsHeaders
       });
     }
@@ -99,47 +117,65 @@ serve(async (req) => {
 
     // Set REPLICA IDENTITY to FULL
     if (!operation || operation === "replica-identity") {
-      const { error } = await supabase.rpc("execute_sql", {
-        sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
-      });
-      if (error) {
-        console.error("REPLICA IDENTITY failed:", error);
-        throw error;
+      try {
+        console.log(`Setting REPLICA IDENTITY FULL on table ${tableName}`);
+        
+        // Use direct SQL query 
+        const { data, error } = await supabase.rpc(
+          'execute_function', 
+          { 
+            function_name: 'alter_table_replica_identity',
+            parameters: { table_name: tableName } 
+          }
+        );
+        
+        if (error) {
+          console.error("REPLICA IDENTITY failed:", error);
+          messages.push(`Warning: Could not set REPLICA IDENTITY: ${error.message}`);
+        } else {
+          console.log("REPLICA IDENTITY FULL set successfully");
+          messages.push("REPLICA IDENTITY FULL set");
+        }
+      } catch (error) {
+        console.error("Error setting REPLICA IDENTITY:", error);
+        messages.push(`Warning: Error setting REPLICA IDENTITY: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
-      messages.push("REPLICA IDENTITY FULL set");
     }
 
     // Add table to publication
     if (!operation || operation === "add-publication") {
-      const { data, error } = await supabase
-        .from("pg_publication_tables")
-        .select("*")
-        .eq("pubname", "supabase_realtime")
-        .eq("schemaname", "public")
-        .eq("tablename", tableName);
-
-      if (error) {
-        console.error("Error checking publication:", error);
-        throw new Error(`Failed to check publication: ${error.message}`);
-      }
-
-      if (!data || data.length === 0) {
-        const { error: pubError } = await supabase.rpc("execute_sql", {
-          sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
-        });
-        if (pubError) {
-          console.error("Failed to add table to publication:", pubError);
-          throw pubError;
+      try {
+        console.log(`Adding table ${tableName} to publication`);
+        
+        // Use direct SQL query
+        const { data, error } = await supabase.rpc(
+          'execute_function',
+          {
+            function_name: 'add_table_to_publication',
+            parameters: { table_name: tableName }
+          }
+        );
+        
+        if (error) {
+          console.error("Failed to add table to publication:", error);
+          messages.push(`Warning: Could not add to publication: ${error.message}`);
+        } else {
+          console.log(`Table ${tableName} added to publication successfully`);
+          messages.push(`Table ${tableName} added to publication`);
         }
-        messages.push(`Table ${tableName} added to publication`);
-      } else {
-        messages.push(`Table ${tableName} already in publication`);
+      } catch (error) {
+        console.error("Error adding table to publication:", error);
+        messages.push(`Warning: Error adding to publication: ${error instanceof Error ? error.message : "Unknown error"}`);
       }
     }
 
-    console.log("✅ Operation successful:", messages);
+    console.log("✅ Operation completed with messages:", messages);
 
-    return new Response(JSON.stringify({ success: true, messages }), {
+    return new Response(JSON.stringify({ 
+      success: true, 
+      messages,
+      status: "completed"
+    }), {
       status: 200,
       headers: corsHeaders
     });
@@ -147,7 +183,7 @@ serve(async (req) => {
   } catch (error) {
     console.error("🔥 Unhandled error in enable-realtime:", error);
     return new Response(JSON.stringify({
-      error: error?.message ?? "Unknown error"
+      error: error instanceof Error ? error.message : "Unknown error"
     }), {
       status: 500,
       headers: corsHeaders

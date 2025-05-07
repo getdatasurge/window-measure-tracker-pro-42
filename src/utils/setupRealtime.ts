@@ -1,56 +1,55 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/components/ui/use-toast';
 
-/**
- * Setup realtime functionality for the measurements table
- * This needs to be called before subscribing to realtime updates
- */
-export const setupRealtime = async (): Promise<boolean> => {
+// Define the function to enable realtime on a specific table
+export async function enableRealtimeForTable(tableName: string, operation?: string) {
   try {
-    console.log('Setting up realtime for measurements table...');
+    console.log(`Setting up realtime for ${tableName}${operation ? ` (${operation})` : ''}`);
     
-    // First, check if the table exists to avoid errors
-    const { data, error } = await supabase
-      .from('measurements')
-      .select('id')
-      .limit(1);
+    const payload = {
+      tableName,
+      ...(operation && { operation })
+    };
     
-    // If there's an error or no data, the table might not exist yet
-    if (error) {
-      console.log('Error checking measurements table:', error.message);
-      return false;
-    }
-    
-    const tableExists = Array.isArray(data) && data.length >= 0;
-    
-    if (!tableExists) {
-      console.log('Measurements table does not exist yet - skipping realtime setup');
-      return false;
-    }
-    
-    // Call the Edge Function to enable realtime for the measurements table
-    const { data: funcData, error: funcError } = await supabase.functions.invoke('enable-realtime', {
-      body: {
-        tableName: 'measurements'
-      }
+    // Call the Supabase edge function
+    const { data, error } = await supabase.functions.invoke('enable-realtime', {
+      body: JSON.stringify(payload)
     });
     
-    if (funcError) {
-      console.warn('Error setting up realtime, falling back to polling:', funcError);
+    if (error) {
+      console.error(`Error enabling realtime for ${tableName}:`, error);
       return false;
     }
     
-    console.log('Realtime setup result:', funcData);
+    console.log(`Realtime setup for ${tableName} completed:`, data);
     return true;
   } catch (err) {
-    console.error('Failed to setup realtime, will use polling instead:', err);
+    console.error(`Exception enabling realtime for ${tableName}:`, err);
     return false;
   }
-};
+}
 
-// Add a local mock implementation that always returns success
-// This helps during development when the edge function may not be available
-export const mockSetupRealtime = async (): Promise<boolean> => {
-  console.log('[MOCK] Setting up realtime for measurements table...');
-  return true;
-};
+// Function to setup all required realtime connections
+export async function setupRealtime() {
+  try {
+    // Enable realtime for the measurements table
+    const success = await enableRealtimeForTable('measurements');
+    
+    if (!success) {
+      console.warn('Failed to enable realtime for measurements table');
+      // Don't show error toasts to users during page load as it's confusing
+      // But we should log it to console
+    }
+    
+    // Additional tables can be added here
+    
+    return success;
+  } catch (error) {
+    console.error('Error setting up realtime:', error);
+    return false;
+  }
+}
+
+// Re-export the function for backward compatibility
+export { setupRealtime as enableMeasurementsRealtime };

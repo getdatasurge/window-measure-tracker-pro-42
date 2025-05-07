@@ -1,12 +1,18 @@
 
 import React from 'react';
 import { formatDistanceToNow } from 'date-fns';
-import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
+import { useGetMeasurementsQuery } from '@/services/apiSlice';
 import { Wifi, WifiOff } from 'lucide-react';
 
 const RecentMeasurements: React.FC = () => {
-  // Use our real-time subscription hook instead of the basic fetch hook
-  const { measurements, subscriptionState } = useMeasurementSubscription({});
+  // Use our RTK Query hook for measurements
+  const { 
+    data: measurementsResponse, 
+    error, 
+    isLoading,
+  } = useGetMeasurementsQuery();
+  
+  const measurements = measurementsResponse?.data || [];
   
   // Take only the 5 most recent measurements
   const recentMeasurements = measurements.slice(0, 5);
@@ -35,10 +41,21 @@ const RecentMeasurements: React.FC = () => {
     }
   };
 
-  if (subscriptionState.isConnected === false && !recentMeasurements.length) {
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-full">
         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error || measurementsResponse?.error) {
+    return (
+      <div className="text-center text-red-400 p-4">
+        <p>Error loading measurements</p>
+        <p className="text-xs text-zinc-500 mt-1">
+          {error || measurementsResponse?.error || 'Unknown error'}
+        </p>
       </div>
     );
   }
@@ -55,17 +72,9 @@ const RecentMeasurements: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center mb-2">
         <h3 className="text-sm font-medium text-white">Recent Measurements</h3>
-        {subscriptionState.isConnected ? (
-          <div className="flex items-center text-green-500 text-xs">
-            <Wifi className="h-3 w-3 mr-1" />
-            <span>Live</span>
-          </div>
-        ) : (
-          <div className="flex items-center text-amber-500 text-xs">
-            <WifiOff className="h-3 w-3 mr-1" />
-            <span>Polling</span>
-          </div>
-        )}
+        <div className="flex items-center text-green-500 text-xs">
+          <span>Updated</span>
+        </div>
       </div>
       
       {recentMeasurements.map((measurement) => (
