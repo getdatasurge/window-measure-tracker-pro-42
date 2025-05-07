@@ -53,11 +53,14 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         area = (width * height) / 144; // Convert to square feet (from inches)
       }
       
-      // Ensure direction is properly typed
-      let direction: Direction | string = 'N/A';
-      if (data.direction) {
+      // Ensure direction is properly typed and meets constraint requirements
+      // Direction needs to be one of the valid enum values
+      let direction: Direction = 'N/A';
+      if (data.direction && ['North', 'South', 'East', 'West', 'N/A'].includes(data.direction as string)) {
         direction = data.direction as Direction;
       }
+
+      console.log("Direction being sent to database:", direction);
 
       // Prepare data for database submission
       const measurementData = {
@@ -69,7 +72,7 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         area,
         quantity: data.quantity || 1,
         recorded_by: user.id,
-        direction: (direction || 'N/A').toLowerCase(),
+        direction: direction, // Use the validated direction value
         notes: data.notes || '',
         status: 'pending',
         measurement_date: new Date().toISOString(),
@@ -79,6 +82,8 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         photos: photoUrls
       };
       
+      console.log("Measurement data being submitted:", measurementData);
+      
       // Save to supabase
       const { data: insertedData, error } = await supabase
         .from('measurements')
@@ -86,6 +91,7 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         .select();
         
       if (error) {
+        console.error("Error inserting measurement:", error);
         throw error;
       }
       

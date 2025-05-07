@@ -1,5 +1,4 @@
-
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Measurement } from '@/types/measurement';
 
 interface UseTabNavigationProps {
@@ -9,91 +8,103 @@ interface UseTabNavigationProps {
   errors: {[key: string]: string};
 }
 
-export function useTabNavigation({
+interface TabNavigationResult {
+  enhancedUpdateFormData: (field: string, value: any) => void;
+}
+
+interface FieldTabMapping {
+  [key: string]: string;
+}
+
+export const useTabNavigation = ({
   setActiveTab,
   formData,
   setErrors,
   errors
-}: UseTabNavigationProps) {
-  // Track the last field that was modified in each tab
-  const [lastModifiedFields, setLastModifiedFields] = useState<{[key: string]: string}>({});
+}: UseTabNavigationProps): TabNavigationResult => {
+  // Keep track of which fields have been visited
+  const [visitedFields, setVisitedFields] = useState<Set<string>>(new Set());
   
-  // Define the last field for each tab
-  const tabLastFields = {
-    details: 'recordedBy',
-    dimensions: 'area',
-    attributes: 'notes',
-    photos: 'photos',
-    status: 'reviewComments'
+  // Define which fields belong to which tabs
+  const fieldToTabMapping: FieldTabMapping = {
+    // Details tab fields
+    'projectId': 'details',
+    'location': 'details',
+    'projectName': 'details',
+    'recordedBy': 'details',
+    'measurementDate': 'details',
+    
+    // Dimensions tab fields
+    'width': 'dimensions',
+    'height': 'dimensions',
+    'depth': 'dimensions',
+    'area': 'dimensions',
+    
+    // Attributes tab fields
+    'direction': 'attributes',
+    'notes': 'attributes',
+    'filmRequired': 'attributes',
+    'quantity': 'attributes',
+
+    // Photos tab fields
+    'photos': 'photos',
+    
+    // Status tab fields
+    'status': 'status',
+    'updatedBy': 'status',
+    'updatedAt': 'status',
+    'approvalBy': 'status',
+    'reviewComments': 'status'
   };
-
-  // Validate before advancing tabs
-  const validateBeforeAdvance = useCallback((currentTab: string) => {
-    // Validate required fields based on the current tab
-    if (currentTab === 'details') {
-      if (!formData.location || formData.location.trim() === '') {
-        setErrors(prev => ({...prev, location: 'Location is required'}));
-        return;
-      }
-      
-      // If validation passes, advance to next tab
-      setTimeout(() => setActiveTab('dimensions'), 300);
-    } else if (currentTab === 'dimensions') {
-      setTimeout(() => setActiveTab('attributes'), 300);
-    } else if (currentTab === 'attributes') {
-      setTimeout(() => setActiveTab('photos'), 300);
-    } else if (currentTab === 'photos') {
-      setTimeout(() => setActiveTab('status'), 300);
-    }
-  }, [formData, setActiveTab, setErrors]);
   
-  // Simple validation function - expand as needed
-  const isFieldValid = useCallback((field: string, value: any): boolean => {
-    if (value === undefined || value === null || value === '') return false;
+  // Check if a tab is complete
+  const isTabComplete = useCallback((tabName: string): boolean => {
+    const tabFields = Object.entries(fieldToTabMapping)
+      .filter(([_, tab]) => tab === tabName)
+      .map(([field]) => field);
     
-    if (field === 'width' || field === 'height') {
-      return parseFloat(value) > 0;
+    // Details tab requires project and location
+    if (tabName === 'details') {
+      return !!formData.projectId && !!formData.location;
     }
     
-    if (field === 'quantity') {
-      return parseInt(value) > 0;
+    // Dimensions tab requires width and height
+    if (tabName === 'dimensions') {
+      return !!formData.width && !!formData.height;
     }
     
-    return true;
-  }, []);
-
-  // Enhanced updateFormData that tracks last field modified
+    // For other tabs, they're complete if any field is filled
+    return tabFields.some(field => {
+      const value = formData[field];
+      if (field === 'direction') {
+        // Direction is special - we consider it "filled" if it has a valid value
+        return !!value && ['North', 'South', 'East', 'West', 'N/A'].includes(value);
+      }
+      return !!value;
+    });
+  }, [formData, fieldToTabMapping]);
+  
+  // Handle field updates and potentially auto-advance tabs
   const enhancedUpdateFormData = useCallback((field: string, value: any) => {
-    // Determine which tab this field belongs to
-    let currentTab = '';
-    if (['projectId', 'projectName', 'location', 'measurementDate', 'recordedBy'].includes(field)) {
-      currentTab = 'details';
-    } else if (['width', 'height', 'area', 'quantity'].includes(field)) {
-      currentTab = 'dimensions';
-    } else if (['notes'].includes(field)) {
-      currentTab = 'attributes';
-    } else if (['photos'].includes(field)) {
-      currentTab = 'photos';
-    } else if (['status', 'reviewComments'].includes(field)) {
-      currentTab = 'status';
+    // Mark this field as visited
+    setVisitedFields(prev => {
+      const newSet = new Set(prev);
+      newSet.add(field);
+      return newSet;
+    });
+    
+    // Clear any errors for this field
+    if (errors[field]) {
+      setErrors(prev => {
+        const newErrors = {...prev};
+        delete newErrors[field];
+        return newErrors;
+      });
     }
     
-    if (currentTab) {
-      setLastModifiedFields(prev => ({...prev, [currentTab]: field}));
-    }
-    
-    // Auto-advance logic
-    if (field === tabLastFields[currentTab]) {
-      const isValidForAutoAdvance = isFieldValid(field, value);
-      
-      if (isValidForAutoAdvance) {
-        validateBeforeAdvance(currentTab);
-      }
-    }
-  }, [validateBeforeAdvance, isFieldValid, tabLastFields]);
-
+  }, [errors, setErrors]);
+  
   return {
-    enhancedUpdateFormData,
-    lastModifiedFields
+    enhancedUpdateFormData
   };
-}
+};

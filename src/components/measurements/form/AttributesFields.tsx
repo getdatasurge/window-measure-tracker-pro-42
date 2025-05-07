@@ -21,6 +21,9 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
   setValue,
   errors 
 }) => {
+  // Define the valid direction options based on the database constraint
+  const directionOptions: Direction[] = ['North', 'South', 'East', 'West', 'N/A'];
+
   return (
     <>
       {/* Location */}
@@ -41,18 +44,18 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
         <div className="space-y-2">
           <Label htmlFor="direction">Direction</Label>
           <Select
-            value={watch('direction')}
+            value={watch('direction') || 'N/A'}
             onValueChange={(value: Direction) => setValue('direction', value)}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select direction" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="North">North</SelectItem>
-              <SelectItem value="South">South</SelectItem>
-              <SelectItem value="East">East</SelectItem>
-              <SelectItem value="West">West</SelectItem>
-              <SelectItem value="N/A">N/A</SelectItem>
+            <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
+              {directionOptions.map((dir) => (
+                <SelectItem key={dir} value={dir} className="text-white">
+                  {dir}
+                </SelectItem>
+              ))}
             </SelectContent>
           </Select>
         </div>
@@ -78,7 +81,7 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
       <div className="flex items-center space-x-2">
         <Switch
           id="filmRequired"
-          checked={watch('filmRequired')}
+          checked={watch('filmRequired') !== false}
           onCheckedChange={(checked) => setValue('filmRequired', checked)}
         />
         <Label htmlFor="filmRequired">Film Required</Label>
