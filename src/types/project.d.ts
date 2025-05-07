@@ -1,36 +1,13 @@
 
-export interface ProjectOption {
-  id: string;
-  name: string;
-  client_name?: string;
-  location?: string;
-  status?: string;
-}
+// Re-export types from project-types.ts to maintain backward compatibility
+import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from './project-types';
 
-export interface ProjectDetails extends ProjectOption {
-  deadline?: string;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-}
-
-export interface ProjectCreateInput {
-  name: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-}
-
-export interface ProjectUpdateInput {
-  name?: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-  status?: string;
-}
+export {
+  ProjectOption,
+  ProjectDetails,
+  ProjectCreateInput,
+  ProjectUpdateInput
+};
 
 // Export existing Project-related types
 export * from './project';
