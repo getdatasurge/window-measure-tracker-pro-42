@@ -2,18 +2,15 @@
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
-import MeasurementEntryModal from './MeasurementEntryModal';
 import { ProjectSelector } from './ProjectSelector';
 import { MeasurementMenu } from './MeasurementMenu';
-import { useMeasurementSave } from '@/hooks/useMeasurementSave';
-import { Measurement } from '@/types/measurement';
+import AddMeasurementModal from './AddMeasurementModal';
 
 export function FloatingMeasurementTools() {
   const [isOpen, setIsOpen] = useState(false);
   const [showMeasurementModal, setShowMeasurementModal] = useState(false);
   const [showProjectSelector, setShowProjectSelector] = useState(false);
   const navigate = useNavigate();
-  const { saveMeasurement, isSaving } = useMeasurementSave();
   
   const handleAddMeasurement = () => {
     setIsOpen(false);
@@ -23,15 +20,6 @@ export function FloatingMeasurementTools() {
   const handleProjectMeasurements = () => {
     setIsOpen(false);
     setShowProjectSelector(true);
-  };
-  
-  const handleMeasurementSave = async (measurement: Measurement) => {
-    await saveMeasurement(measurement, () => {
-      // Close the modal
-      setShowMeasurementModal(false);
-      // Navigate to measurements page to see the newly created measurement
-      navigate('/measurements');
-    });
   };
   
   const handleProjectSelect = (projectId: string) => {
@@ -66,16 +54,11 @@ export function FloatingMeasurementTools() {
         onProjectSelect={handleProjectSelect}
       />
       
-      {/* Measurement Entry Modal */}
-      {showMeasurementModal && (
-        <MeasurementEntryModal
-          isOpen={showMeasurementModal}
-          onOpenChange={setShowMeasurementModal}
-          onSave={handleMeasurementSave}
-          mode="create"
-          defaultValues={{}}
-        />
-      )}
+      {/* New Measurement Modal */}
+      <AddMeasurementModal
+        open={showMeasurementModal}
+        onOpenChange={setShowMeasurementModal}
+      />
     </div>
   );
 }
