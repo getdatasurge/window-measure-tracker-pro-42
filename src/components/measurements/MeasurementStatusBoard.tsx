@@ -32,7 +32,12 @@ const MeasurementStatusBoard: React.FC = () => {
   const { toast } = useToast();
   
   // Use our centralized hook for fetching measurements
-  const { measurements, isLoading: loading, error } = useMeasurements({
+  const { 
+    measurements, 
+    isLoading: loading, 
+    error, 
+    refetchMeasurements 
+  } = useMeasurements({
     ...(filter.projectId ? { projectId: filter.projectId } : {}),
     ...(filter.dateRange?.from && filter.dateRange?.to ? { date: filter.dateRange.from } : {}),
   });
@@ -49,6 +54,8 @@ const MeasurementStatusBoard: React.FC = () => {
     }
     
     try {
+      console.log("Preparing measurement data for save:", measurement);
+      
       // Prepare data for database (converting to match DB schema)
       const measurementData = {
         project_id: measurement.projectId,
@@ -68,9 +75,12 @@ const MeasurementStatusBoard: React.FC = () => {
         photos: measurement.photos || [],
       };
       
+      console.log("Formatted measurement data:", measurementData);
+      
       let result;
       
       if (measurement.id && editMeasurement) {
+        console.log("Updating existing measurement with ID:", measurement.id);
         // Update existing measurement
         const { data, error } = await supabase
           .from('measurements')
@@ -78,7 +88,12 @@ const MeasurementStatusBoard: React.FC = () => {
           .eq('id', measurement.id)
           .select();
           
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase update error:", error);
+          throw error;
+        }
+        
+        console.log("Update successful:", data);
         result = data;
         
         toast({
@@ -86,13 +101,19 @@ const MeasurementStatusBoard: React.FC = () => {
           description: "The measurement has been successfully updated."
         });
       } else {
+        console.log("Creating new measurement");
         // Create new measurement
         const { data, error } = await supabase
           .from('measurements')
           .insert(measurementData)
           .select();
           
-        if (error) throw error;
+        if (error) {
+          console.error("Supabase insert error:", error);
+          throw error;
+        }
+        
+        console.log("Insert successful:", data);
         result = data;
         
         toast({
@@ -108,6 +129,9 @@ const MeasurementStatusBoard: React.FC = () => {
           name: measurement.projectName
         }));
       }
+      
+      // Explicitly refetch measurements to update the UI
+      await refetchMeasurements();
       
       // Close the modal
       setEditModalOpen(false);
