@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
 import { Measurement, MeasurementStatus } from '@/types/measurement';
 import { cn } from '@/lib/utils';
@@ -19,6 +20,9 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
     { value: 'Installed', label: 'Installed', className: 'text-green-500' },
     { value: 'Completed', label: 'Completed', className: 'text-purple-500' }
   ];
+
+  // Check if current status is "Installed" to show the installation date field
+  const showInstallationDate = formData.status === 'Installed';
 
   return (
     <div className="grid grid-cols-1 gap-6">
@@ -46,6 +50,22 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
           </SelectContent>
         </Select>
       </div>
+
+      {showInstallationDate && (
+        <div className="space-y-2">
+          <Label htmlFor="installationDate" className="text-sm text-zinc-400">
+            Installation Date <span className="text-red-500">*</span>
+          </Label>
+          <Input
+            id="installationDate"
+            type="date"
+            value={formData.installationDate || ''}
+            onChange={(e) => updateFormData('installationDate', e.target.value)}
+            className="bg-zinc-800/50 border-zinc-700 text-white"
+            required={showInstallationDate}
+          />
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label htmlFor="reviewComments" className="text-sm text-zinc-400">

@@ -1,4 +1,3 @@
-
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -11,13 +10,14 @@ export interface MeasurementFormData {
   location: string;
   width: string;
   height: string;
-  depth?: string;
   direction?: Direction | string;
   notes?: string;
   filmRequired: boolean;
   quantity: number;
   status?: MeasurementStatus;
   photos: File[];
+  installationDate?: string; // Add installation date field
+  reviewComments?: string;
   // Add temporary ID for optimistic updates
   tempId?: string;
   // Add validation status

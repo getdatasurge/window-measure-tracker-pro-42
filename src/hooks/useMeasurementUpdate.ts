@@ -35,7 +35,7 @@ export function useMeasurementUpdate() {
       };
       
       // Use the direction from measurement or default if not provided
-      const direction = measurement.direction || DEFAULT_DIRECTION;
+      const direction = measurement.direction || 'N/A';
       
       console.log("Direction being sent to database:", direction);
       
@@ -45,7 +45,6 @@ export function useMeasurementUpdate() {
         location: measurement.location.trim(),
         width: parseNumericValue(measurement.width),
         height: parseNumericValue(measurement.height),
-        depth: parseNumericValue(measurement.depth),
         area: parseNumericValue(measurement.area),
         quantity: measurement.quantity || 1,
         recorded_by: user.id,
@@ -58,6 +57,11 @@ export function useMeasurementUpdate() {
         photos: Array.isArray(measurement.photos) ? measurement.photos : [],
         film_required: measurement.film_required === undefined ? true : !!measurement.film_required,
       };
+      
+      // Only include installation date if status is 'installed'
+      if (measurement.status?.toLowerCase() === 'installed' && measurement.installationDate) {
+        measurementData.installation_date = measurement.installationDate;
+      }
       
       // Validate required fields
       const requiredFields = ['project_id', 'location', 'width', 'height'];

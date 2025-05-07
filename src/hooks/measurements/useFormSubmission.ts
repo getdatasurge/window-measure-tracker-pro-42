@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
@@ -45,7 +44,6 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
       
       const width = parseNumericValue(data.width);
       const height = parseNumericValue(data.height);
-      const depth = parseNumericValue(data.depth);
       
       // Calculate area if width and height are provided
       let area = null;
@@ -64,7 +62,6 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         location: data.location.trim(),
         width,
         height,
-        depth,
         area,
         quantity: data.quantity || 1,
         recorded_by: user.id,
@@ -77,6 +74,11 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         film_required: data.filmRequired,
         photos: photoUrls
       };
+      
+      // Only add installation_date if status is 'installed'
+      if (data.status?.toLowerCase() === 'installed' && data.installationDate) {
+        measurementData.installation_date = data.installationDate;
+      }
       
       console.log("Measurement data being submitted:", measurementData);
       
