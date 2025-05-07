@@ -43,7 +43,7 @@ export const setupRealtime = async () => {
     
     try {
       // Fall back to a function call with all operations
-      const { error: fnError } = await supabase.functions.invoke('enable-realtime', {
+      const { data, error: fnError } = await supabase.functions.invoke('enable-realtime', {
         body: { tableName: 'measurements' }
       });
       
@@ -56,6 +56,7 @@ export const setupRealtime = async () => {
       return true;
     } catch (fnError) {
       console.error('Failed to setup realtime:', fnError);
+      console.warn('Realtime setup may not be complete');
       return false;
     }
   }

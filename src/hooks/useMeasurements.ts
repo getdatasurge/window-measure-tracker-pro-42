@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
@@ -145,10 +146,18 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
             refetchMeasurements();
           }
         )
-        .subscribe();
+        .subscribe((status) => {
+          console.log('Realtime subscription status:', status);
+        });
         
       console.log('Realtime subscription established for measurements table');
       setIsRealtime(true);
+
+      // Return unsubscribe function
+      return () => {
+        console.log('Unsubscribing from realtime channel');
+        supabase.removeChannel(channel);
+      };
     } catch (error) {
       console.error('Failed to set up realtime subscription:', error);
     }
