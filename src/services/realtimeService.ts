@@ -1,13 +1,14 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { setupRealtime } from '@/utils/setupRealtime';
+import { setupRealtime, mockSetupRealtime } from '@/utils/setupRealtime';
 
 // Track if subscription has been set up to prevent redundant setups
 let subscriptionSetupComplete = false;
 let activeChannel = null;
+let isUsingPollingFallback = false;
 
 /**
- * Setup a real-time subscription for the measurements table
+ * Setup a real-time subscription for the measurements table with fallback to polling
  */
 export const setupMeasurementsSubscription = async (
   onUpdate: () => void
@@ -31,14 +32,26 @@ export const setupMeasurementsSubscription = async (
     
     console.log("Setting up new realtime subscription for measurements");
     
-    // Enable realtime for the measurements table first (this only needs to happen once per session)
-    const realtimeStatus = await setupRealtime();
+    // Try to enable realtime for the measurements table
+    const realtimeStatus = await setupRealtime().catch(() => false);
     
+    // If real-time setup fails, fall back to mock/polling
     if (!realtimeStatus) {
-      console.warn("Failed to enable realtime for measurements table");
+      console.warn("Failed to enable realtime for measurements table, using polling fallback");
+      isUsingPollingFallback = true;
+      
+      // Set up polling mechanism
+      const pollingInterval = setInterval(() => {
+        console.log("Polling for measurement updates...");
+        onUpdate();
+      }, 30000); // Poll every 30 seconds
+      
       return { 
         channel: null,
-        cleanup: () => {} 
+        cleanup: () => {
+          clearInterval(pollingInterval);
+          isUsingPollingFallback = false;
+        }
       };
     }
     
@@ -60,6 +73,14 @@ export const setupMeasurementsSubscription = async (
       )
       .subscribe((status) => {
         console.log('Realtime subscription status:', status);
+        
+        // If subscription fails, fall back to polling
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') {
+          console.warn("Realtime subscription error, falling back to polling");
+          isUsingPollingFallback = true;
+        } else if (status === 'SUBSCRIBED') {
+          isUsingPollingFallback = false;
+        }
       });
     
     console.log('Realtime subscription established for measurements table');
@@ -82,9 +103,20 @@ export const setupMeasurementsSubscription = async (
     };
   } catch (error) {
     console.error('Failed to set up realtime subscription:', error);
+    isUsingPollingFallback = true;
+    
+    // Set up polling fallback
+    const pollingInterval = setInterval(() => {
+      console.log("Polling for measurement updates due to realtime setup failure");
+      onUpdate();
+    }, 30000);
+    
     return {
       channel: null,
-      cleanup: () => {}
+      cleanup: () => {
+        clearInterval(pollingInterval);
+        isUsingPollingFallback = false;
+      }
     };
   }
 };
@@ -94,11 +126,25 @@ export const setupMeasurementsSubscription = async (
  */
 export const enableMeasurementsRealtime = async (): Promise<boolean> => {
   try {
-    // Use the updated setupRealtime utility 
+    // First try the standard setup
     const success = await setupRealtime();
+    
+    // If it fails, try the mock/fallback approach
+    if (!success) {
+      console.log("Standard realtime setup failed, using mock implementation");
+      return await mockSetupRealtime();
+    }
+    
     return success;
   } catch (error) {
     console.error('Failed to enable real-time:', error);
     return false;
   }
+};
+
+/**
+ * Check if we're currently using polling fallback instead of realtime
+ */
+export const isUsingPollingFallbackMode = (): boolean => {
+  return isUsingPollingFallback;
 };

@@ -3,7 +3,7 @@ import React from 'react';
 import { Tabs } from '@/components/ui/tabs';
 import MeasurementTabsNav from './components/MeasurementTabsNav';
 import MeasurementTabsContent from './components/MeasurementTabsContent';
-import { useTabNavigation } from './hooks/useTabNavigation';
+import { useTabNavigation } from '@/hooks/measurements/useTabNavigation';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface MeasurementTabsProps {
@@ -23,7 +23,8 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
   errors = {},
   setErrors = () => {}
 }) => {
-  // Use our custom hook for tab navigation
+  // Use our custom hook for tab navigation 
+  // Note: We're explicitly passing MeasurementFormData here, not Measurement
   const { enhancedUpdateFormData } = useTabNavigation({
     setActiveTab,
     formData,

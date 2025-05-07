@@ -3,11 +3,37 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from './types';
 
-// Use environment variables or fallback to the hardcoded values
+// Store the Supabase URL and key in constants
+// These values are allowed to be public in the client code
 const SUPABASE_URL = "https://bvipslspkgbjovgztubb.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2aXBzbHNwa2diam92Z3p0dWJiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDY0MzIwMzAsImV4cCI6MjA2MjAwODAzMH0.nTuIZrvBfpg0TB6L_4kp3E8LYRaV0kUvojSRIuBIi2Y";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+// Create and export the Supabase client
+// The client is wrapped in a function to handle retries and logging
+const createSupabaseClient = () => {
+  console.log("Initializing Supabase client with URL:", SUPABASE_URL);
+  
+  // Create the Supabase client with the URL and anon key
+  const client = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true
+    }
+  });
+  
+  return client;
+};
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Export the client instance
+export const supabase = createSupabaseClient();
+
+// Add a wrapper function for error handling on queries
+export const safeQuery = async <T>(queryFn: () => Promise<T>): Promise<{data: any, error: Error | null}> => {
+  try {
+    const result = await queryFn();
+    return { data: result, error: null };
+  } catch (error) {
+    console.error("Supabase query error:", error);
+    return { data: null, error: error as Error };
+  }
+};

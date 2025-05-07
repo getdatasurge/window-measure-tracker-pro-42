@@ -1,5 +1,4 @@
 
-// First, let's update the useTabNavigation hook to properly handle MeasurementFormData
 import { useState, useEffect } from 'react';
 import { MeasurementFormData } from './types';
 
