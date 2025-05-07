@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
@@ -9,7 +8,7 @@ const corsHeaders = {
   "Access-Control-Max-Age": "86400",
 };
 
-const supabaseClient = createClient(
+const supabase = createClient(
   Deno.env.get("SUPABASE_URL") ?? '',
   Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ''
 );
@@ -27,7 +26,21 @@ serve(async (req) => {
       });
     }
 
-    const { tableName, operation } = await req.json();
+    const rawBody = await req.text();
+    let tableName = '';
+    let operation = '';
+
+    try {
+      const body = JSON.parse(rawBody);
+      tableName = body.tableName;
+      operation = body.operation;
+    } catch (err) {
+      console.error("Invalid JSON body:", rawBody);
+      return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
 
     if (!tableName) {
       return new Response(JSON.stringify({ error: "Table name is required" }), {
@@ -36,29 +49,59 @@ serve(async (req) => {
       });
     }
 
+    // ✅ Check if table exists
+    const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
+      sql: `
+        SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists
+      `
+    });
+
+    if (existsError) {
+      console.error("Failed to check if table exists:", existsError);
+      throw existsError;
+    }
+
+    if (!Array.isArray(existsData) || !existsData[0]?.exists) {
+      return new Response(JSON.stringify({ error: `Table "${tableName}" does not exist` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" }
+      });
+    }
+
     const messages: string[] = [];
 
     if (!operation || operation === "replica-identity") {
-      await supabaseClient.rpc("execute_sql", {
+      const { error } = await supabase.rpc("execute_sql", {
         sql: `ALTER TABLE public.${tableName} REPLICA IDENTITY FULL;`
       });
+      if (error) {
+        console.error("REPLICA IDENTITY failed:", error);
+        throw error;
+      }
       messages.push("REPLICA IDENTITY FULL set");
     }
 
     if (!operation || operation === "add-publication") {
-      const { data, error } = await supabaseClient
+      const { data, error } = await supabase
         .from("pg_publication_tables")
         .select("*")
         .eq("pubname", "supabase_realtime")
         .eq("schemaname", "public")
         .eq("tablename", tableName);
 
-      if (error) throw new Error(`Failed to check publication: ${error.message}`);
+      if (error) {
+        console.error("Error checking publication:", error);
+        throw new Error(`Failed to check publication: ${error.message}`);
+      }
 
       if (!data || data.length === 0) {
-        await supabaseClient.rpc("execute_sql", {
+        const { error: pubError } = await supabase.rpc("execute_sql", {
           sql: `ALTER PUBLICATION supabase_realtime ADD TABLE public.${tableName};`
         });
+        if (pubError) {
+          console.error("Failed to add table to publication:", pubError);
+          throw pubError;
+        }
         messages.push(`Table ${tableName} added to publication`);
       } else {
         messages.push(`Table ${tableName} already in publication`);
@@ -70,8 +113,8 @@ serve(async (req) => {
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
   } catch (error) {
-    console.error("Error in enabling realtime:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error("Unhandled error in enable-realtime:", error);
+    return new Response(JSON.stringify({ error: error?.message ?? "Unknown error" }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" }
     });
