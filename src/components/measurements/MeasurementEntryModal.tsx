@@ -10,6 +10,7 @@ import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
 import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 type MeasurementEntryModalProps = {
   isOpen: boolean;
@@ -32,6 +33,8 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
   const [formData, setFormData] = useState<Measurement>(measurement || generateNewMeasurement(defaultValues));
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
+  const [currentStep, setCurrentStep] = useState(1);
   const { user, profile } = useAuth();
   const { toast } = useToast();
 
@@ -72,10 +75,39 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       setFormSubmitted(false);
       // Always start at the first tab when opening the modal
       setActiveTab('details');
+      setCurrentStep(1);
+      setErrors({});
     }
   }, [isOpen, measurement, defaultValues, initialFormData, profile]);
   
   const handleSave = async () => {
+    // Validate form
+    const newErrors: {[key: string]: string} = {};
+    
+    // Required fields validation
+    if (!formData.location?.trim()) {
+      newErrors.location = 'Location is required';
+    }
+    
+    if (!formData.projectId) {
+      newErrors.projectId = 'Project is required';
+    }
+    
+    // More validations can be added here
+    
+    // If errors exist, show them and stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      
+      // Navigate to the tab with errors
+      if (newErrors.location || newErrors.projectId) {
+        setActiveTab('details');
+        setCurrentStep(1);
+      }
+      
+      return;
+    }
+    
     setIsSaving(true);
     
     try {
@@ -121,6 +153,66 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
     }));
   };
 
+  const handleNextStep = () => {
+    // Basic validation for current step
+    if (currentStep === 1) {
+      // Validate location
+      if (!formData.location?.trim()) {
+        setErrors({...errors, location: 'Location is required'});
+        return;
+      }
+      
+      // Validate project
+      if (!formData.projectId) {
+        setErrors({...errors, projectId: 'Project is required'});
+        return;
+      }
+    }
+    
+    // If validation passes, go to next step
+    if (currentStep < 5) {
+      setCurrentStep(prev => prev + 1);
+      
+      // Map steps to tabs
+      switch(currentStep + 1) {
+        case 2:
+          setActiveTab('dimensions');
+          break;
+        case 3:
+          setActiveTab('status');
+          break;
+        case 4:
+          setActiveTab('attributes');
+          break;
+        case 5:
+          setActiveTab('photos');
+          break;
+      }
+    }
+  };
+
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(prev => prev - 1);
+      
+      // Map steps to tabs
+      switch(currentStep - 1) {
+        case 1:
+          setActiveTab('details');
+          break;
+        case 2:
+          setActiveTab('dimensions');
+          break;
+        case 3:
+          setActiveTab('status');
+          break;
+        case 4:
+          setActiveTab('attributes');
+          break;
+      }
+    }
+  };
+
   // Calculate area when width or height changes
   useEffect(() => {
     if (formData.width && formData.height) {
@@ -133,6 +225,8 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       }
     }
   }, [formData.width, formData.height]);
+
+  const isFinalStep = currentStep === 5;
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -148,7 +242,10 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           <div className="sticky top-0 z-10 bg-zinc-900">
             <div className="flex items-center justify-between p-6 border-b border-zinc-800">
               <div>
-                <h2 className="text-lg font-semibold">{mode === 'edit' ? 'Edit Measurement' : 'New Measurement'}</h2>
+                <h2 className="text-lg font-semibold">
+                  {mode === 'edit' ? 'Edit Measurement' : 
+                   `New Measurement${formData.projectName ? ` for ${formData.projectName}` : ''}`}
+                </h2>
                 {mode === 'edit' && <p className="text-sm text-zinc-400">
                   ID: {formData.id} | Project: {formData.projectName}
                 </p>}
@@ -166,9 +263,11 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           <div className="flex-1 overflow-y-auto">
             <MeasurementTabs 
               activeTab={activeTab} 
-              setActiveTab={setActiveTab} 
+              setActiveTab={setActiveTab}
               formData={formData} 
               updateFormData={updateFormData}
+              errors={errors}
+              setErrors={setErrors}
             />
           </div>
 
@@ -176,9 +275,19 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           <div className="sticky bottom-0 z-10 bg-zinc-900">
             <div className="flex justify-between items-center border-t border-zinc-800 p-6">
               <div className="text-xs text-zinc-500">
-                Last updated: {new Date(formData.updatedAt).toLocaleString()} by {formData.updatedBy || 'N/A'}
+                Step {currentStep} of 5 | Last updated: {new Date(formData.updatedAt).toLocaleString()} by {formData.updatedBy || 'N/A'}
               </div>
               <div className="flex gap-2">
+                {currentStep > 1 && (
+                  <Button 
+                    variant="outline"
+                    onClick={handlePreviousStep}
+                    disabled={isSaving}
+                  >
+                    Back
+                  </Button>
+                )}
+                
                 <Button 
                   variant="outline" 
                   onClick={() => onOpenChange(false)}
@@ -186,12 +295,13 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
                 >
                   Cancel
                 </Button>
+                
                 <Button 
                   className="bg-green-600 hover:bg-green-700 text-white" 
-                  onClick={handleSave}
+                  onClick={isFinalStep ? handleSave : handleNextStep}
                   disabled={isSaving}
                 >
-                  {isSaving ? 'Saving...' : mode === 'edit' ? 'Save Changes' : 'Submit Measurement'}
+                  {isSaving ? 'Saving...' : (isFinalStep ? 'Submit Measurement' : 'Continue Entry')}
                 </Button>
               </div>
             </div>

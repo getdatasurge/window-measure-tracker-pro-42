@@ -91,6 +91,22 @@ const MeasurementStatusBoard: React.FC = () => {
 
   useEffect(() => {
     fetchMeasurements();
+    
+    // Set up real-time subscription for measurements changes
+    const channel = supabase
+      .channel('public:measurements')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'measurements' }, 
+        (payload) => {
+          console.log('Measurement change detected:', payload);
+          fetchMeasurements(); // Refresh all measurements
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, [fetchMeasurements]);
 
   // Save measurement to Supabase
@@ -155,6 +171,14 @@ const MeasurementStatusBoard: React.FC = () => {
           title: "Measurement created",
           description: "The measurement has been successfully created."
         });
+      }
+      
+      // Save last selected project to localStorage
+      if (measurement.projectId && measurement.projectName) {
+        localStorage.setItem('lastSelectedProject', JSON.stringify({
+          id: measurement.projectId,
+          name: measurement.projectName
+        }));
       }
       
       // Refresh measurements
