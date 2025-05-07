@@ -5,6 +5,7 @@ import Sidebar from './Sidebar';
 import Header from './Header';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarToggle } from '@/components/ui/SidebarToggle';
+import { FloatingMeasurementTools } from '@/components/measurements/FloatingMeasurementTools';
 
 const MainLayout: React.FC = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -91,6 +92,9 @@ const MainLayout: React.FC = () => {
               <Outlet />
             </div>
           </main>
+          
+          {/* Add the FloatingMeasurementTools component */}
+          <FloatingMeasurementTools />
         </div>
       </div>
     </div>
