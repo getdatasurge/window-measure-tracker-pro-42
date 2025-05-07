@@ -12,7 +12,7 @@ export function useUpdateProject(
   refreshProjects: () => Promise<any>
 ) {
   /**
-   * Update an existing project
+   * Update an existing project with error handling
    */
   const updateProject = async (id: string, projectData: ProjectUpdateInput): Promise<ProjectDetails | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
@@ -23,29 +23,27 @@ export function useUpdateProject(
           .from('projects')
           .update(projectData)
           .eq('id', id)
-          .select();
+          .select()
+          .single();
           
         if (error) throw error;
         
-        return data?.[0] || null;
+        return data;
       });
       
       setState(prev => ({
         ...prev,
         loading: false,
-        selectedProject: data || prev.selectedProject,
         error: null
       }));
       
-      if (data) {
-        toast({
-          title: "Project updated",
-          description: `Successfully updated project: ${data.name || 'Unnamed project'}`,
-        });
-        
-        // Refresh the projects list
-        refreshProjects();
-      }
+      toast({
+        title: "Project updated",
+        description: `Successfully updated project: ${data.name || 'Unnamed project'}`,
+      });
+      
+      // Refresh the projects list
+      refreshProjects();
       
       return data;
     } catch (error) {
