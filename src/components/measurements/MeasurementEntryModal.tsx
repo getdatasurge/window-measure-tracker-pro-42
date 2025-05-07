@@ -1,16 +1,14 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Measurement } from '@/types/measurement';
-import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
-import { generateNewMeasurement } from '@/utils/measurementUtils';
-import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/hooks/use-toast';
-import { MeasurementModalProps, MeasurementFormState } from './modal/types';
+import { MeasurementModalProps } from './modal/types';
 import MeasurementModalHeader from './modal/MeasurementModalHeader';
 import MeasurementModalContent from './modal/MeasurementModalContent';
 import MeasurementModalFooter from './modal/MeasurementModalFooter';
+import { useMeasurementModalState } from './modal/hooks/useMeasurementModalState';
+import { useFormValidation } from './modal/hooks/useFormValidation';
 
 const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
   isOpen,
@@ -20,77 +18,56 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
   mode,
   defaultValues = {}
 }) => {
-  const [activeTab, setActiveTab] = useState('details');
-  const [formData, setFormData] = useState<MeasurementFormState>(measurement || generateNewMeasurement(defaultValues));
-  const [formSubmitted, setFormSubmitted] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
-  const [errors, setErrors] = useState<{[key: string]: string}>({});
-  const [currentStep, setCurrentStep] = useState(1);
-  const { user, profile } = useAuth();
   const { toast } = useToast();
-  const TOTAL_STEPS = 5;
-
-  // Use our custom hook for localStorage management
+  const { validateForm } = useFormValidation();
+  
   const {
-    initialFormData,
+    activeTab,
+    setActiveTab,
+    formData,
+    updateFormData,
+    formSubmitted,
+    setFormSubmitted,
+    isSaving,
+    setIsSaving,
+    errors,
+    setErrors,
+    currentStep,
+    TOTAL_STEPS,
+    handleNextStep,
+    handlePreviousStep,
+    user,
+    profile,
     saveFormData
-  } = useMeasurementFormStorage(isOpen, defaultValues);
-
-  // Load initial data when modal opens
+  } = useMeasurementModalState({
+    isOpen,
+    measurement,
+    defaultValues
+  });
+  
+  // Calculate area when width or height changes
   useEffect(() => {
-    if (isOpen) {
-      if (measurement) {
-        // If editing an existing measurement, use that
-        setFormData(measurement);
-      } else if (Object.keys(defaultValues).length > 0) {
-        // If we have default values from context, use those
-        setFormData(generateNewMeasurement({
-          ...defaultValues,
-          recordedBy: profile?.full_name || 'Unknown User'
-        }));
-      } else if (initialFormData) {
-        // If we have data from localStorage, use that
-        const now = new Date().toISOString();
-        setFormData({
-          ...generateNewMeasurement(),
-          ...initialFormData,
-          recordedBy: profile?.full_name || initialFormData.recordedBy || 'Unknown User'
-        });
-      } else {
-        // Start fresh
-        setFormData(generateNewMeasurement({
-          recordedBy: profile?.full_name || 'Unknown User'
-        }));
+    if (formData.width && formData.height) {
+      const width = parseFloat(formData.width);
+      const height = parseFloat(formData.height);
+      if (!isNaN(width) && !isNaN(height)) {
+        // Convert to square feet
+        const area = width * height / 144;
+        updateFormData('area', `${area.toFixed(2)} ft²`);
       }
-
-      // Reset the form submission state
-      setFormSubmitted(false);
-      // Always start at the first tab when opening the modal
-      setActiveTab('details');
-      setCurrentStep(1);
-      setErrors({});
     }
-  }, [isOpen, measurement, defaultValues, initialFormData, profile]);
+  }, [formData.width, formData.height]);
   
   const handleSave = async () => {
     // Validate form
-    const newErrors: {[key: string]: string} = {};
-    
-    // Required fields validation
-    if (!formData.location?.trim()) {
-      newErrors.location = 'Location is required';
-    }
-    
-    if (!formData.projectId) {
-      newErrors.projectId = 'Project is required';
-    }
+    const validation = validateForm(formData);
     
     // If errors exist, show them and stop submission
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
+    if (!validation.isValid) {
+      setErrors(validation.errors);
       
       // Navigate to the tab with errors
-      if (newErrors.location || newErrors.projectId) {
+      if (validation.errors.location || validation.errors.projectId) {
         setActiveTab('details');
         setCurrentStep(1);
       }
@@ -138,86 +115,6 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
       setIsSaving(false);
     }
   };
-  
-  const updateFormData = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const handleNextStep = () => {
-    // Basic validation for current step
-    if (currentStep === 1) {
-      // Validate location
-      if (!formData.location?.trim()) {
-        setErrors({...errors, location: 'Location is required'});
-        return;
-      }
-      
-      // Validate project
-      if (!formData.projectId) {
-        setErrors({...errors, projectId: 'Project is required'});
-        return;
-      }
-    }
-    
-    // If validation passes, go to next step
-    if (currentStep < TOTAL_STEPS) {
-      setCurrentStep(prev => prev + 1);
-      
-      // Map steps to tabs
-      switch(currentStep + 1) {
-        case 2:
-          setActiveTab('dimensions');
-          break;
-        case 3:
-          setActiveTab('status');
-          break;
-        case 4:
-          setActiveTab('attributes');
-          break;
-        case 5:
-          setActiveTab('photos');
-          break;
-      }
-    }
-  };
-
-  const handlePreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(prev => prev - 1);
-      
-      // Map steps to tabs
-      switch(currentStep - 1) {
-        case 1:
-          setActiveTab('details');
-          break;
-        case 2:
-          setActiveTab('dimensions');
-          break;
-        case 3:
-          setActiveTab('status');
-          break;
-        case 4:
-          setActiveTab('attributes');
-          break;
-      }
-    }
-  };
-
-  // Calculate area when width or height changes
-  useEffect(() => {
-    if (formData.width && formData.height) {
-      const width = parseFloat(formData.width);
-      const height = parseFloat(formData.height);
-      if (!isNaN(width) && !isNaN(height)) {
-        // Convert to square feet
-        const area = width * height / 144;
-        updateFormData('area', `${area.toFixed(2)} ft²`);
-      }
-    }
-  }, [formData.width, formData.height]);
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
