@@ -148,11 +148,11 @@ export const useMeasurementSubscription = ({
               const formattedMeasurement = formatMeasurement(newData);
               
               // Update local state
-              setMeasurements(prev => {
+              setMeasurements(prevMeasurements => {
                 // Check if the item already exists (duplicate insert)
-                const exists = prev.some(m => m.id === formattedMeasurement.id);
-                if (exists) return prev;
-                return [formattedMeasurement, ...prev];
+                const exists = prevMeasurements.some(m => m.id === formattedMeasurement.id);
+                if (exists) return prevMeasurements;
+                return [formattedMeasurement, ...prevMeasurements];
               });
               
               // Call the onInsert handler if provided
@@ -184,8 +184,8 @@ export const useMeasurementSubscription = ({
               const formattedMeasurement = formatMeasurement(updatedData);
               
               // Conflict resolution logic - prefer server data but preserve local changes not yet synced
-              setMeasurements(prev => {
-                return prev.map(m => {
+              setMeasurements(prevMeasurements => {
+                return prevMeasurements.map(m => {
                   // If this is the updated measurement
                   if (m.id === formattedMeasurement.id) {
                     // Check timestamps for conflict resolution
@@ -225,7 +225,7 @@ export const useMeasurementSubscription = ({
             const deletedId = payload.old.id;
             
             // Update local state
-            setMeasurements(prev => prev.filter(m => m.id !== deletedId));
+            setMeasurements(prevMeasurements => prevMeasurements.filter(m => m.id !== deletedId));
             
             // Call the onDelete handler if provided
             if (onDelete) onDelete(deletedId);
@@ -235,8 +235,8 @@ export const useMeasurementSubscription = ({
           console.log('Supabase real-time subscription status:', status);
           
           // Update connection state based on status
-          setSubscriptionState(prev => ({
-            ...prev,
+          setSubscriptionState(currentState => ({
+            ...currentState,
             isConnected: status === 'SUBSCRIBED',
             isPolling: status !== 'SUBSCRIBED'
           }));
@@ -253,7 +253,7 @@ export const useMeasurementSubscription = ({
             if (retryAttempt < MAX_RETRY_ATTEMPTS) {
               setTimeout(() => setupSubscription(retryAttempt + 1), 5000);
             }
-          } else if (status === 'SUBSCRIBED' && prev.isPolling) {
+          } else if (status === 'SUBSCRIBED' && currentState.isPolling) {
             toast({
               title: "Real-time connection restored",
               description: "Now receiving live updates.",
@@ -265,8 +265,8 @@ export const useMeasurementSubscription = ({
     } catch (error) {
       console.error('Failed to setup real-time subscription:', error);
       
-      setSubscriptionState(prev => ({
-        ...prev,
+      setSubscriptionState(currentState => ({
+        ...currentState,
         lastError: error instanceof Error ? error : new Error('Unknown subscription error'),
         isConnected: false,
         isPolling: true
@@ -294,7 +294,7 @@ export const useMeasurementSubscription = ({
   // Set up subscription and polling
   useEffect(() => {
     let channel: any = null;
-    let pollingInterval: number | null = null;
+    let pollingInterval: ReturnType<typeof setInterval> | null = null;
     
     // Initial data fetch
     fetchMeasurements();
