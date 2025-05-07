@@ -8,11 +8,13 @@ export interface ProjectOption {
   name: string;
 }
 
-// Define explicit return type to prevent circular references
-export function useProjectList(): {
+// Define explicit return type interface to break the circular reference
+interface ProjectListHookReturn {
   projectsList: ProjectOption[];
   fetchProjects: () => Promise<void>;
-} {
+}
+
+export function useProjectList(): ProjectListHookReturn {
   const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);
   
   // Fetch projects for dropdown
