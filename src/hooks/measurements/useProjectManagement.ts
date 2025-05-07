@@ -1,7 +1,6 @@
 
 import { useCallback } from 'react';
-import { useProjectList } from './useProjectList';
-import { ProjectOption } from './types';
+import { useProjectList, ProjectOption } from './useProjectList';
 
 interface UseProjectManagementProps {
   setValue: (field: string, value: any) => void;

@@ -1,7 +1,12 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption } from './types';
+
+// Define ProjectOption directly in this file to avoid circular imports
+export interface ProjectOption {
+  id: string;
+  name: string;
+}
 
 export function useProjectList() {
   const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);
@@ -16,7 +21,6 @@ export function useProjectList() {
       const { data, error } = await supabase
         .from('projects')
         .select('id, name')
-        .eq('is_active', true)
         .order('name');
 
       if (error) {

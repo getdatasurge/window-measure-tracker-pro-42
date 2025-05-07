@@ -79,17 +79,18 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
           // Get the project name from the nested projects object
           const projectName = item.projects ? item.projects.name : '';
           
+          // Convert numeric fields to strings to match the Measurement interface
           return {
             id: item.id,
             projectId: item.project_id,
             measurementDate: item.measurement_date,
-            projectName: projectName || '', // Use the extracted project name
+            projectName: projectName || '',
             createdAt: item.created_at,
             updatedAt: item.updated_at,
             recordedBy: item.recorded_by || '',
-            width: String(item.width || ''), // Convert to string to match Measurement type
-            height: String(item.height || ''), // Convert to string to match Measurement type
-            area: String(item.area || ''), // Convert to string to match Measurement type
+            width: String(item.width || ''), // Convert to string
+            height: String(item.height || ''), // Convert to string
+            area: String(item.area || ''), // Convert to string
             status: item.status || 'Pending',
             location: item.location || '',
             direction: item.direction || 'N/A',
@@ -97,7 +98,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             quantity: item.quantity || 1,
             film_required: item.film_required,
             installationDate: item.installation_date,
-            photos: item.photos || []
+            photos: [] // Default to empty array since it's missing in the database
           } as Measurement;
         });
       }
@@ -131,6 +132,24 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
       return false;
     }
   }, [fetchMeasurementsData]);
+  
+  /**
+   * Setup polling as fallback for real-time updates
+   */
+  const setupPolling = useCallback(() => {
+    console.info('Starting polling fallback mechanism');
+    
+    // Poll for updates every 30 seconds
+    const intervalId = setInterval(() => {
+      console.info('Polling for measurement updates...');
+      refreshData();
+    }, 30000);
+    
+    // Return cleanup function
+    return () => {
+      clearInterval(intervalId);
+    };
+  }, [refreshData]);
   
   /**
    * Setup real-time subscription
@@ -221,25 +240,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
       }));
       return setupPolling();
     }
-  }, [options.onInsert, options.onUpdate, options.onDelete]);
-  
-  /**
-   * Setup polling as fallback for real-time updates
-   */
-  const setupPolling = useCallback(() => {
-    console.info('Starting polling fallback mechanism');
-    
-    // Poll for updates every 30 seconds
-    const intervalId = setInterval(() => {
-      console.info('Polling for measurement updates...');
-      refreshData();
-    }, 30000);
-    
-    // Return cleanup function
-    return () => {
-      clearInterval(intervalId);
-    };
-  }, [refreshData]);
+  }, [options.onInsert, options.onUpdate, options.onDelete, setupPolling]);
   
   // Effect to load initial data and setup real-time or polling
   useEffect(() => {
