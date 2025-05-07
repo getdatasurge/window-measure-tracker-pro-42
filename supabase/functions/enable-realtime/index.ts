@@ -52,7 +52,7 @@ serve(async (req) => {
     // ✅ Check if table exists
     const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
       sql: `
-        SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists
+        SELECT to_regclass('public."${tableName}"') IS NOT NULL AS exists
       `
     });
 
