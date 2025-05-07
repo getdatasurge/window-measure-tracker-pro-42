@@ -13,20 +13,19 @@ interface MeasurementTabsProps {
   setActiveTab: (tab: string) => void;
   formData: Measurement;
   updateFormData: (field: string, value: any) => void;
-  errors?: {[key: string]: string};
-  setErrors?: (errors: {[key: string]: string}) => void;
 }
 
 const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
   activeTab,
   setActiveTab,
   formData,
-  updateFormData,
-  errors = {},
-  setErrors = () => {}
+  updateFormData
 }) => {
   // Track the last field that was modified in each tab
   const [lastModifiedFields, setLastModifiedFields] = useState<{[key: string]: string}>({});
+  
+  // Track form validation errors
+  const [errors, setErrors] = useState<{[key: string]: string}>({});
   
   // Define the last field for each tab
   const tabLastFields = {
@@ -74,7 +73,7 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
     // Validate required fields based on the current tab
     if (currentTab === 'details') {
       if (!formData.location || formData.location.trim() === '') {
-        setErrors({ ...errors, location: 'Location is required' });
+        setErrors(prev => ({...prev, location: 'Location is required'}));
         return;
       }
       

@@ -179,13 +179,13 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           setActiveTab('dimensions');
           break;
         case 3:
-          setActiveTab('attributes');
+          setActiveTab('status');
           break;
         case 4:
-          setActiveTab('photos');
+          setActiveTab('attributes');
           break;
         case 5:
-          setActiveTab('status');
+          setActiveTab('photos');
           break;
       }
     }
@@ -204,10 +204,10 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
           setActiveTab('dimensions');
           break;
         case 3:
-          setActiveTab('attributes');
+          setActiveTab('status');
           break;
         case 4:
-          setActiveTab('photos');
+          setActiveTab('attributes');
           break;
       }
     }
