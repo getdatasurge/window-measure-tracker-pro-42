@@ -15,7 +15,7 @@ interface AttributesFieldsProps {
   errors: FormErrors;
 }
 
-const AttributesFields: React.FC<AttributesFieldsProps> = ({ 
+const AttributesFieldsProps: React.FC<AttributesFieldsProps> = ({ 
   register, 
   watch, 
   setValue,
@@ -93,8 +93,15 @@ const AttributesFields: React.FC<AttributesFieldsProps> = ({
           {...register('notes')}
         />
       </div>
+
+      {/* Input Source - Hidden field that defaults to 'manual' */}
+      <input 
+        type="hidden" 
+        {...register('input_source')} 
+        value="manual" 
+      />
     </>
   );
 };
 
-export default AttributesFields;
+export default AttributesFieldsProps;

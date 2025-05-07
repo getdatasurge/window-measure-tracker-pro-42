@@ -1,3 +1,4 @@
+
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -22,12 +23,16 @@ export interface MeasurementFormData {
   tempId?: string;
   // Add validation status
   isValid?: boolean;
+  // Add input source field
+  input_source?: string;
 }
 
 export interface UseAddMeasurementFormProps {
   onSuccess: () => void;
   initialProjectId?: string;
   initialProjectName?: string;
+  editMode?: boolean;
+  measurementToEdit?: any;
 }
 
 export interface FormErrors {
@@ -36,7 +41,6 @@ export interface FormErrors {
   width?: { message?: string };
   height?: { message?: string };
   quantity?: { message?: string };
-  depth?: { message?: string };
 }
 
 export interface ProjectOption {
@@ -48,6 +52,7 @@ export interface PhotoUploadState {
   photoFiles: File[];
   photoErrors: string[];
   uploadProgress: number;
+  existingPhotos: string[];
 }
 
 export interface PhotoUploadHandlers {
@@ -55,6 +60,7 @@ export interface PhotoUploadHandlers {
   removePhoto: (index: number) => void;
   uploadPhotos: () => Promise<string[]>;
   resetPhotoState: () => void;
+  setInitialPhotos: (photos: string[]) => void;
 }
 
 export interface FormSubmissionState {
@@ -66,7 +72,8 @@ export interface FormSubmissionHandlers {
   handleSubmission: (
     data: MeasurementFormData,
     photoUrls: string[],
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    measurementId?: string
   ) => Promise<any>;
 }
 

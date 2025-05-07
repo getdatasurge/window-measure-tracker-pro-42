@@ -26,7 +26,8 @@ export interface Measurement {
   film_required?: boolean;
   photos?: string[];
   recorded_by?: string; // User ID for database purposes
-  installationDate?: string; // Add installationDate property
+  installationDate?: string; // Installation date property
+  input_source?: string; // Adding input source field
 }
 
 export interface MeasurementFilter {

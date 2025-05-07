@@ -14,7 +14,8 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
   const handleSubmission = async (
     data: MeasurementFormData,
     photoUrls: string[],
-    onSuccess?: () => void
+    onSuccess?: () => void,
+    measurementId?: string
   ): Promise<any> => {
     if (!user) {
       toast({
@@ -68,12 +69,13 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         recorded_by: user.id,
         direction,
         notes: data.notes || '',
-        status: 'pending',
+        status: data.status?.toLowerCase() || 'pending',
         measurement_date: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         updated_by: user.id,
         film_required: data.filmRequired,
-        photos: photoUrls
+        photos: photoUrls,
+        input_source: data.input_source || 'manual'
       };
       
       // Only add installation_date if status is 'installed'
@@ -83,15 +85,50 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
       
       console.log("Measurement data being submitted:", measurementData);
       
-      // Save to supabase
-      const { data: insertedData, error } = await supabase
-        .from('measurements')
-        .insert(measurementData)
-        .select();
+      let result;
+      
+      // Save to supabase - either create or update
+      if (measurementId) {
+        // Update existing measurement
+        const { data: updatedData, error } = await supabase
+          .from('measurements')
+          .update(measurementData)
+          .eq('id', measurementId)
+          .select();
+          
+        if (error) {
+          console.error("Error updating measurement:", error);
+          throw error;
+        }
         
-      if (error) {
-        console.error("Error inserting measurement:", error);
-        throw error;
+        console.log("Measurement updated:", updatedData);
+        result = updatedData;
+        
+        toast({
+          title: "Measurement updated successfully",
+          description: "The measurement has been successfully updated.",
+          duration: 3000,
+        });
+      } else {
+        // Create new measurement
+        const { data: insertedData, error } = await supabase
+          .from('measurements')
+          .insert(measurementData)
+          .select();
+          
+        if (error) {
+          console.error("Error inserting measurement:", error);
+          throw error;
+        }
+        
+        console.log("Measurement created:", insertedData);
+        result = insertedData;
+        
+        toast({
+          title: "Measurement submitted successfully",
+          description: "The measurement has been successfully created.",
+          duration: 3000,
+        });
       }
       
       // Save last selected project to localStorage
@@ -100,20 +137,13 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         name: data.projectName
       }));
       
-      // Show success message
-      toast({
-        title: "Measurement submitted successfully",
-        description: "The measurement has been successfully created.",
-        duration: 5000, // Auto dismiss after 5 seconds
-      });
-      
       // Call success callback if provided
       if (onSuccess) {
         // Execute onSuccess as a separate step AFTER the database operation completes
         await onSuccess();
       }
       
-      return insertedData;
+      return result;
       
     } catch (err) {
       console.error('Error saving measurement:', err);
@@ -121,7 +151,7 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         title: "Error saving measurement",
         description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
         variant: "destructive",
-        duration: 5000, // Auto dismiss after 5 seconds
+        duration: 5000,
       });
       throw err;
     }

@@ -1,114 +1,122 @@
 
-import { useState, useCallback } from 'react';
+import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { MAX_FILE_SIZE, MAX_FILES, PhotoUploadState, PhotoUploadHandlers } from './types';
+import { MAX_FILE_SIZE, MAX_FILES } from './types';
 
-export function usePhotoUpload(): PhotoUploadState & PhotoUploadHandlers {
+export function usePhotoUpload() {
   const [photoFiles, setPhotoFiles] = useState<File[]>([]);
   const [photoErrors, setPhotoErrors] = useState<string[]>([]);
-  const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [existingPhotos, setExistingPhotos] = useState<string[]>([]);
   
-  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    const errors: string[] = [];
+  // Initialize with existing photos (for edit mode)
+  const setInitialPhotos = (photos: string[]) => {
+    setExistingPhotos(photos);
+  };
+  
+  const validateFile = (file: File): string | null => {
+    if (file.size > MAX_FILE_SIZE) {
+      return `File "${file.name}" is too large (max ${MAX_FILE_SIZE / (1024 * 1024)}MB)`;
+    }
     
-    if (!files) return;
+    if (!file.type.startsWith('image/')) {
+      return `File "${file.name}" is not an image`;
+    }
     
-    // Check if adding these files would exceed the limit
-    const newFiles = Array.from(files);
+    return null;
+  };
+  
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files || []);
+    const validFiles: File[] = [];
+    const newErrors: string[] = [];
     
-    if (photoFiles.length + newFiles.length > MAX_FILES) {
-      errors.push(`You can only upload a maximum of ${MAX_FILES} photos.`);
-      setPhotoErrors(errors);
+    // Check if we'd exceed max files
+    if (photoFiles.length + files.length > MAX_FILES) {
+      newErrors.push(`You can only upload up to ${MAX_FILES} photos`);
+      setPhotoErrors(newErrors);
       return;
     }
     
     // Validate each file
-    const validFiles = newFiles.filter(file => {
-      if (file.size > MAX_FILE_SIZE) {
-        errors.push(`File "${file.name}" exceeds 5MB size limit.`);
-        return false;
+    files.forEach(file => {
+      const error = validateFile(file);
+      if (error) {
+        newErrors.push(error);
+      } else {
+        validFiles.push(file);
       }
-      
-      if (!file.type.startsWith('image/')) {
-        errors.push(`File "${file.name}" is not an image.`);
-        return false;
-      }
-      
-      return true;
     });
     
-    setPhotoErrors(errors);
+    setPhotoFiles(prev => [...prev, ...validFiles]);
+    setPhotoErrors(newErrors);
     
-    if (validFiles.length > 0) {
-      setPhotoFiles(prev => [...prev, ...validFiles]);
+    // Reset the input to allow selecting the same file again
+    if (e.target) {
+      e.target.value = '';
     }
-    
-    // Reset the input value to allow selecting the same file again
-    e.target.value = '';
-  }, [photoFiles]);
+  };
   
-  const removePhoto = useCallback((index: number): void => {
+  const removePhoto = (index: number) => {
     setPhotoFiles(prev => prev.filter((_, i) => i !== index));
-  }, []);
+  };
   
   const uploadPhotos = async (): Promise<string[]> => {
     if (photoFiles.length === 0) return [];
     
-    const uploadedUrls: string[] = [];
+    const urls: string[] = [];
     
     try {
       for (let i = 0; i < photoFiles.length; i++) {
         const file = photoFiles[i];
         const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const fileName = `${Math.random().toString(36).substring(2, 15)}_${Date.now()}.${fileExt}`;
         const filePath = `measurements/${fileName}`;
         
-        setUploadProgress(Math.round(((i) / photoFiles.length) * 100));
-        
-        const { data, error } = await supabase.storage
-          .from('measurements')
+        // Upload to Supabase storage
+        const { error: uploadError, data } = await supabase.storage
+          .from('measurement_photos')
           .upload(filePath, file);
-          
-        if (error) {
-          throw error;
+        
+        if (uploadError) {
+          throw uploadError;
         }
         
-        if (data) {
-          // Get public URL for the uploaded file
-          const { data: publicUrlData } = supabase.storage
-            .from('measurements')
-            .getPublicUrl(filePath);
-            
-          if (publicUrlData.publicUrl) {
-            uploadedUrls.push(publicUrlData.publicUrl);
-          }
-        }
+        // Get public URL
+        const { data: { publicUrl } } = supabase.storage
+          .from('measurement_photos')
+          .getPublicUrl(filePath);
+        
+        urls.push(publicUrl);
         
         // Update progress
-        setUploadProgress(Math.round(((i + 1) / photoFiles.length) * 100));
+        setUploadProgress(((i + 1) / photoFiles.length) * 100);
       }
       
-      return uploadedUrls;
-    } catch (err) {
-      console.error('Error uploading photos:', err);
-      throw err;
+      return urls;
+    } catch (error) {
+      console.error('Error uploading photos:', error);
+      setPhotoErrors([...photoErrors, 'Error uploading photos. Please try again.']);
+      throw error;
     }
   };
   
-  const resetPhotoState = (): void => {
+  const resetPhotoState = () => {
     setPhotoFiles([]);
     setPhotoErrors([]);
     setUploadProgress(0);
+    setExistingPhotos([]);
   };
-
+  
   return {
     photoFiles,
     photoErrors,
     uploadProgress,
+    existingPhotos,
     handleFileChange,
     removePhoto,
     uploadPhotos,
-    resetPhotoState
+    resetPhotoState,
+    setInitialPhotos
   };
 }

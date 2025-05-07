@@ -56,6 +56,7 @@ export function useMeasurementUpdate() {
         updated_by: user.id,
         photos: Array.isArray(measurement.photos) ? measurement.photos : [],
         film_required: measurement.film_required === undefined ? true : !!measurement.film_required,
+        input_source: measurement.input_source || 'manual'
       };
       
       // Only include installation date if status is 'installed'
