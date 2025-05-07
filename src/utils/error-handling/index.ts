@@ -5,7 +5,7 @@
 
 import { toast } from '@/components/ui/use-toast';
 
-// Export the logger function
+// Export the logger function directly from the module
 export { logError } from './errorLogger';
 export * from './errorBoundary';
 

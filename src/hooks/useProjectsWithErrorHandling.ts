@@ -2,8 +2,41 @@
 import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project.d';
-import { tryAsync, withErrorHandling } from '@/utils/error-handling';
+import { tryAsync, withErrorHandling } from '@/utils/error-handling/index';
+
+// Define the types locally to break circular dependencies
+interface ProjectOption {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+  deadline?: string;
+}
+
+interface ProjectDetails extends ProjectOption {
+  description?: string;
+  created_at?: string;
+  updated_at?: string;
+  created_by?: string;
+}
+
+interface ProjectCreateInput {
+  name: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+}
+
+interface ProjectUpdateInput {
+  name?: string;
+  client_name?: string;
+  location?: string;
+  description?: string;
+  deadline?: string;
+  status?: string;
+}
 
 interface ProjectsHookState {
   loading: boolean;
