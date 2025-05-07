@@ -3,10 +3,11 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.15.0";
 
 // Define CORS headers
 const corsHeaders = {
-  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Origin": "*", // Replace '*' with your frontend origin in production
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Max-Age": "86400",
+  "Content-Type": "application/json"
 };
 
 // Initialize Supabase client
@@ -19,15 +20,19 @@ const supabase = createClient(
 const isValidTableName = (name: string) => /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(name);
 
 serve(async (req) => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
-    return new Response(null, { status: 204, headers: corsHeaders });
+    return new Response("ok", {
+      status: 200,
+      headers: corsHeaders
+    });
   }
 
   try {
     if (req.method !== "POST") {
       return new Response(JSON.stringify({ error: "Method not allowed" }), {
         status: 405,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: corsHeaders
       });
     }
 
@@ -40,7 +45,7 @@ serve(async (req) => {
     try {
       const maybeDoubleEncoded = JSON.parse(rawBody);
       const body = typeof maybeDoubleEncoded === "string"
-        ? JSON.parse(maybeDoubleEncoded) // handle extra string layer
+        ? JSON.parse(maybeDoubleEncoded)
         : maybeDoubleEncoded;
 
       tableName = body.tableName;
@@ -50,14 +55,14 @@ serve(async (req) => {
       console.error("❌ Failed to parse JSON body:", rawBody);
       return new Response(JSON.stringify({ error: "Invalid JSON format" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: corsHeaders
       });
     }
 
     if (!tableName) {
       return new Response(JSON.stringify({ error: "Table name is required" }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: corsHeaders
       });
     }
 
@@ -67,11 +72,10 @@ serve(async (req) => {
         error: "Invalid table name. Use letters, numbers, underscores only."
       }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: corsHeaders
       });
     }
 
-    // Check if the table exists
     const checkSQL = `SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists`;
     const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
       sql: checkSQL
@@ -87,7 +91,7 @@ serve(async (req) => {
         error: `Table "${tableName}" does not exist`
       }), {
         status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" }
+        headers: corsHeaders
       });
     }
 
@@ -137,7 +141,7 @@ serve(async (req) => {
 
     return new Response(JSON.stringify({ success: true, messages }), {
       status: 200,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: corsHeaders
     });
 
   } catch (error) {
@@ -146,7 +150,7 @@ serve(async (req) => {
       error: error?.message ?? "Unknown error"
     }), {
       status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" }
+      headers: corsHeaders
     });
   }
 });
