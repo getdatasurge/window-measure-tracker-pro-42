@@ -1,15 +1,1 @@
-
 project_id = "bvipslspkgbjovgztubb"
-
-[api]
-
-[db]
-
-[auth]
-
-[functions]
-[functions.backfill-profiles]
-verify_jwt = true
-
-[functions.enable-realtime]
-verify_jwt = true
