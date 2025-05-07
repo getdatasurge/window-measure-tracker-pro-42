@@ -235,8 +235,8 @@ export const useMeasurementSubscription = ({
           console.log('Supabase real-time subscription status:', status);
           
           // Update connection state based on status
-          setSubscriptionState(currentState => ({
-            ...currentState,
+          setSubscriptionState(prevState => ({
+            ...prevState,
             isConnected: status === 'SUBSCRIBED',
             isPolling: status !== 'SUBSCRIBED'
           }));
@@ -253,7 +253,7 @@ export const useMeasurementSubscription = ({
             if (retryAttempt < MAX_RETRY_ATTEMPTS) {
               setTimeout(() => setupSubscription(retryAttempt + 1), 5000);
             }
-          } else if (status === 'SUBSCRIBED' && currentState.isPolling) {
+          } else if (status === 'SUBSCRIBED' && prevState.isPolling) {
             toast({
               title: "Real-time connection restored",
               description: "Now receiving live updates.",
@@ -265,8 +265,8 @@ export const useMeasurementSubscription = ({
     } catch (error) {
       console.error('Failed to setup real-time subscription:', error);
       
-      setSubscriptionState(currentState => ({
-        ...currentState,
+      setSubscriptionState(prev => ({
+        ...prev,
         lastError: error instanceof Error ? error : new Error('Unknown subscription error'),
         isConnected: false,
         isPolling: true
