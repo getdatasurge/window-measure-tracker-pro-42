@@ -1,6 +1,6 @@
 
 import { useCallback } from 'react';
-import { ProjectOption } from './types';
+import { ProjectOption } from './useProjectList';
 import { useProjectList } from './useProjectList';
 
 interface UseProjectManagementProps {

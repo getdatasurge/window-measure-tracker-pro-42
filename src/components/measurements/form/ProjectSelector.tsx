@@ -2,7 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { ProjectOption } from '@/hooks/measurements/types';
+import { ProjectOption } from '@/hooks/measurements/useProjectList';
 
 interface ProjectSelectorProps {
   projectId: string;
