@@ -27,7 +27,7 @@ export interface Measurement {
   photos?: string[];
   recorded_by?: string; // User ID for database purposes
   installationDate?: string; // Installation date property
-  input_source?: string; // Adding input source field
+  createdAt?: string; // Created at timestamp
 }
 
 export interface MeasurementFilter {

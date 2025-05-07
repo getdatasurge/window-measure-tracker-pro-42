@@ -3,7 +3,6 @@ import { configureStore } from '@reduxjs/toolkit';
 import { setupListeners } from '@reduxjs/toolkit/query';
 import { apiSlice } from '@/services/apiSlice';
 import { 
-  persistStore, 
   FLUSH,
   REHYDRATE,
   PAUSE,
@@ -30,7 +29,7 @@ export const store = configureStore({
 setupListeners(store.dispatch);
 
 // Export the persistor to use in the Provider
-export const persistor = persistStore(store);
+export const persistor = null; // Removed persistor to simplify
 
 // Infer the `RootState` and `AppDispatch` types from the store
 export type RootState = ReturnType<typeof store.getState>;

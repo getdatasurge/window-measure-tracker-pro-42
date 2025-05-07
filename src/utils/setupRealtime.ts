@@ -1,52 +1,58 @@
 
 import { supabase } from '@/integrations/supabase/client';
 
-// Define the function to enable realtime on a specific table
-export async function enableRealtimeForTable(tableName: string, operation?: string) {
+/**
+ * Set up realtime functionality for a table
+ * 
+ * @param tableName The name of the table to enable realtime for
+ * @returns Promise<boolean> true if realtime was enabled, false if not
+ */
+export async function setupRealtime(tableName: string = 'measurements'): Promise<boolean> {
   try {
-    console.log(`Setting up realtime for ${tableName}${operation ? ` (${operation})` : ''}`);
+    console.log(`Setting up realtime for ${tableName} table`);
     
-    const payload = {
-      tableName,
-      ...(operation && { operation })
-    };
-    
-    // Call the Supabase edge function
-    const { data, error } = await supabase.functions.invoke('enable-realtime', {
-      body: JSON.stringify(payload)
-    });
-    
-    if (error) {
-      console.error(`Error enabling realtime for ${tableName}:`, error);
+    // Check if the table exists first
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('id')
+        .limit(1);
+      
+      if (error) {
+        console.error(`Error verifying table ${tableName} exists:`, error);
+        return false;
+      }
+      
+      console.log(`Verified table ${tableName} exists`);
+    } catch (error) {
+      console.error(`Error checking if table ${tableName} exists:`, error);
       return false;
     }
     
-    console.log(`Realtime setup for ${tableName} completed:`, data);
-    return true;
-  } catch (err) {
-    console.error(`Exception enabling realtime for ${tableName}:`, err);
-    return false;
-  }
-}
-
-// Function to setup all required realtime connections
-export async function setupRealtime() {
-  try {
-    // Enable realtime for the measurements table
-    const success = await enableRealtimeForTable('measurements');
-    
-    if (!success) {
-      console.warn('Failed to enable realtime for measurements table');
-      // Don't show error toasts to users during page load as it's confusing
-      // But we should log it to console
+    // Attempt to subscribe to the table to verify realtime is enabled
+    try {
+      const channel = supabase
+        .channel(`${tableName}-test`)
+        .on(
+          'postgres_changes',
+          { event: '*', schema: 'public', table: tableName },
+          (payload) => {
+            console.log('Realtime test payload:', payload);
+          }
+        )
+        .subscribe();
+        
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      supabase.removeChannel(channel);
+      
+      console.log(`Successfully set up realtime for ${tableName}`);
+      return true;
+    } catch (error) {
+      console.error(`Error setting up realtime subscription for ${tableName}:`, error);
+      return false;
     }
-    
-    return success;
   } catch (error) {
-    console.error('Error setting up realtime:', error);
+    console.error(`Error in setupRealtime:`, error);
     return false;
   }
 }
-
-// Re-export the function for backward compatibility
-export { setupRealtime as enableMeasurementsRealtime };

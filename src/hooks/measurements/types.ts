@@ -1,3 +1,4 @@
+
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -25,7 +26,6 @@ export interface MeasurementFormData {
   reviewComments?: string;
   tempId?: string;
   isValid?: boolean;
-  input_source?: string;
   updatedAt?: string;
   updatedBy?: string;
   area?: string;
@@ -53,7 +53,6 @@ export interface MeasurementFormState {
   area?: string;
   tempId?: string;
   isValid?: boolean;
-  input_source?: string;
   updatedAt?: string;
   updatedBy?: string;
   recordedBy?: string;

@@ -6,8 +6,8 @@ import { setupRealtime } from '@/utils/setupRealtime';
 export const enableMeasurementsRealtime = async () => {
   try {
     console.log('Setting up realtime for measurements');
-    await setupRealtime();
-    return true;
+    const result = await setupRealtime('measurements');
+    return result;
   } catch (error) {
     console.error('Error enabling realtime for measurements:', error);
     console.warn('Failed to enable realtime for measurements table');
@@ -18,12 +18,17 @@ export const enableMeasurementsRealtime = async () => {
 
 // Setup subscription to measurements table
 export const setupMeasurementsSubscription = () => {
-  const channel = supabaseClient
-    .channel('public:measurements')
-    .on('postgres_changes', { event: '*', schema: 'public', table: 'measurements' }, payload => {
-      console.log('Realtime update received:', payload);
-    })
-    .subscribe();
-    
-  return channel;
+  try {
+    const channel = supabaseClient
+      .channel('public:measurements')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'measurements' }, payload => {
+        console.log('Realtime update received:', payload);
+      })
+      .subscribe();
+      
+    return channel;
+  } catch (error) {
+    console.error('Error setting up measurements subscription:', error);
+    return null;
+  }
 };

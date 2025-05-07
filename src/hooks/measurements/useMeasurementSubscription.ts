@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Measurement } from '@/types/measurement';
@@ -88,9 +87,9 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             createdAt: item.created_at,
             updatedAt: item.updated_at,
             recordedBy: item.recorded_by || '',
-            width: String(item.width || ''), // Convert to string
-            height: String(item.height || ''), // Convert to string
-            area: String(item.area || ''), // Convert to string
+            width: String(item.width || ''), 
+            height: String(item.height || ''), 
+            area: String(item.area || ''), 
             status: item.status || 'Pending',
             location: item.location || '',
             direction: item.direction || 'N/A',
@@ -98,7 +97,8 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             quantity: item.quantity || 1,
             film_required: item.film_required,
             installationDate: item.installation_date,
-            photos: Array.isArray(item.photos) ? item.photos : [] // Ensure photos is always an array
+            photos: Array.isArray(item.photos) ? item.photos : []
+            // Note: Removed the input_source field since it doesn't exist in the database
           } as Measurement;
         });
       }
@@ -268,7 +268,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
   // Return the hook API
   return {
     measurements,
-    refreshData,
+    refreshData: fetchMeasurementsData,
     subscriptionState,
     isPolling: subscriptionState.isPolling,
     initialDataLoaded: measurements.length > 0

@@ -3,7 +3,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabaseClient } from './supabaseClient';
 import { Measurement } from '@/types/measurement';
 
-// Define simple response type
+// Define simpler response type
 interface ApiResponse<T> {
   data: T;
   error: string | null;
@@ -35,6 +35,7 @@ export const apiSlice = createApi({
               notes,
               status,
               measurement_date,
+              created_at,
               updated_at,
               updated_by,
               film_required,
@@ -67,6 +68,7 @@ export const apiSlice = createApi({
             status: (item.status || 'Pending'),
             photos: Array.isArray(item.photos) ? item.photos : [],
             measurementDate: item.measurement_date || new Date().toISOString(),
+            createdAt: item.created_at || new Date().toISOString(),
             updatedAt: item.updated_at || new Date().toISOString(),
             updatedBy: item.updated_by,
             film_required: item.film_required

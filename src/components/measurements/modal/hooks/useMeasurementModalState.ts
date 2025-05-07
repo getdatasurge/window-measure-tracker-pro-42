@@ -33,7 +33,6 @@ export const useMeasurementModalState = ({
     status: measurement?.status || 'Pending',
     photos: measurement?.photos || [],
     installationDate: measurement?.installationDate || '',
-    input_source: measurement?.input_source || 'manual',
     updatedAt: new Date().toISOString(),
     updatedBy: profile?.full_name || 'Unknown User',
     ...defaultValues
@@ -59,7 +58,6 @@ export const useMeasurementModalState = ({
         status: measurement.status || 'Pending',
         photos: measurement.photos || [],
         installationDate: measurement.installationDate || '',
-        input_source: measurement.input_source || 'manual',
         updatedAt: new Date().toISOString(),
         updatedBy: profile?.full_name || 'Unknown User',
         ...defaultValues
