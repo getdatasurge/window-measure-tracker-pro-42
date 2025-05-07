@@ -60,7 +60,7 @@ serve(async (req) => {
       });
     }
 
-    const checkSQL = `SELECT to_regclass('public."${tableName}"') IS NOT NULL AS exists`;
+    const checkSQL = `SELECT to_regclass('public.${tableName}') IS NOT NULL AS exists`;
 
     const { data: existsData, error: existsError } = await supabase.rpc("execute_sql", {
       sql: checkSQL
