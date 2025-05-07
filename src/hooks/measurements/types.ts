@@ -1,3 +1,4 @@
+
 import { Direction, MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -15,15 +16,18 @@ export interface MeasurementFormData {
   filmRequired: boolean;
   quantity: number;
   status?: MeasurementStatus;
-  photos: File[];
-  installationDate?: string; // Add installation date field
+  photos: any[]; // Making this accept both File[] and string[]
+  installationDate?: string;
   reviewComments?: string;
-  // Add temporary ID for optimistic updates
   tempId?: string;
-  // Add validation status
   isValid?: boolean;
-  // Add input source field
   input_source?: string;
+  updatedAt?: string;
+  updatedBy?: string;
+  area?: string;
+  recorded_by?: string; // Add for database operations
+  film_required?: boolean; // For backwards compatibility
+  measurementDate?: string; // Add for compatibility with Measurement type
 }
 
 export interface MeasurementFormState {
@@ -35,22 +39,24 @@ export interface MeasurementFormState {
   height: string;
   direction?: Direction | string;
   notes?: string;
-  filmRequired: boolean; // Ensure this exists
+  filmRequired: boolean;
   quantity: number;
   status?: MeasurementStatus;
-  photos: string[]; // Note: this is string[] while MeasurementFormData uses File[]
+  photos: string[];
   installationDate?: string;
   reviewComments?: string;
   area?: string;
   tempId?: string;
   isValid?: boolean;
   input_source?: string;
+  updatedAt?: string;
+  updatedBy?: string;
 }
 
 export function convertFormStateToFormData(state: MeasurementFormState): MeasurementFormData {
   return {
     ...state,
-    photos: [], // Convert string[] to File[] as needed
+    photos: state.photos || [], // Convert string[] to any[]
     filmRequired: state.filmRequired ?? true
   };
 }

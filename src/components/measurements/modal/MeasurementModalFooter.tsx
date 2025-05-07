@@ -14,11 +14,13 @@ const MeasurementModalFooter: React.FC<ModalFooterProps> = ({
   onSave
 }) => {
   const isFinalStep = currentStep === totalSteps;
+  const updatedAtString = formData.updatedAt || new Date().toISOString();
+  const updatedByString = formData.updatedBy || 'Unknown User';
   
   return (
     <div className="flex justify-between items-center border-t border-zinc-800 p-6">
       <div className="text-xs text-zinc-500">
-        Step {currentStep} of {totalSteps} | Last updated: {new Date(formData.updatedAt).toLocaleString()} by {formData.updatedBy || 'N/A'}
+        Step {currentStep} of {totalSteps} | Last updated: {new Date(updatedAtString).toLocaleString()} by {updatedByString}
       </div>
       <div className="flex gap-2">
         {currentStep > 1 && (

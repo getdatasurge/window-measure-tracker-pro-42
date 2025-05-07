@@ -1,6 +1,6 @@
+
 import { useState, useCallback, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth';
-import { useProfile } from '@/contexts/profile';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface UseMeasurementModalStateProps {
@@ -14,8 +14,7 @@ export const useMeasurementModalState = ({
   measurement,
   defaultValues
 }: UseMeasurementModalStateProps) => {
-  const { user } = useAuth();
-  const { profile } = useProfile();
+  const { user, profile } = useAuth();
   
   const TOTAL_STEPS = 3;
   const [currentStep, setCurrentStep] = useState(1);
@@ -35,8 +34,11 @@ export const useMeasurementModalState = ({
     photos: measurement?.photos || [],
     installationDate: measurement?.installationDate || '',
     input_source: measurement?.input_source || 'manual',
+    updatedAt: new Date().toISOString(),
+    updatedBy: profile?.full_name || 'Unknown User',
     ...defaultValues
   });
+  
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
@@ -52,12 +54,14 @@ export const useMeasurementModalState = ({
         height: measurement.height || '',
         direction: measurement.direction || 'N/A',
         notes: measurement.notes || '',
-        filmRequired: measurement.film_required !== false,
+        filmRequired: measurement.filmRequired !== false,
         quantity: measurement.quantity || 1,
         status: measurement.status || 'pending',
         photos: measurement.photos || [],
         installationDate: measurement.installationDate || '',
         input_source: measurement.input_source || 'manual',
+        updatedAt: new Date().toISOString(),
+        updatedBy: profile?.full_name || 'Unknown User',
         ...defaultValues
       });
     } else if (defaultValues) {
@@ -66,7 +70,7 @@ export const useMeasurementModalState = ({
         ...defaultValues
       }));
     }
-  }, [measurement, defaultValues]);
+  }, [measurement, defaultValues, profile]);
   
   const updateFormData = useCallback((key: keyof MeasurementFormData, value: any) => {
     setFormData(prev => ({

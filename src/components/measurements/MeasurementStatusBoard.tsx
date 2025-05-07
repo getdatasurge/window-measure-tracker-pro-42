@@ -170,16 +170,15 @@ const MeasurementStatusBoard: React.FC = () => {
         onEditMeasurement={handleCardClick} 
       />
       
-      <EditMeasurementModal
-        measurement={editMeasurement}
-        isOpen={editModalOpen}
-        onOpenChange={setEditModalOpen}
-        onSave={handleSaveMeasurement}
-        defaultValues={{
-          projectId: '',
-          projectName: 'Select Project'
-        }}
-      />
+      {editMeasurement && (
+        <EditMeasurementModal
+          measurement={editMeasurement}
+          isOpen={editModalOpen}
+          onOpenChange={setEditModalOpen}
+          onSave={handleSaveMeasurement}
+          defaultValues={{}}
+        />
+      )}
     </div>
   );
 };

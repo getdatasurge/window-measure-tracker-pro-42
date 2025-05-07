@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
@@ -8,6 +9,7 @@ import MeasurementModalContent from './modal/MeasurementModalContent';
 import MeasurementModalFooter from './modal/MeasurementModalFooter';
 import { useMeasurementModalState } from './modal/hooks/useMeasurementModalState';
 import { useFormValidation } from './modal/hooks/useFormValidation';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
   isOpen,
@@ -55,7 +57,7 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
         updateFormData('area', `${area.toFixed(2)} ft²`);
       }
     }
-  }, [formData.width, formData.height]);
+  }, [formData.width, formData.height, updateFormData]);
   
   const handleSave = async () => {
     // Validate form
@@ -83,12 +85,11 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
         updatedBy: profile?.full_name || 'Unknown User',
         filmRequired: formData.filmRequired || true, // Ensure filmRequired is included
         photos: Array.isArray(formData.photos) ? formData.photos : [] // Ensure photos is properly formatted
-      } as MeasurementFormData; // Add explicit type assertion
+      };
     
       // If we have a user ID, save it in recorded_by for database
       if (user?.id) {
-        // This is separated from updatedMeasurement to avoid including in the UI form data
-        // It will be used when inserting/updating in the database
+        // Pass recorded_by directly to the database handler through onSave
         updatedMeasurement.recorded_by = user.id;
       }
   
@@ -99,7 +100,6 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
       setFormSubmitted(true);
   
       // Send back to parent component
-      // This needs to be awaited to ensure sequential operations
       await onSave(updatedMeasurement);
       
       // Only close modal after save completes

@@ -14,10 +14,10 @@ const MeasurementModalContent: React.FC<ModalContentProps> = ({
   return (
     <div className="flex-1 overflow-y-auto">
       <MeasurementTabs 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab}
+        activeTab={activeTab as any} 
+        setActiveTab={setActiveTab as any}
         formData={formData} 
-        updateFormData={updateFormData}
+        updateFormData={updateFormData as any}
         errors={errors}
         setErrors={setErrors}
       />

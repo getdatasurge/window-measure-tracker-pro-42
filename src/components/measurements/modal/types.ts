@@ -1,16 +1,16 @@
 
-import { Measurement } from '@/types/measurement';
+import { MeasurementFormData } from '@/hooks/measurements/types';
 
 export interface MeasurementModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  measurement?: Measurement;
-  onSave: (measurement: Measurement) => void;
+  measurement?: MeasurementFormData;
+  onSave: (measurement: MeasurementFormData & { recorded_by?: string }) => void;
   mode: 'create' | 'edit';
-  defaultValues?: Partial<Measurement>;
+  defaultValues?: Partial<MeasurementFormData>;
 }
 
-export interface MeasurementFormState extends Measurement {
+export interface MeasurementFormState extends MeasurementFormData {
   tempId?: string;
   isValid?: boolean;
 }
@@ -24,7 +24,7 @@ export interface ModalHeaderProps {
 export interface ModalFooterProps {
   currentStep: number;
   totalSteps: number;
-  formData: MeasurementFormState;
+  formData: MeasurementFormData;
   isSaving: boolean;
   onPrevious: () => void;
   onNext: () => void;
@@ -35,7 +35,7 @@ export interface ModalFooterProps {
 export interface ModalContentProps {
   activeTab: string;
   setActiveTab: (tab: string) => void;
-  formData: MeasurementFormState;
+  formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
   errors: {[key: string]: string};
   setErrors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
