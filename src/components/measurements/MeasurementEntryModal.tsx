@@ -69,7 +69,6 @@ const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
       // Navigate to the tab with errors
       if (validation.errors.location || validation.errors.projectId) {
         setActiveTab('details');
-        setCurrentStep(1);
       }
       
       return;
