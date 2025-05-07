@@ -2,26 +2,17 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { X } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 import { Measurement } from '@/types/measurement';
-import MeasurementTabs from './MeasurementTabs';
 import { useMeasurementFormStorage } from '@/hooks/useMeasurementFormStorage';
 import { generateNewMeasurement } from '@/utils/measurementUtils';
 import { useAuth } from '@/contexts/auth';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { MeasurementModalProps, MeasurementFormState } from './modal/types';
+import MeasurementModalHeader from './modal/MeasurementModalHeader';
+import MeasurementModalContent from './modal/MeasurementModalContent';
+import MeasurementModalFooter from './modal/MeasurementModalFooter';
 
-type MeasurementEntryModalProps = {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
-  measurement?: Measurement;
-  onSave: (measurement: Measurement) => void;
-  mode: 'create' | 'edit';
-  defaultValues?: Partial<Measurement>;
-};
-
-const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
+const MeasurementEntryModal: React.FC<MeasurementModalProps> = ({
   isOpen,
   onOpenChange,
   measurement,
@@ -30,13 +21,14 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
   defaultValues = {}
 }) => {
   const [activeTab, setActiveTab] = useState('details');
-  const [formData, setFormData] = useState<Measurement>(measurement || generateNewMeasurement(defaultValues));
+  const [formData, setFormData] = useState<MeasurementFormState>(measurement || generateNewMeasurement(defaultValues));
   const [formSubmitted, setFormSubmitted] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [errors, setErrors] = useState<{[key: string]: string}>({});
   const [currentStep, setCurrentStep] = useState(1);
   const { user, profile } = useAuth();
   const { toast } = useToast();
+  const TOTAL_STEPS = 5;
 
   // Use our custom hook for localStorage management
   const {
@@ -92,8 +84,6 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
     if (!formData.projectId) {
       newErrors.projectId = 'Project is required';
     }
-    
-    // More validations can be added here
     
     // If errors exist, show them and stop submission
     if (Object.keys(newErrors).length > 0) {
@@ -173,7 +163,7 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
     }
     
     // If validation passes, go to next step
-    if (currentStep < 5) {
+    if (currentStep < TOTAL_STEPS) {
       setCurrentStep(prev => prev + 1);
       
       // Map steps to tabs
@@ -228,8 +218,6 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
       }
     }
   }, [formData.width, formData.height]);
-
-  const isFinalStep = currentStep === 5;
   
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -243,71 +231,35 @@ const MeasurementEntryModal: React.FC<MeasurementEntryModalProps> = ({
         >
           {/* Fixed Header */}
           <div className="sticky top-0 z-10 bg-zinc-900">
-            <div className="flex items-center justify-between p-6 border-b border-zinc-800">
-              <div>
-                <h2 className="text-lg font-semibold">
-                  {mode === 'edit' ? 'Edit Measurement' : 
-                   `New Measurement${formData.projectName ? ` for ${formData.projectName}` : ''}`}
-                </h2>
-                {mode === 'edit' && <p className="text-sm text-zinc-400">
-                  ID: {formData.id} | Project: {formData.projectName}
-                </p>}
-              </div>
-              <button 
-                className="p-1 rounded-md hover:bg-zinc-800"
-                onClick={() => onOpenChange(false)}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
+            <MeasurementModalHeader 
+              mode={mode}
+              formData={formData}
+              onClose={() => onOpenChange(false)}
+            />
           </div>
           
           {/* Scrollable Content Area */}
-          <div className="flex-1 overflow-y-auto">
-            <MeasurementTabs 
-              activeTab={activeTab} 
-              setActiveTab={setActiveTab}
-              formData={formData} 
-              updateFormData={updateFormData}
-              errors={errors}
-              setErrors={setErrors}
-            />
-          </div>
+          <MeasurementModalContent
+            activeTab={activeTab}
+            setActiveTab={setActiveTab}
+            formData={formData}
+            updateFormData={updateFormData}
+            errors={errors}
+            setErrors={setErrors}
+          />
 
           {/* Fixed Footer */}
           <div className="sticky bottom-0 z-10 bg-zinc-900">
-            <div className="flex justify-between items-center border-t border-zinc-800 p-6">
-              <div className="text-xs text-zinc-500">
-                Step {currentStep} of 5 | Last updated: {new Date(formData.updatedAt).toLocaleString()} by {formData.updatedBy || 'N/A'}
-              </div>
-              <div className="flex gap-2">
-                {currentStep > 1 && (
-                  <Button 
-                    variant="outline"
-                    onClick={handlePreviousStep}
-                    disabled={isSaving}
-                  >
-                    Back
-                  </Button>
-                )}
-                
-                <Button 
-                  variant="outline" 
-                  onClick={() => onOpenChange(false)}
-                  disabled={isSaving}
-                >
-                  Cancel
-                </Button>
-                
-                <Button 
-                  className="bg-green-600 hover:bg-green-700 text-white" 
-                  onClick={isFinalStep ? handleSave : handleNextStep}
-                  disabled={isSaving}
-                >
-                  {isSaving ? 'Saving...' : (isFinalStep ? 'Submit Measurement' : 'Continue Entry')}
-                </Button>
-              </div>
-            </div>
+            <MeasurementModalFooter
+              currentStep={currentStep}
+              totalSteps={TOTAL_STEPS}
+              formData={formData}
+              isSaving={isSaving}
+              onPrevious={handlePreviousStep}
+              onNext={handleNextStep}
+              onCancel={() => onOpenChange(false)}
+              onSave={handleSave}
+            />
           </div>
         </motion.div>
       </DialogContent>

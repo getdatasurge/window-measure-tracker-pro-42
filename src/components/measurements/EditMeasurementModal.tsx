@@ -2,14 +2,11 @@
 import React from 'react';
 import MeasurementEntryModal from './MeasurementEntryModal';
 import { Measurement } from '@/types/measurement';
+import { MeasurementModalProps } from './modal/types';
 
-interface EditMeasurementModalProps {
+type EditMeasurementModalProps = Omit<MeasurementModalProps, 'mode'> & {
   measurement: Measurement | null;
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSave: (measurement: Measurement) => void;
-  defaultValues?: Partial<Measurement>;
-}
+};
 
 const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
   measurement,
