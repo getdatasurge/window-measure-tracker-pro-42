@@ -1,9 +1,13 @@
 
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { ProjectOption, ProjectListState, ProjectListHandlers } from './types';
+import { ProjectOption } from './types';
 
-export function useProjectList(): ProjectListState & ProjectListHandlers {
+// Define explicit return type to avoid circular references
+export function useProjectList(): {
+  projectsList: ProjectOption[];
+  fetchProjects: () => Promise<void>;
+} {
   const [projectsList, setProjectsList] = useState<ProjectOption[]>([]);
   
   // Fetch projects for dropdown
