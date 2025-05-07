@@ -10,14 +10,14 @@ type EditMeasurementModalProps = Omit<MeasurementModalProps, 'mode'> & {
 
 const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
   measurement,
-  open,
+  isOpen,
   onOpenChange,
   onSave,
   defaultValues = {}
 }) => {
   return (
     <MeasurementEntryModal
-      isOpen={open}
+      isOpen={isOpen}
       onOpenChange={onOpenChange}
       measurement={measurement || undefined}
       onSave={onSave}

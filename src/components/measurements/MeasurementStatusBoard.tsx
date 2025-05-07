@@ -99,7 +99,7 @@ const MeasurementStatusBoard: React.FC = () => {
       
       <EditMeasurementModal
         measurement={editMeasurement}
-        open={editModalOpen}
+        isOpen={editModalOpen}
         onOpenChange={setEditModalOpen}
         onSave={handleSaveMeasurement}
         defaultValues={{
