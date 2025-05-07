@@ -28,14 +28,13 @@ export const formatMeasurement = (dbMeasurement: any): Measurement => {
   };
 
   // Format all measurement values for display
-  return {
+  const formattedMeasurement: Measurement = {
     id: dbMeasurement.id,
     projectId: dbMeasurement.project_id,
     projectName: dbMeasurement.projects?.name || 'Unknown Project',
     location: dbMeasurement.location || '',
     width: safeNumber(dbMeasurement.width),
     height: safeNumber(dbMeasurement.height),
-    depth: dbMeasurement.depth ? `${safeNumber(dbMeasurement.depth)}"` : undefined,
     area: dbMeasurement.area ? `${safeNumber(dbMeasurement.area)} ft²` : '0 ft²',
     quantity: dbMeasurement.quantity || 1,
     recordedBy: dbMeasurement.recorded_by || '',
@@ -50,4 +49,12 @@ export const formatMeasurement = (dbMeasurement: any): Measurement => {
     // Safely handle potentially missing columns
     input_source: dbMeasurement.input_source || 'manual'
   };
+
+  // Add depth if it exists in the database but not explicitly in the type
+  if (dbMeasurement.depth !== undefined) {
+    (formattedMeasurement as any).depth = dbMeasurement.depth ? 
+      `${safeNumber(dbMeasurement.depth)}"` : undefined;
+  }
+
+  return formattedMeasurement;
 };

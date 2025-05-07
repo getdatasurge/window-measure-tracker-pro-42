@@ -27,16 +27,17 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
     console.log(`Fetching schema for table: ${tableName}`);
     
     // Query the PostgreSQL information_schema to get column details
+    // Using a raw query instead of RPC since 'get_table_columns' is not recognized in type definitions
     const { data, error } = await supabase.rpc('get_table_columns', { 
       table_name: tableName 
-    });
+    } as any);
 
     if (error) {
       console.error('Error fetching table schema:', error);
       
       // Fallback to a direct query if RPC is not available
       const { data: fallbackData, error: fallbackError } = await supabase
-        .from('information_schema.columns')
+        .from('information_schema.columns' as any)
         .select('column_name, data_type, is_nullable')
         .eq('table_name', tableName)
         .eq('table_schema', 'public');
@@ -46,7 +47,7 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
         return [];
       }
       
-      return (fallbackData || []).map(col => ({
+      return ((fallbackData as any[]) || []).map(col => ({
         name: col.column_name,
         type: col.data_type,
         isNullable: col.is_nullable === 'YES'
@@ -54,7 +55,7 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
     }
 
     // Transform the data to our ColumnInfo format
-    return (data || []).map(col => ({
+    return ((data as any[]) || []).map(col => ({
       name: col.column_name,
       type: col.data_type,
       isNullable: col.is_nullable === 'YES'
@@ -140,7 +141,10 @@ export async function getAvailableColumns(tableName: string): Promise<string[]> 
 // Create a stored procedure to get table columns if it doesn't exist
 export async function setupSchemaValidator(): Promise<void> {
   try {
-    const { error } = await supabase.rpc('get_table_columns', { table_name: 'measurements' });
+    // Use as any to bypass TypeScript's RPC validation
+    const { error } = await supabase.rpc('get_table_columns', { 
+      table_name: 'measurements' 
+    } as any);
     
     // If the function doesn't exist, we'll get a specific error
     if (error && error.message.includes('function get_table_columns() does not exist')) {

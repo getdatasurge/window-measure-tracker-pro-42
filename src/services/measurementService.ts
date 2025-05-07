@@ -151,7 +151,7 @@ export const saveMeasurement = async (measurement: any, userId: string): Promise
     // Filter out fields that don't exist in the database
     const validDbFields = Object.entries(dbFields)
       .filter(([key]) => availableColumns.includes(key))
-      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {});
+      .reduce((obj, [key, value]) => ({ ...obj, [key]: value }), {} as Record<string, any>);
     
     console.log('Saving measurement with validated fields:', validDbFields);
     
@@ -169,7 +169,7 @@ export const saveMeasurement = async (measurement: any, userId: string): Promise
     if (measurement.id) {
       const { data, error } = await supabase
         .from('measurements')
-        .update(validDbFields)
+        .update(validDbFields as any)
         .eq('id', measurement.id)
         .select();
         
@@ -178,7 +178,7 @@ export const saveMeasurement = async (measurement: any, userId: string): Promise
     } else {
       const { data, error } = await supabase
         .from('measurements')
-        .insert(validDbFields)
+        .insert(validDbFields as any)
         .select();
         
       if (error) throw error;

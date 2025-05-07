@@ -36,7 +36,7 @@ const InputSourceField: React.FC<InputSourceFieldProps> = ({ register, value = '
     <input 
       type="hidden" 
       {...register('input_source')} 
-      value={value} 
+      defaultValue={value} 
     />
   );
 };
