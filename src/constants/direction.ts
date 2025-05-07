@@ -5,6 +5,11 @@
 export type Direction = 'N' | 'NE' | 'E' | 'SE' | 'S' | 'SW' | 'W' | 'NW' | 'N/A';
 
 /**
+ * Default direction to use when none is specified
+ */
+export const DEFAULT_DIRECTION: Direction = 'N/A';
+
+/**
  * Options for direction selection
  */
 export const DIRECTION_OPTIONS = [

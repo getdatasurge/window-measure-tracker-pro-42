@@ -44,9 +44,9 @@ const AttributesTab: React.FC<AttributesTabProps> = ({ formData, updateFormData 
               <SelectValue placeholder="Select direction" />
             </SelectTrigger>
             <SelectContent className="bg-zinc-800 border-zinc-700 text-white">
-              {DIRECTION_OPTIONS.map((direction) => (
-                <SelectItem key={direction} value={direction} className="text-white">
-                  {direction}
+              {DIRECTION_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value} className="text-white">
+                  {option.label}
                 </SelectItem>
               ))}
             </SelectContent>
