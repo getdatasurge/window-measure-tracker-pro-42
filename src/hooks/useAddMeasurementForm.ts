@@ -72,7 +72,9 @@ export const useAddMeasurementForm = ({
   
   // Fetch projects when component mounts
   useEffect(() => {
-    fetchProjects();
+    if (fetchProjects) {
+      fetchProjects();
+    }
   }, [fetchProjects]);
   
   // Form submission handler

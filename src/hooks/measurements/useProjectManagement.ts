@@ -1,14 +1,13 @@
 
 import { useCallback } from 'react';
 import { useProjectList } from './useProjectList';
-import { ProjectOption } from './types';
 
 interface UseProjectManagementProps {
   setValue: (field: string, value: any) => void;
 }
 
 export function useProjectManagement({ setValue }: UseProjectManagementProps) {
-  const { projectsList, fetchProjects } = useProjectList();
+  const { projectsList, isLoading, error, fetchProjects } = useProjectList();
   
   const handleProjectChange = useCallback((projectId: string) => {
     const selectedProject = projectsList.find(p => p.id === projectId);
@@ -21,6 +20,8 @@ export function useProjectManagement({ setValue }: UseProjectManagementProps) {
   return {
     projectsList,
     fetchProjects,
-    handleProjectChange
+    handleProjectChange,
+    isLoading,
+    error
   };
 }

@@ -3,10 +3,8 @@ import { Direction, MeasurementStatus } from '@/types/measurement';
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_FILES = 3;
 
-export interface ProjectOption {
-  id: string;
-  name: string;
-}
+// Re-export ProjectOption from useProjectList
+export type { ProjectOption } from './useProjectList';
 
 export interface MeasurementFormData {
   id?: string;
