@@ -1,6 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { setupRealtime, mockSetupRealtime } from '@/utils/setupRealtime';
+import { setupRealtime } from '@/utils/setupRealtime';
 
 // Track if subscription has been set up to prevent redundant setups
 let subscriptionSetupComplete = false;
@@ -35,7 +35,7 @@ export const setupMeasurementsSubscription = async (
     // Try to enable realtime for the measurements table
     const realtimeStatus = await setupRealtime().catch(() => false);
     
-    // If real-time setup fails, fall back to mock/polling
+    // If real-time setup fails, fall back to polling
     if (!realtimeStatus) {
       console.warn("Failed to enable realtime for measurements table, using polling fallback");
       isUsingPollingFallback = true;
@@ -126,13 +126,13 @@ export const setupMeasurementsSubscription = async (
  */
 export const enableMeasurementsRealtime = async (): Promise<boolean> => {
   try {
-    // First try the standard setup
+    // Try the standard setup
     const success = await setupRealtime();
     
-    // If it fails, try the mock/fallback approach
+    // If it fails, use polling as fallback
     if (!success) {
-      console.log("Standard realtime setup failed, using mock implementation");
-      return await mockSetupRealtime();
+      console.log("Standard realtime setup failed, falling back to polling");
+      return false;
     }
     
     return success;

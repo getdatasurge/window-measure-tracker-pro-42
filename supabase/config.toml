@@ -1,1 +1,18 @@
+
 project_id = "bvipslspkgbjovgztubb"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[db]
+port = 54322
+
+[studio]
+port = 54323
+
+# Enable the Functions service
+[functions]
+[functions.enable-realtime]
+verify_jwt = true

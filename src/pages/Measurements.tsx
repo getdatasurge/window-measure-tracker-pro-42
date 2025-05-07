@@ -2,10 +2,21 @@
 import React from 'react';
 import MeasurementStatusBoard from '@/components/measurements/MeasurementStatusBoard';
 import withResponsiveLayout from '@/hoc/withResponsiveLayout';
+import { useGetMeasurementsQuery } from '@/services/apiSlice';
 
 const MeasurementsPage: React.FC = () => {
+  const {
+    data: measurementsResponse,
+    error,
+    isLoading,
+    refetch
+  } = useGetMeasurementsQuery();
+
   return (
-    <MeasurementStatusBoard />
+    <MeasurementStatusBoard 
+      measurements={measurementsResponse?.data || []} 
+      onRefresh={refetch}
+    />
   );
 };
 
