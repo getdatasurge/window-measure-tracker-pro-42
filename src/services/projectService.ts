@@ -2,12 +2,21 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 
+// Define ProjectOption interface here to avoid circular dependencies
+interface ProjectOption {
+  id: string;
+  name: string;
+  client_name?: string;
+  location?: string;
+  status?: string;
+}
+
 /**
  * Fetch projects with optional filtering
  * @param activeOnly Whether to only fetch active projects
  * @returns Array of projects
  */
-export const fetchProjects = async (activeOnly = true) => {
+export const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]> => {
   try {
     let query = supabase
       .from('projects')

@@ -98,7 +98,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             quantity: item.quantity || 1,
             film_required: item.film_required,
             installationDate: item.installation_date,
-            photos: [] // Default to empty array since it's missing in the database
+            photos: item.photos || [] // Ensure photos is always an array
           } as Measurement;
         });
       }

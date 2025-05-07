@@ -10,6 +10,8 @@ This document serves as an auto-maintained knowledge base for our project, track
 - **State Management**: React Context API, React Query
 - **Database**: Supabase PostgreSQL
 - **Real-time**: Supabase Realtime
+- **Error Handling**: Multi-level error boundaries, structured error logging
+- **API Integration**: Type-safe request utilities with retry logic
 
 ## API Integrations
 
@@ -26,6 +28,12 @@ This document serves as an auto-maintained knowledge base for our project, track
   - Error state management
 - **useProjectList**: Hook for fetching projects
 - **formatMeasurement**: Utility for consistent measurement formatting
+- **apiRequest**: Core utility for API requests with retry logic and type safety
+- **ErrorBoundary**: Hierarchical error boundary component with custom fallbacks
+- **withErrorBoundary**: HOC for wrapping components with error boundaries
+- **logError**: Structured error logging with sensitive data protection
+- **tryAsync**: Type-safe async error handling utility
+- **withErrorHandling**: Function wrapper for automatic error handling
 
 ## Deployment & Environment
 
@@ -52,4 +60,10 @@ This document serves as an auto-maintained knowledge base for our project, track
 - Improved error handling in real-time subscriptions
 - Added fallback polling mechanism for real-time connection failures
 - Standardized measurement data format with proper type conversions
+
+### 2025-05-08
+- Added structured API request foundation with retry logic
+- Implemented hierarchical error boundary system
+- Created knowledge base auto-documentation system
+- Added structured error logging with privacy protection
 
