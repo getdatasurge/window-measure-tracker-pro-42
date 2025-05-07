@@ -309,10 +309,16 @@ export const useMeasurement = (id?: string) => {
  */
 export const enableMeasurementsRealtime = async () => {
   try {
-    // Enable REPLICA IDENTITY FULL on measurements table for comprehensive change tracking
-    await supabase.rpc('enable_realtime', {
-      table_name: 'measurements'
+    // Try using the function invocation to enable realtime
+    const { error } = await supabase.functions.invoke('enable-realtime', {
+      body: { tableName: 'measurements' }
     });
+    
+    if (error) {
+      console.error('Failed to enable real-time via function:', error);
+      return false;
+    }
+    
     return true;
   } catch (error) {
     console.error('Failed to enable real-time:', error);
