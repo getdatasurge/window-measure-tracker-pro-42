@@ -3,57 +3,64 @@ import React from 'react';
 import { TabsContent } from '@/components/ui/tabs';
 import MeasurementDetailsTab from '../tabs/MeasurementDetailsTab';
 import DimensionsTab from '../tabs/DimensionsTab';
-import AttributesTab from '../tabs/AttributesTab';
 import PhotosTab from '../tabs/PhotosTab';
 import StatusWorkflowTab from '../tabs/StatusWorkflowTab';
+import AttributesTab from '../tabs/AttributesTab';
+import { Measurement } from '@/types/measurement';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface MeasurementTabsContentProps {
   activeTab: string;
-  formData: MeasurementFormData;
+  formData: Measurement;
   updateFormData: (field: string, value: any) => void;
-  errors: {[key: string]: string};
-  setErrors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
+  errors?: {[key: string]: string};
+  setErrors?: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
 }
 
 const MeasurementTabsContent: React.FC<MeasurementTabsContentProps> = ({
   activeTab,
   formData,
   updateFormData,
-  errors,
-  setErrors
+  errors = {},
+  setErrors = () => {}
 }) => {
+  // Cast to MeasurementFormData for tabs that expect that type
+  const formDataForForm = formData as MeasurementFormData;
+  
   return (
-    <div className="p-6">
-      <TabsContent value="details" className="m-0">
+    <div className="mt-2">
+      <TabsContent value="details" className={activeTab === 'details' ? 'block' : 'hidden'}>
         <MeasurementDetailsTab 
-          formData={formData} 
+          formData={formDataForForm}
           updateFormData={updateFormData}
           errors={errors}
-          setErrors={setErrors}
         />
       </TabsContent>
-      <TabsContent value="dimensions" className="m-0">
+      
+      <TabsContent value="dimensions" className={activeTab === 'dimensions' ? 'block' : 'hidden'}>
         <DimensionsTab 
-          formData={formData} 
+          formData={formDataForForm} 
           updateFormData={updateFormData} 
         />
       </TabsContent>
-      <TabsContent value="attributes" className="m-0">
+      
+      <TabsContent value="attributes" className={activeTab === 'attributes' ? 'block' : 'hidden'}>
         <AttributesTab 
-          formData={formData} 
+          formData={formDataForForm} 
           updateFormData={updateFormData} 
         />
       </TabsContent>
-      <TabsContent value="photos" className="m-0">
+      
+      <TabsContent value="photos" className={activeTab === 'photos' ? 'block' : 'hidden'}>
         <PhotosTab 
-          formData={formData} 
+          formData={formDataForForm} 
           updateFormData={updateFormData} 
         />
       </TabsContent>
-      <TabsContent value="status" className="m-0">
+      
+      <TabsContent value="workflow" className={activeTab === 'workflow' ? 'block' : 'hidden'}>
         <StatusWorkflowTab 
-          formData={formData} 
+          formData={formDataForForm} 
           updateFormData={updateFormData} 
         />
       </TabsContent>

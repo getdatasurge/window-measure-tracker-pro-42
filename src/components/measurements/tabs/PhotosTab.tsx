@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import Image from 'next/image';
 
 interface PhotosTabProps {
   formData: MeasurementFormData;
@@ -105,11 +104,10 @@ const PhotosTab: React.FC<PhotosTabProps> = ({ formData, updateFormData }) => {
             >
               {typeof photo === 'string' && (
                 <div className="relative w-full h-full">
-                  <Image 
+                  <img 
                     src={photo} 
                     alt={`Photo ${index + 1}`}
-                    fill
-                    className="object-cover"
+                    className="absolute inset-0 w-full h-full object-cover"
                   />
                   <Button
                     variant="destructive"

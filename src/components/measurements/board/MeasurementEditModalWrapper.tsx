@@ -33,8 +33,8 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
   // Ensure direction is a valid Direction type
   const validDirection = (measurement.direction as Direction) || 'N/A';
 
-  // Convert Measurement to MeasurementFormData format with explicit casting
-  const enhancedMeasurement: MeasurementFormData = {
+  // Convert Measurement to Measurement format with explicit casting for compatibility with both types
+  const enhancedMeasurement: Measurement = {
     id: measurement.id, // Ensure id is passed correctly and required
     projectId: measurement.projectId || '',
     projectName: measurement.projectName || '',
@@ -43,7 +43,7 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     height: measurement.height || '',
     direction: validDirection,
     notes: measurement.notes || '',
-    filmRequired: measurement.film_required !== false, // Ensure proper boolean conversion
+    film_required: measurement.film_required !== false, // Ensure proper boolean conversion
     quantity: measurement.quantity || 1,
     status: measurement.status || 'Pending',
     photos: Array.isArray(measurement.photos) ? measurement.photos : [],
@@ -53,7 +53,10 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     updatedBy: measurement.updatedBy || '',
     recorded_by: measurement.recorded_by,
     recordedBy: measurement.recordedBy || '',
-    area: measurement.area || ''
+    area: measurement.area || '',
+    // Add any other required Measurement properties
+    measurementDate: measurement.measurementDate || new Date().toISOString(),
+    filmRequired: measurement.film_required !== false
   };
   
   return (
