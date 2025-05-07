@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Spinner } from '@/components/ui/spinner';
+import { cleanupAuthState } from '@/features/auth/cleanupAuthState';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -29,6 +30,9 @@ const AuthCallback = () => {
         }
         
         console.log('No error parameters found in URL');
+        
+        // Clean up any existing auth state to prevent conflicts
+        cleanupAuthState();
         
         // Get redirect path from localStorage or default to dashboard
         const redirectTo = localStorage.getItem('authRedirectTo') || '/dashboard';

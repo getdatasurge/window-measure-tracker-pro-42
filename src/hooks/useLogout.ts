@@ -1,8 +1,8 @@
 
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { toast } from '@/components/ui/use-toast';
-import { useAuth } from '@/contexts/auth';
+import { supabase } from '@/integrations/supabase/client';
+import { cleanupAuthState } from '@/features/auth/cleanupAuthState';
+import { useToast } from '@/hooks/use-toast';
 
 interface UseLogoutOptions {
   redirectUrl?: string;
@@ -10,32 +10,38 @@ interface UseLogoutOptions {
 
 export const useLogout = (options: UseLogoutOptions = {}) => {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
-  const navigate = useNavigate();
-  const { signOut } = useAuth();
+  const { toast } = useToast();
   const { redirectUrl = '/' } = options;
 
   const logout = async () => {
     setIsLoggingOut(true);
-    
     try {
-      await signOut();
+      // Clean up auth state
+      cleanupAuthState();
       
-      // Navigate to root after successful logout
-      navigate(redirectUrl);
+      // Try global sign out (catching any errors)
+      try {
+        await supabase.auth.signOut({ scope: 'global' });
+      } catch (err) {
+        console.error('Error during global sign out:', err);
+        // Continue even if this fails
+      }
       
-      toast({
-        title: 'Logged out successfully',
-        description: 'You have been logged out of your account.',
-      });
+      // Force page reload for a clean state
+      if (redirectUrl) {
+        window.location.href = redirectUrl;
+      }
+      
+      return true;
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Error during logout:', error);
       toast({
         title: 'Logout failed',
-        description: error instanceof Error ? error.message : 'Failed to log out. Please try again.',
-        variant: 'destructive'
+        description: 'There was a problem signing you out. Please try again.',
+        variant: 'destructive',
       });
-    } finally {
       setIsLoggingOut(false);
+      return false;
     }
   };
 
