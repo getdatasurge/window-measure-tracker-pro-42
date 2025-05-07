@@ -1,4 +1,3 @@
-
 import { useState, useCallback, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -27,7 +26,6 @@ export const useAddMeasurementForm = ({
       location: '',
       width: '',
       height: '',
-      depth: '',
       direction: 'N/A' as Direction,
       notes: '',
       filmRequired: true,

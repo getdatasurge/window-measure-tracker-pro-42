@@ -40,7 +40,7 @@ export function useMeasurementUpdate() {
       console.log("Direction being sent to database:", direction);
       
       // Prepare data for database (converting to match DB schema)
-      const measurementData = {
+      const measurementData: any = {
         project_id: measurement.projectId,
         location: measurement.location.trim(),
         width: parseNumericValue(measurement.width),

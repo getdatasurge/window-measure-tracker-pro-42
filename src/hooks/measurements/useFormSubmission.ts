@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
@@ -57,7 +58,7 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
       console.log("Direction being sent to database:", direction);
 
       // Prepare data for database submission
-      const measurementData = {
+      const measurementData: any = {
         project_id: data.projectId,
         location: data.location.trim(),
         width,

@@ -12,7 +12,6 @@ export interface Measurement {
   location: string;
   width: string; 
   height: string;
-  depth?: string;
   area: string;
   quantity: number;
   recordedBy: string;
@@ -27,6 +26,7 @@ export interface Measurement {
   film_required?: boolean;
   photos?: string[];
   recorded_by?: string; // User ID for database purposes
+  installationDate?: string; // Add installationDate property
 }
 
 export interface MeasurementFilter {
