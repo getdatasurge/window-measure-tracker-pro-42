@@ -1,42 +1,9 @@
+
 import { useState, useCallback } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { ProjectOption, ProjectDetails, ProjectCreateInput, ProjectUpdateInput } from '@/types/project.d';
 import { tryAsync, withErrorHandling } from '@/utils/error-handling';
-import { recordUtility, addHistoryEntry } from '@/utils/knowledgeBase';
-
-// Define interfaces directly in this file to avoid circular dependencies
-interface ProjectOption {
-  id: string;
-  name: string;
-  client_name?: string;
-  location?: string;
-  status?: string;
-}
-
-interface ProjectDetails extends ProjectOption {
-  deadline?: string;
-  description?: string;
-  created_at?: string;
-  updated_at?: string;
-  created_by?: string;
-}
-
-interface ProjectCreateInput {
-  name: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-}
-
-interface ProjectUpdateInput {
-  name?: string;
-  client_name?: string;
-  location?: string;
-  description?: string;
-  deadline?: string;
-  status?: string;
-}
 
 interface ProjectsHookState {
   loading: boolean;
@@ -146,11 +113,11 @@ export function useProjectsWithErrorHandling() {
   /**
    * Fetch a project by ID
    */
-  const fetchProjectById = withErrorHandling(async (id: string): Promise<ProjectDetails | null> => {
+  const fetchProjectById = async (id: string): Promise<ProjectDetails | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
-    const [data, error] = await tryAsync(
-      withRetry(async () => {
+    try {
+      const data = await withRetry(async () => {
         const { data, error } = await supabase
           .from('projects')
           .select('*')
@@ -160,35 +127,43 @@ export function useProjectsWithErrorHandling() {
         if (error) throw error;
         
         return data;
-      })
-    );
-    
-    setState(prev => ({
-      ...prev,
-      loading: false,
-      selectedProject: data,
-      error: error
-    }));
-    
-    if (error) {
+      });
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        selectedProject: data,
+        error: null
+      }));
+      
+      return data;
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error(`Failed to fetch project with ID: ${id}`);
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorObj
+      }));
+      
       toast({
         title: "Error loading project",
-        description: `Could not load project details: ${error.message}`,
+        description: `Could not load project details: ${errorObj.message}`,
         variant: "destructive"
       });
+      
+      return null;
     }
-    
-    return data;
-  });
+  };
   
   /**
    * Create a new project with error handling
    */
-  const createProject = withErrorHandling(async (projectData: ProjectCreateInput): Promise<ProjectDetails | null> => {
+  const createProject = async (projectData: ProjectCreateInput): Promise<ProjectDetails | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
-    const [data, error] = await tryAsync(
-      withRetry(async () => {
+    try {
+      const data = await withRetry(async () => {
         const { data, error } = await supabase
           .from('projects')
           .insert([projectData])
@@ -197,43 +172,52 @@ export function useProjectsWithErrorHandling() {
         if (error) throw error;
         
         return data?.[0] || null;
-      })
-    );
-    
-    setState(prev => ({
-      ...prev,
-      loading: false,
-      error: error
-    }));
-    
-    if (error) {
+      });
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: null
+      }));
+      
+      if (data) {
+        toast({
+          title: "Project created",
+          description: `Successfully created project: ${data.name || 'Unnamed project'}`,
+        });
+        
+        // Refresh the projects list
+        fetchProjects();
+      }
+      
+      return data;
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error('Failed to create project');
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorObj
+      }));
+      
       toast({
         title: "Error creating project",
-        description: `Could not create project: ${error.message}`,
+        description: `Could not create project: ${errorObj.message}`,
         variant: "destructive"
       });
+      
       return null;
     }
-    
-    toast({
-      title: "Project created",
-      description: `Successfully created project: ${data?.name || 'Unnamed project'}`,
-    });
-    
-    // Refresh the projects list
-    fetchProjects();
-    
-    return data;
-  });
+  };
   
   /**
    * Update an existing project
    */
-  const updateProject = withErrorHandling(async (id: string, projectData: ProjectUpdateInput): Promise<ProjectDetails | null> => {
+  const updateProject = async (id: string, projectData: ProjectUpdateInput): Promise<ProjectDetails | null> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
-    const [data, error] = await tryAsync(
-      withRetry(async () => {
+    try {
+      const data = await withRetry(async () => {
         const { data, error } = await supabase
           .from('projects')
           .update(projectData)
@@ -243,44 +227,53 @@ export function useProjectsWithErrorHandling() {
         if (error) throw error;
         
         return data?.[0] || null;
-      })
-    );
-    
-    setState(prev => ({
-      ...prev,
-      loading: false,
-      selectedProject: data || prev.selectedProject,
-      error: error
-    }));
-    
-    if (error) {
+      });
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        selectedProject: data || prev.selectedProject,
+        error: null
+      }));
+      
+      if (data) {
+        toast({
+          title: "Project updated",
+          description: `Successfully updated project: ${data.name || 'Unnamed project'}`,
+        });
+        
+        // Refresh the projects list
+        fetchProjects();
+      }
+      
+      return data;
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error(`Failed to update project with ID: ${id}`);
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorObj
+      }));
+      
       toast({
         title: "Error updating project",
-        description: `Could not update project: ${error.message}`,
+        description: `Could not update project: ${errorObj.message}`,
         variant: "destructive"
       });
+      
       return null;
     }
-    
-    toast({
-      title: "Project updated",
-      description: `Successfully updated project: ${data?.name || 'Unnamed project'}`,
-    });
-    
-    // Refresh the projects list
-    fetchProjects();
-    
-    return data;
-  });
+  };
   
   /**
    * Delete a project
    */
-  const deleteProject = withErrorHandling(async (id: string): Promise<boolean> => {
+  const deleteProject = async (id: string): Promise<boolean> => {
     setState(prev => ({ ...prev, loading: true, error: null }));
     
-    const [success, error] = await tryAsync(
-      withRetry(async () => {
+    try {
+      const success = await withRetry(async () => {
         const { error } = await supabase
           .from('projects')
           .delete()
@@ -289,42 +282,44 @@ export function useProjectsWithErrorHandling() {
         if (error) throw error;
         
         return true;
-      })
-    );
-    
-    setState(prev => ({
-      ...prev,
-      loading: false,
-      selectedProject: prev.selectedProject?.id === id ? null : prev.selectedProject,
-      error: error
-    }));
-    
-    if (error) {
+      });
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        selectedProject: prev.selectedProject?.id === id ? null : prev.selectedProject,
+        error: null
+      }));
+      
+      if (success) {
+        toast({
+          title: "Project deleted",
+          description: "Project has been successfully deleted",
+        });
+        
+        // Refresh the projects list
+        fetchProjects();
+      }
+      
+      return success;
+    } catch (error) {
+      const errorObj = error instanceof Error ? error : new Error(`Failed to delete project with ID: ${id}`);
+      
+      setState(prev => ({
+        ...prev,
+        loading: false,
+        error: errorObj
+      }));
+      
       toast({
         title: "Error deleting project",
-        description: `Could not delete project: ${error.message}`,
+        description: `Could not delete project: ${errorObj.message}`,
         variant: "destructive"
       });
+      
       return false;
     }
-    
-    toast({
-      title: "Project deleted",
-      description: "Project has been successfully deleted",
-    });
-    
-    // Refresh the projects list
-    fetchProjects();
-    
-    return true;
-  });
-  
-  // Record this utility in the knowledge base
-  recordUtility(
-    'useProjectsWithErrorHandling', 
-    'Enhanced project management hook with retry logic and comprehensive error handling',
-    'const { projects, fetchProjects, fetchProjectById, createProject } = useProjectsWithErrorHandling();'
-  );
+  };
   
   return {
     ...state,

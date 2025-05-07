@@ -34,8 +34,7 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo): void {
     // Log the error
-    logError({
-      error,
+    logError(error, {
       componentStack: errorInfo.componentStack,
       level: this.props.level || 'component',
     });
