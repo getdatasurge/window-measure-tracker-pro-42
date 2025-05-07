@@ -26,10 +26,11 @@ export async function fetchTableSchema(tableName: string): Promise<ColumnInfo[]>
   try {
     console.log(`Fetching schema for table: ${tableName}`);
     
-    // Use a type assertion to bypass TypeScript's strict typing for RPC calls
-    const { data, error } = await supabase.rpc('get_table_columns', { 
+    // Use a specific type assertion with any first to bypass TypeScript's strict typing
+    // for the RPC call to get_table_columns which is not in the generated types
+    const { data, error } = await (supabase.rpc as any)('get_table_columns', { 
       table_name: tableName 
-    }) as any;
+    });
 
     if (error) {
       console.error('Error fetching table schema:', error);
@@ -152,10 +153,10 @@ export async function getAvailableColumns(tableName: string): Promise<string[]> 
 // Create a stored procedure to get table columns if it doesn't exist
 export async function setupSchemaValidator(): Promise<void> {
   try {
-    // Use a type assertion to bypass TypeScript's strict typing for RPC calls
-    const { error } = await supabase.rpc('get_table_columns', { 
+    // Use the same type assertion approach for consistent handling
+    const { error } = await (supabase.rpc as any)('get_table_columns', { 
       table_name: 'measurements' 
-    }) as any;
+    });
     
     // If the function doesn't exist, we'll get a specific error
     if (error && error.message.includes('function get_table_columns() does not exist')) {
