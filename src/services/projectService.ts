@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
 import { ProjectOption } from '@/types/project-types';
@@ -24,7 +25,8 @@ export const fetchProjects = async (activeOnly = true): Promise<ProjectOption[]>
       throw error;
     }
 
-    return (data ?? []) as ProjectOption[]; // ✅ explicit cast fixes TS2589
+    // Use explicit type annotation to avoid excessive type instantiation
+    return (data || []) as ProjectOption[];
   } catch (error) {
     console.error('Exception fetching projects:', error);
     toast({
