@@ -1,5 +1,5 @@
 
-import { supabase } from './supabaseClient';
+import { supabaseClient } from './supabaseClient';
 import { setupRealtime } from '@/utils/setupRealtime';
 
 // Enable measurements realtime updates
@@ -18,7 +18,7 @@ export const enableMeasurementsRealtime = async () => {
 
 // Setup a subscription to a table
 export const setupMeasurementsSubscription = () => {
-  const channel = supabase
+  const channel = supabaseClient
     .channel('public:measurements')
     .on('postgres_changes', { event: '*', schema: 'public', table: 'measurements' }, payload => {
       console.log('Realtime update received:', payload);
