@@ -21,11 +21,15 @@ interface FilterState {
 interface MeasurementStatusBoardProps {
   measurements: Measurement[];
   onRefresh: () => void;
+  isLoading?: boolean;
+  error?: string | null;
 }
 
 const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({ 
   measurements, 
-  onRefresh
+  onRefresh,
+  isLoading = false,
+  error = null
 }) => {
   const [filter, setFilter] = useState<FilterState>({
     projectId: null,
@@ -117,6 +121,30 @@ const MeasurementStatusBoard: React.FC<MeasurementStatusBoardProps> = ({
       description: "Measurement data has been updated."
     });
   }, [onRefresh, toast]);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 space-y-4">
+        <div className="text-red-400">Error loading measurements: {error}</div>
+        <Button 
+          variant="outline" 
+          onClick={onRefresh}
+          className="flex items-center gap-2"
+        >
+          <RefreshCw size={16} />
+          Try Again
+        </Button>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

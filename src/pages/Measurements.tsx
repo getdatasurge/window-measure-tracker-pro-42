@@ -12,7 +12,6 @@ const MeasurementsPage: React.FC = () => {
     refetch
   } = useGetMeasurementsQuery();
 
-  // Make sure we're sending valid props that match the expected MeasurementStatusBoardProps interface
   return (
     <MeasurementStatusBoard 
       measurements={measurementsResponse?.data || []} 

@@ -3,13 +3,13 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabaseClient, handleSupabaseError } from './supabaseClient';
 import { Measurement } from '@/types/measurement';
 
-// Define the response shapes
+// Define a simple response type
 interface MeasurementsResponse {
   data: Measurement[];
   error: string | null;
 }
 
-// Create the API slice using RTK Query
+// Create the API slice using RTK Query with simpler typing
 export const apiSlice = createApi({
   reducerPath: 'api',
   baseQuery: fakeBaseQuery(),
@@ -19,8 +19,6 @@ export const apiSlice = createApi({
       queryFn: async () => {
         console.log('Fetching measurements from Supabase');
         try {
-          // Notice we're not using deleted=eq.false filter because it seems this column might not exist
-          // Instead we'll filter on the frontend if needed
           const { data, error } = await supabaseClient
             .from('measurements')
             .select(`
@@ -90,7 +88,6 @@ export const apiSlice = createApi({
       }
     }),
     
-    // Similar pattern for projects
     getProjects: builder.query({
       queryFn: async () => {
         console.log('Fetching projects from Supabase');
