@@ -33,35 +33,10 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
   // Ensure direction is a valid Direction type
   const validDirection = (measurement.direction as Direction) || 'N/A';
 
-  // Convert Measurement to Measurement format with explicit casting for compatibility with both types
-  const enhancedMeasurement: Measurement = {
-    id: measurement.id, // Ensure id is passed correctly and required
-    projectId: measurement.projectId || '',
-    projectName: measurement.projectName || '',
-    location: measurement.location || '',
-    width: measurement.width || '',
-    height: measurement.height || '',
-    direction: validDirection,
-    notes: measurement.notes || '',
-    film_required: measurement.film_required !== false, // Ensure proper boolean conversion
-    quantity: measurement.quantity || 1,
-    status: measurement.status || 'Pending',
-    photos: Array.isArray(measurement.photos) ? measurement.photos : [],
-    installationDate: measurement.installationDate || '',
-    input_source: measurement.input_source || 'manual',
-    updatedAt: measurement.updatedAt || new Date().toISOString(),
-    updatedBy: measurement.updatedBy || '',
-    recorded_by: measurement.recorded_by,
-    recordedBy: measurement.recordedBy || '',
-    area: measurement.area || '',
-    // Add any other required Measurement properties
-    measurementDate: measurement.measurementDate || new Date().toISOString(),
-    filmRequired: measurement.film_required !== false
-  };
-  
+  // Pass the measurement directly to EditMeasurementModal which handles the conversion
   return (
     <EditMeasurementModal
-      measurement={enhancedMeasurement}
+      measurement={measurement}
       isOpen={isOpen}
       onOpenChange={onOpenChange}
       onSave={onSave}

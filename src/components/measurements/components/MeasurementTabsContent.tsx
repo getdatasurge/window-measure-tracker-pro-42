@@ -11,7 +11,7 @@ import { MeasurementFormData } from '@/hooks/measurements/types';
 
 interface MeasurementTabsContentProps {
   activeTab: string;
-  formData: Measurement;
+  formData: Measurement | MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
   errors?: {[key: string]: string};
   setErrors?: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
@@ -34,6 +34,7 @@ const MeasurementTabsContent: React.FC<MeasurementTabsContentProps> = ({
           formData={formDataForForm}
           updateFormData={updateFormData}
           errors={errors}
+          setErrors={setErrors}
         />
       </TabsContent>
       

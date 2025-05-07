@@ -39,13 +39,13 @@ const EditMeasurementModal: React.FC<EditMeasurementModalProps> = ({
     recordedBy: measurement.recordedBy || '',
     area: measurement.area || '',
     measurementDate: measurement.measurementDate || new Date().toISOString()
-  } : undefined;
+  } as MeasurementFormData : undefined;
 
   return (
     <MeasurementEntryModal
       isOpen={isOpen}
       onOpenChange={onOpenChange}
-      measurement={formattedMeasurement as Measurement} // Cast to ensure compatibility
+      measurement={formattedMeasurement}
       onSave={onSave}
       mode={measurement ? 'edit' : 'create'}
       defaultValues={defaultValues}

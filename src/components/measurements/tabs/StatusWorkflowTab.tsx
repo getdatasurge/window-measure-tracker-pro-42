@@ -1,5 +1,22 @@
-import React from 'react';
+
+import React, { useState } from 'react';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import { MeasurementFormData } from '@/hooks/measurements/types';
+import { 
+  Label,
+  Button,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+  Textarea,
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+  Calendar
+} from '@/components/ui';
 
 interface StatusWorkflowTabProps {
   formData: MeasurementFormData;
@@ -82,7 +99,7 @@ const StatusWorkflowTab: React.FC<StatusWorkflowTabProps> = ({ formData, updateF
                 selected={date}
                 onSelect={handleDateSelect}
                 initialFocus
-                className="bg-zinc-800 text-white"
+                className="bg-zinc-800 text-white pointer-events-auto"
               />
             </PopoverContent>
           </Popover>

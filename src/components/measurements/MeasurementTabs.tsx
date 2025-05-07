@@ -49,15 +49,6 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
     }
   };
 
-  // Cast formData to Measurement to ensure compatibility with MeasurementTabsContent
-  // We need to ensure the id property exists since it's required in Measurement
-  const formDataAsMeasurement = {
-    ...formData,
-    id: formData.id || 'temp-id', // Use a temporary ID if none exists
-    measurementDate: formData.measurementDate || new Date().toISOString(),
-    filmRequired: formData.filmRequired !== undefined ? formData.filmRequired : true,
-  } as Measurement;
-
   return (
     <Tabs 
       value={activeTab} 
@@ -67,7 +58,7 @@ const MeasurementTabs: React.FC<MeasurementTabsProps> = ({
       <MeasurementTabsNav activeTab={activeTab} />
       <MeasurementTabsContent 
         activeTab={activeTab}
-        formData={formDataAsMeasurement} 
+        formData={formData}
         updateFormData={handleFormDataUpdate}
         errors={errors}
         setErrors={setErrors}

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 import { Label } from '@/components/ui/label';
@@ -17,17 +18,31 @@ interface MeasurementDetailsTabProps {
   formData: MeasurementFormData;
   updateFormData: (field: string, value: any) => void;
   errors: {[key: string]: string};
-  setErrors: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
+  setErrors?: React.Dispatch<React.SetStateAction<{[key: string]: string}>>;
 }
 
 const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({ 
   formData, 
   updateFormData,
   errors,
-  setErrors
+  setErrors = () => {} // Provide default empty function if not provided
 }) => {
   const [projectSearchTerm, setProjectSearchTerm] = useState('');
-  const { projects, isLoading } = useProjects();
+  const { loading: isLoading, error, getProjects } = useProjects();
+  const [projectsList, setProjectsList] = useState<Array<{id: string, name: string}>>([]);
+  
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const projects = await getProjects();
+        setProjectsList(projects.map(p => ({ id: p.id, name: p.name })));
+      } catch (error) {
+        console.error("Failed to load projects", error);
+      }
+    };
+    
+    fetchProjects();
+  }, [getProjects]);
   
   // Load last selected project from localStorage if no project is selected
   useEffect(() => {
@@ -46,12 +61,12 @@ const MeasurementDetailsTab: React.FC<MeasurementDetailsTabProps> = ({
   }, [formData.projectId, formData.projectName, updateFormData]);
   
   // Filter projects based on search term
-  const filteredProjects = projects.filter(project => 
+  const filteredProjects = projectsList.filter(project => 
     project.name.toLowerCase().includes(projectSearchTerm.toLowerCase())
   );
   
   const handleProjectSelect = (projectId: string) => {
-    const selectedProject = projects.find(p => p.id === projectId);
+    const selectedProject = projectsList.find(p => p.id === projectId);
     if (selectedProject) {
       updateFormData('projectId', selectedProject.id);
       updateFormData('projectName', selectedProject.name);
