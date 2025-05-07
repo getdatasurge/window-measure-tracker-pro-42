@@ -8,6 +8,8 @@ interface MeasurementsQueryOptions {
   projectId?: string;
   date?: Date;
   status?: string;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 /**
@@ -22,9 +24,9 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
   const [isSetupInProgress, setIsSetupInProgress] = useState<boolean>(false);
   
   // Function to fetch measurements with current options
-  const fetchMeasurements = useCallback(async () => {
-    // If a fetch is already in progress, don't start another one
-    if (isLoading) return;
+  const fetchMeasurements = useCallback(async (forceRefresh = false) => {
+    // If a fetch is already in progress and not forced, don't start another one
+    if (isLoading && !forceRefresh) return;
     
     try {
       setIsLoading(true);
@@ -59,7 +61,7 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
         setIsRealtime(false);
       }
     };
-  }, [options.projectId, options.date, options.status]);
+  }, [options.projectId, options.date, options.status, options.startDate, options.endDate]);
   
   // Set up realtime subscription
   const setupRealtimeSubscription = async () => {
@@ -70,7 +72,7 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
       const { channel, cleanup } = await setupMeasurementsSubscription(() => {
         // Debounce refetch to prevent rapid consecutive calls
         console.log("Realtime update received, scheduling refetch");
-        setTimeout(fetchMeasurements, 300);
+        setTimeout(() => fetchMeasurements(true), 300);
       });
       
       if (channel) {
@@ -85,14 +87,43 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
   // Expose refetchMeasurements for manual data refreshing
   const refetchMeasurements = async () => {
     console.log("Manually refetching measurements");
-    return fetchMeasurements();
+    return fetchMeasurements(true);
   };
+  
+  // Get measurements grouped by date
+  const getMeasurementsByDate = useCallback((date: Date) => {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+    
+    return measurements.filter(m => {
+      const measurementDate = new Date(m.measurementDate);
+      return measurementDate >= startDate && measurementDate <= endDate;
+    });
+  }, [measurements]);
+  
+  // Get measurements by status
+  const getMeasurementsByStatus = useCallback((status: string | string[]) => {
+    if (Array.isArray(status)) {
+      return measurements.filter(m => 
+        status.some(s => m.status.toLowerCase() === s.toLowerCase())
+      );
+    }
+    
+    return measurements.filter(m => 
+      m.status.toLowerCase() === status.toLowerCase()
+    );
+  }, [measurements]);
   
   return {
     measurements,
     isLoading,
     error,
-    refetchMeasurements
+    refetchMeasurements,
+    getMeasurementsByDate,
+    getMeasurementsByStatus
   };
 };
 

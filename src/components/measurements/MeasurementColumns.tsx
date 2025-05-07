@@ -3,6 +3,7 @@ import React from 'react';
 import { Measurement } from '@/types/measurement';
 import StatusColumn from './StatusColumn';
 import { AnimatePresence } from 'framer-motion';
+import { useMeasurements } from '@/hooks/useMeasurements';
 
 interface MeasurementColumnsProps {
   filteredMeasurements: Measurement[];
@@ -10,44 +11,49 @@ interface MeasurementColumnsProps {
 }
 
 export function MeasurementColumns({ filteredMeasurements, onEditMeasurement }: MeasurementColumnsProps) {
-  // Helper function to determine which column a measurement belongs to
-  const getMeasurementsForColumn = (columnName: string) => {
-    switch (columnName) {
-      case 'Measured':
-        return filteredMeasurements.filter(m => 
-          m.status.toLowerCase() === 'pending'
-        );
-      case 'Cut':
-        return filteredMeasurements.filter(m => 
-          m.status.toLowerCase() === 'film_cut'
-        );
-      case 'Installed / Completed':
-        return filteredMeasurements.filter(m => 
-          m.status.toLowerCase() === 'installed' || 
-          m.status.toLowerCase() === 'completed'
-        );
-      default:
-        return [];
+  const { getMeasurementsByStatus } = useMeasurements();
+  
+  // Define column configurations
+  const columns = [
+    {
+      title: 'Measured',
+      status: 'pending',
+      color: 'bg-amber-500/30',
+      getMeasurements: () => filteredMeasurements.filter(m => m.status.toLowerCase() === 'pending')
+    },
+    {
+      title: 'Cut',
+      status: 'film_cut',
+      color: 'bg-blue-500/30',
+      getMeasurements: () => filteredMeasurements.filter(m => m.status.toLowerCase() === 'film_cut')
+    },
+    {
+      title: 'Installed / Completed',
+      status: ['installed', 'completed'],
+      color: 'bg-green-500/30',
+      getMeasurements: () => filteredMeasurements.filter(m => 
+        m.status.toLowerCase() === 'installed' || 
+        m.status.toLowerCase() === 'completed'
+      )
     }
-  };
+  ];
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
       <AnimatePresence>
-        {['Measured', 'Cut', 'Installed / Completed'].map(columnName => (
-          <StatusColumn
-            key={columnName}
-            title={`${columnName} (${getMeasurementsForColumn(columnName).length})`}
-            status={columnName as any}
-            measurements={getMeasurementsForColumn(columnName)}
-            onEditMeasurement={onEditMeasurement}
-            color={
-              columnName === 'Measured' ? 'bg-amber-500/30' : 
-              columnName === 'Cut' ? 'bg-blue-500/30' : 
-              'bg-green-500/30'
-            }
-          />
-        ))}
+        {columns.map((column) => {
+          const measurements = column.getMeasurements();
+          return (
+            <StatusColumn
+              key={column.title}
+              title={`${column.title} (${measurements.length})`}
+              status={column.status as any}
+              measurements={measurements}
+              onEditMeasurement={onEditMeasurement}
+              color={column.color}
+            />
+          );
+        })}
       </AnimatePresence>
     </div>
   );

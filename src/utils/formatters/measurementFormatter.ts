@@ -2,7 +2,7 @@
 import { Measurement } from '@/types/measurement';
 
 /**
- * Format a measurement from the database to our UI format
+ * Format a database measurement record to match the frontend Measurement interface
  */
 export const formatMeasurement = (item: any): Measurement => {
   return {
@@ -17,13 +17,12 @@ export const formatMeasurement = (item: any): Measurement => {
     quantity: item.quantity || 1,
     recordedBy: item.recorded_by || '',
     direction: (item.direction || 'N/A') as any,
-    notes: item.notes || '',
+    notes: item.notes,
     status: (item.status || 'Pending') as any,
     measurementDate: item.measurement_date || new Date().toISOString(),
     updatedAt: item.updated_at || new Date().toISOString(),
-    updatedBy: item.updated_by || '',
-    photos: item.photos || [],
+    updatedBy: item.updated_by,
     film_required: item.film_required,
-    reviewComments: '',
+    photos: Array.isArray(item.photos) ? item.photos : [],
   };
 };

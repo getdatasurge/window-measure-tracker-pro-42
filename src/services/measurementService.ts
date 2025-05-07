@@ -11,6 +11,8 @@ export const fetchMeasurementsData = async (
     projectId?: string;
     date?: Date;
     status?: string;
+    startDate?: Date;
+    endDate?: Date;
   } = {}
 ): Promise<Measurement[]> => {
   try {
@@ -45,6 +47,7 @@ export const fetchMeasurementsData = async (
       query = query.eq('project_id', options.projectId);
     }
     
+    // Single date filter
     if (options.date) {
       const startDate = new Date(options.date);
       startDate.setHours(0, 0, 0, 0);
@@ -55,6 +58,18 @@ export const fetchMeasurementsData = async (
       query = query
         .gte('measurement_date', startDate.toISOString())
         .lt('measurement_date', endDate.toISOString());
+    }
+    // Date range filter (startDate to endDate)
+    else if (options.startDate && options.endDate) {
+      const startDate = new Date(options.startDate);
+      startDate.setHours(0, 0, 0, 0);
+      
+      const endDate = new Date(options.endDate);
+      endDate.setHours(23, 59, 59, 999);
+      
+      query = query
+        .gte('measurement_date', startDate.toISOString())
+        .lte('measurement_date', endDate.toISOString());
     }
     
     if (options.status) {

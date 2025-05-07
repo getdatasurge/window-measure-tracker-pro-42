@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/auth';
 import { useForm } from 'react-hook-form';
 import { useMeasurements } from '@/hooks/useMeasurements';
+import { Image, X } from 'lucide-react';
 
 interface AddMeasurementModalProps {
   open: boolean;
@@ -31,7 +32,11 @@ interface MeasurementFormData {
   notes?: string;
   filmRequired: boolean;
   quantity: number;
+  photos: File[];
 }
+
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const MAX_FILES = 3;
 
 const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({ 
   open, 
@@ -44,6 +49,9 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
   const { refetchMeasurements } = useMeasurements();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [projectsList, setProjectsList] = useState<{id: string, name: string}[]>([]);
+  const [photoFiles, setPhotoFiles] = useState<File[]>([]);
+  const [photoErrors, setPhotoErrors] = useState<string[]>([]);
+  const [uploadProgress, setUploadProgress] = useState(0);
   
   const { register, handleSubmit, setValue, watch, reset, formState: { errors } } = useForm<MeasurementFormData>({
     defaultValues: {
@@ -56,7 +64,8 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
       direction: 'N/A',
       notes: '',
       filmRequired: true,
-      quantity: 1
+      quantity: 1,
+      photos: []
     }
   });
   
@@ -110,6 +119,98 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     }
   };
   
+  const handleFileChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    const errors: string[] = [];
+    
+    if (!files) return;
+    
+    // Check if adding these files would exceed the limit
+    const newFiles = Array.from(files);
+    
+    if (photoFiles.length + newFiles.length > MAX_FILES) {
+      errors.push(`You can only upload a maximum of ${MAX_FILES} photos.`);
+      setPhotoErrors(errors);
+      return;
+    }
+    
+    // Validate each file
+    const validFiles = newFiles.filter(file => {
+      if (file.size > MAX_FILE_SIZE) {
+        errors.push(`File "${file.name}" exceeds 5MB size limit.`);
+        return false;
+      }
+      
+      if (!file.type.startsWith('image/')) {
+        errors.push(`File "${file.name}" is not an image.`);
+        return false;
+      }
+      
+      return true;
+    });
+    
+    setPhotoErrors(errors);
+    
+    if (validFiles.length > 0) {
+      setPhotoFiles(prev => [...prev, ...validFiles]);
+    }
+    
+    // Reset the input value to allow selecting the same file again
+    e.target.value = '';
+  }, [photoFiles]);
+  
+  const removePhoto = useCallback((index: number) => {
+    setPhotoFiles(prev => prev.filter((_, i) => i !== index));
+  }, []);
+  
+  const uploadPhotos = async (): Promise<string[]> => {
+    if (photoFiles.length === 0) return [];
+    
+    const uploadedUrls: string[] = [];
+    
+    try {
+      // Prepare the storage bucket if it doesn't exist
+      // Note: This would typically be done via SQL setup rather than in the client
+      // But we're handling it here for demonstration
+      
+      for (let i = 0; i < photoFiles.length; i++) {
+        const file = photoFiles[i];
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 15)}.${fileExt}`;
+        const filePath = `measurements/${fileName}`;
+        
+        setUploadProgress(Math.round(((i) / photoFiles.length) * 100));
+        
+        const { data, error } = await supabase.storage
+          .from('measurements')
+          .upload(filePath, file);
+          
+        if (error) {
+          throw error;
+        }
+        
+        if (data) {
+          // Get public URL for the uploaded file
+          const { data: publicUrlData } = supabase.storage
+            .from('measurements')
+            .getPublicUrl(filePath);
+            
+          if (publicUrlData.publicUrl) {
+            uploadedUrls.push(publicUrlData.publicUrl);
+          }
+        }
+        
+        // Update progress
+        setUploadProgress(Math.round(((i + 1) / photoFiles.length) * 100));
+      }
+      
+      return uploadedUrls;
+    } catch (err) {
+      console.error('Error uploading photos:', err);
+      throw err;
+    }
+  };
+  
   const onSubmit = async (data: MeasurementFormData) => {
     if (!user) {
       toast({
@@ -132,6 +233,23 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
     setIsSubmitting(true);
     
     try {
+      // Upload photos first
+      let photoUrls: string[] = [];
+      
+      if (photoFiles.length > 0) {
+        try {
+          photoUrls = await uploadPhotos();
+        } catch (err) {
+          toast({
+            title: "Photo upload failed",
+            description: err instanceof Error ? err.message : "Failed to upload photos. Please try again.",
+            variant: "destructive"
+          });
+          setIsSubmitting(false);
+          return;
+        }
+      }
+      
       // Parse numeric values to ensure they're saved as numbers
       const parseNumericValue = (value: string | undefined): number | null => {
         if (!value) return null;
@@ -166,7 +284,8 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
         measurement_date: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         updated_by: user.id,
-        film_required: data.filmRequired
+        film_required: data.filmRequired,
+        photos: photoUrls
       };
       
       // Save to supabase
@@ -187,9 +306,15 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
       
       // Show success message
       toast({
-        title: "Measurement saved",
-        description: "The measurement has been successfully created."
+        title: "Measurement submitted successfully",
+        description: "The measurement has been successfully created.",
+        duration: 5000, // Auto dismiss after 5 seconds
       });
+      
+      // Reset form state
+      setPhotoFiles([]);
+      setPhotoErrors([]);
+      setUploadProgress(0);
       
       // Refetch measurements to update UI
       await refetchMeasurements();
@@ -203,7 +328,8 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
       toast({
         title: "Error saving measurement",
         description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
-        variant: "destructive"
+        variant: "destructive",
+        duration: 5000, // Auto dismiss after 5 seconds
       });
     } finally {
       setIsSubmitting(false);
@@ -211,6 +337,10 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
   };
   
   const handleClose = () => {
+    // Reset form state
+    setPhotoFiles([]);
+    setPhotoErrors([]);
+    setUploadProgress(0);
     reset();
     onOpenChange(false);
   };
@@ -330,6 +460,79 @@ const AddMeasurementModal: React.FC<AddMeasurementModalProps> = ({
                 />
                 {errors.quantity && (
                   <p className="text-sm text-red-500">{errors.quantity.message}</p>
+                )}
+              </div>
+            </div>
+            
+            {/* Photo Upload */}
+            <div className="space-y-2">
+              <Label>Photos (Max 3, 5MB each)</Label>
+              <div className="border rounded-md p-4">
+                {/* Photo Preview */}
+                {photoFiles.length > 0 && (
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    {photoFiles.map((file, index) => (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square rounded-md overflow-hidden border bg-muted">
+                          <img 
+                            src={URL.createObjectURL(file)} 
+                            alt={`Preview ${index + 1}`}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => removePhoto(index)}
+                          className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full p-1 shadow-md opacity-80 hover:opacity-100 transition-opacity"
+                        >
+                          <X className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Upload Button */}
+                {photoFiles.length < MAX_FILES && (
+                  <div className="flex justify-center">
+                    <label htmlFor="photo-upload" className="cursor-pointer">
+                      <div className="flex flex-col items-center space-y-2 py-4">
+                        <div className="p-2 rounded-full bg-muted">
+                          <Image className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <span className="text-sm text-muted-foreground">
+                          Click to upload photos ({photoFiles.length}/{MAX_FILES})
+                        </span>
+                      </div>
+                      <input
+                        id="photo-upload"
+                        type="file"
+                        accept="image/*"
+                        onChange={handleFileChange}
+                        className="hidden"
+                        multiple={MAX_FILES - photoFiles.length > 1}
+                      />
+                    </label>
+                  </div>
+                )}
+                
+                {/* Error Messages */}
+                {photoErrors.length > 0 && (
+                  <div className="mt-2">
+                    {photoErrors.map((error, index) => (
+                      <p key={index} className="text-xs text-red-500">{error}</p>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Upload Progress */}
+                {uploadProgress > 0 && uploadProgress < 100 && (
+                  <div className="w-full bg-gray-200 rounded-full h-2 mt-2">
+                    <div
+                      className="bg-green-600 h-2 rounded-full"
+                      style={{ width: `${uploadProgress}%` }}
+                    />
+                  </div>
                 )}
               </div>
             </div>
