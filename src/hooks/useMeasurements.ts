@@ -24,20 +24,20 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
     try {
       setLoading(true);
       
-      // Import the service dynamically to avoid circular dependencies
-      const { fetchMeasurements, fetchMeasurementsByStatus, fetchMeasurementsForDay } = await import('@/utils/measurementDataService');
+      // Import the service directly to avoid circular dependencies
+      const { getMeasurementsForDay, getMeasurementsByStatus, fetchMeasurements } = await import('@/utils/measurementUtils');
       
       let data: Measurement[] = [];
       
       // Apply filters if provided
       if (options.status) {
-        data = await fetchMeasurementsByStatus(options.status);
+        data = await getMeasurementsByStatus(options.status);
       } else if (options.date) {
-        data = await fetchMeasurementsForDay(options.date);
+        data = await getMeasurementsForDay(options.date);
       } else if (options.startDate && options.endDate) {
-        // This would need a custom implementation
+        // Fetch all and filter
         data = await fetchMeasurements();
-        // Filter by date range client-side for now
+        // Filter by date range client-side
         data = data.filter(m => {
           const date = new Date(m.measurementDate);
           return date >= options.startDate! && date <= options.endDate!;
@@ -104,5 +104,5 @@ export const useMeasurements = (options: MeasurementsQueryOptions = {}) => {
   };
 };
 
-// Re-export for backward compatibility (avoid direct import)
-export { enableMeasurementsRealtime } from '@/services/realtimeService';
+// Simple re-export
+export { setupMeasurementsSubscription } from '@/services/realtimeService';

@@ -6,7 +6,7 @@ import { setupRealtime } from '@/utils/setupRealtime';
 export const enableMeasurementsRealtime = async () => {
   try {
     console.log('Setting up realtime for measurements');
-    await setupRealtime('measurements');
+    await setupRealtime();
     return true;
   } catch (error) {
     console.error('Error enabling realtime for measurements:', error);
@@ -16,7 +16,7 @@ export const enableMeasurementsRealtime = async () => {
   }
 };
 
-// Setup a subscription to a table
+// Setup subscription to measurements table
 export const setupMeasurementsSubscription = () => {
   const channel = supabaseClient
     .channel('public:measurements')

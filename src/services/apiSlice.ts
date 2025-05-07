@@ -3,7 +3,7 @@ import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
 import { supabaseClient } from './supabaseClient';
 import { Measurement } from '@/types/measurement';
 
-// Define simple response types
+// Define simple response type
 interface ApiResponse<T> {
   data: T;
   error: string | null;

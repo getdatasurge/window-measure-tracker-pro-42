@@ -3,7 +3,6 @@ import React from 'react';
 import { Measurement } from '@/types/measurement';
 import StatusColumn from './StatusColumn';
 import { AnimatePresence } from 'framer-motion';
-import { useMeasurements } from '@/hooks/useMeasurements';
 
 interface MeasurementColumnsProps {
   filteredMeasurements: Measurement[];
@@ -11,8 +10,6 @@ interface MeasurementColumnsProps {
 }
 
 export function MeasurementColumns({ filteredMeasurements, onEditMeasurement }: MeasurementColumnsProps) {
-  const { getMeasurementsByStatus } = useMeasurements();
-  
   // Define column configurations
   const columns = [
     {

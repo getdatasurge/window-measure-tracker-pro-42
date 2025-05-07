@@ -56,7 +56,7 @@ const DashboardMeasurementSection: React.FC<DashboardMeasurementSectionProps> = 
   }
 
   // Pass measurements directly to MeasurementStatusBoard
-  return <MeasurementStatusBoard measurements={measurements} onRefresh={onRefresh} />;
+  return <MeasurementStatusBoard measurements={measurements} onRefresh={onRefresh} isLoading={false} error={null} />;
 };
 
 export default DashboardMeasurementSection;

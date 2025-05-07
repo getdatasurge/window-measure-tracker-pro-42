@@ -1,6 +1,5 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from '@/components/ui/use-toast';
 
 // Define the function to enable realtime on a specific table
 export async function enableRealtimeForTable(tableName: string, operation?: string) {
@@ -41,8 +40,6 @@ export async function setupRealtime() {
       // Don't show error toasts to users during page load as it's confusing
       // But we should log it to console
     }
-    
-    // Additional tables can be added here
     
     return success;
   } catch (error) {
