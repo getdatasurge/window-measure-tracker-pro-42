@@ -5,7 +5,6 @@ import MeasurementTabsNav from './components/MeasurementTabsNav';
 import MeasurementTabsContent from './components/MeasurementTabsContent';
 import { useTabNavigation } from './hooks/useTabNavigation';
 import { MeasurementFormData } from '@/hooks/measurements/types';
-import { Measurement } from '@/types/measurement';
 
 interface MeasurementTabsProps {
   activeTab: string;
