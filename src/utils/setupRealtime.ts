@@ -10,13 +10,12 @@ export const setupRealtime = async (): Promise<boolean> => {
     console.log('Setting up realtime for measurements table...');
     
     // First, check if the table exists to avoid errors
-    const { data: tableData, error: tableError } = await safeQuery(() => 
-      supabase.from('measurements')
+    const { data, error } = await supabase
+      .from('measurements')
       .select('id')
-      .limit(1)
-    );
+      .limit(1);
     
-    const tableExists = tableData !== null && !tableError;
+    const tableExists = Array.isArray(data) && data.length >= 0 && !error;
     
     if (!tableExists) {
       console.log('Measurements table does not exist yet - skipping realtime setup');
@@ -24,18 +23,18 @@ export const setupRealtime = async (): Promise<boolean> => {
     }
     
     // Call the Edge Function to enable realtime for the measurements table
-    const { data, error } = await supabase.functions.invoke('enable-realtime', {
+    const { data: funcData, error: funcError } = await supabase.functions.invoke('enable-realtime', {
       body: {
         tableName: 'measurements'
       }
     });
     
-    if (error) {
-      console.warn('Error setting up realtime, falling back to polling:', error);
+    if (funcError) {
+      console.warn('Error setting up realtime, falling back to polling:', funcError);
       return false;
     }
     
-    console.log('Realtime setup result:', data);
+    console.log('Realtime setup result:', funcData);
     return true;
   } catch (err) {
     console.error('Failed to setup realtime, will use polling instead:', err);
