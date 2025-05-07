@@ -1,57 +1,29 @@
+import { Database } from './supabase'
 
-// Define measurement related types
-export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
-// Import Direction type from constants instead of defining it here
-import { Direction } from '@/constants/direction';
-export type { Direction }; // Changed to "export type" to fix the isolatedModules error
+export type Measurement = Database['public']['Tables']['measurements']['Row']
+export type MeasurementInsert = Database['public']['Tables']['measurements']['Insert']
+export type MeasurementUpdate = Database['public']['Tables']['measurements']['Update']
 
-export interface Measurement {
-  id: string;
-  projectId?: string;
-  projectName: string;
-  location: string;
-  width: string; 
-  height: string;
-  area: string;
-  quantity: number;
-  recordedBy: string;
-  direction: Direction;
-  notes?: string;
-  status: MeasurementStatus;
-  measurementDate: string;
-  updatedAt: string;
-  updatedBy?: string;
-  approvalBy?: string;
-  reviewComments?: string;
-  film_required?: boolean;
-  photos?: string[];
-  recorded_by?: string; // User ID for database purposes
-  installationDate?: string; // Installation date property
-  createdAt?: string; // Created at timestamp
+// Optional helper type for partial use (e.g. form editing)
+export type MeasurementFormData = Partial<MeasurementInsert> & {
+  recorded_by?: string // Often manually set in client
 }
 
-export interface MeasurementFilter {
-  projectId?: string;
-  location?: string;
-  status?: string;
-  dateRange?: {
-    from?: Date;
-    to?: Date;
-  };
-  installer?: string;
+// Enums (manually defined for now, as your DB has no declared enums)
+export type Direction = 'north' | 'south' | 'east' | 'west' // ← adjust based on actual usage
+export type InputSource = 'manual' | 'automated' | 'imported' // ← add variants if needed
+
+// You may cast direction/input_source like this:
+export function parseDirection(value: string | null): Direction | undefined {
+  if (value === 'north' || value === 'south' || value === 'east' || value === 'west') {
+    return value
+  }
+  return undefined
 }
 
-export interface Project {
-  id: string;
-  name: string;
-}
-
-export interface Installer {
-  id: string;
-  name: string;
-}
-
-export interface StatusOption {
-  value: string;
-  label: string;
+export function parseInputSource(value: string | null): InputSource | undefined {
+  if (value === 'manual' || value === 'automated' || value === 'imported') {
+    return value
+  }
+  return undefined
 }
