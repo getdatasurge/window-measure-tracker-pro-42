@@ -1,11 +1,11 @@
 
 import { createApi, fakeBaseQuery } from '@reduxjs/toolkit/query/react';
-import { supabaseClient, handleSupabaseError } from './supabaseClient';
+import { supabaseClient } from './supabaseClient';
 import { Measurement } from '@/types/measurement';
 
-// Define a simple response type
-interface MeasurementsResponse {
-  data: Measurement[];
+// Define simpler response types
+interface ApiResponse<T> {
+  data: T;
   error: string | null;
 }
 
@@ -15,7 +15,7 @@ export const apiSlice = createApi({
   baseQuery: fakeBaseQuery(),
   tagTypes: ['Measurements', 'Projects'],
   endpoints: (builder) => ({
-    getMeasurements: builder.query<MeasurementsResponse, void>({
+    getMeasurements: builder.query<ApiResponse<Measurement[]>, void>({
       queryFn: async () => {
         console.log('Fetching measurements from Supabase');
         try {
@@ -46,7 +46,7 @@ export const apiSlice = createApi({
           if (error) {
             console.error('Error fetching measurements:', error);
             return { 
-              error: handleSupabaseError(error)
+              error: error.message 
             };
           }
           
@@ -88,7 +88,7 @@ export const apiSlice = createApi({
       }
     }),
     
-    getProjects: builder.query({
+    getProjects: builder.query<ApiResponse<any[]>, void>({
       queryFn: async () => {
         console.log('Fetching projects from Supabase');
         try {
@@ -100,7 +100,7 @@ export const apiSlice = createApi({
           if (error) {
             console.error('Error fetching projects:', error);
             return { 
-              error: handleSupabaseError(error)
+              error: error.message
             };
           }
           

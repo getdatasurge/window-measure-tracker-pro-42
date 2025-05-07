@@ -98,32 +98,13 @@ const DashboardPage: React.FC<DashboardPageProps> = ({
     refetch: refetchMeasurements
   } = useGetMeasurementsQuery();
   
-  // Log information about the query status
-  React.useEffect(() => {
-    console.log('Dashboard RTK Query status:', { 
-      isLoading: isMeasurementsLoading,
-      hasData: !!measurementsResponse?.data,
-      errorMessage: measurementsError || measurementsResponse?.error,
-    });
-    
-    // If there's an error, schedule a single retry after 5 seconds
-    if (measurementsError || measurementsResponse?.error) {
-      const timer = setTimeout(() => {
-        console.log('Attempting to refetch measurements after error');
-        refetchMeasurements();
-      }, 5000);
-      
-      return () => clearTimeout(timer);
-    }
-  }, [measurementsResponse, measurementsError, isMeasurementsLoading, refetchMeasurements]);
-  
   return <DashboardShell>
       <div className="grid gap-4">
         {/* Pass the measurement data to the MeasurementSection */}
         <DashboardMeasurementSection 
           measurements={measurementsResponse?.data || []}
           isLoading={isMeasurementsLoading}
-          error={measurementsError || measurementsResponse?.error || null}
+          error={measurementsError ? String(measurementsError) : null}
           onRefresh={refetchMeasurements}
         />
         

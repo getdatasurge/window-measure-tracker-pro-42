@@ -1,8 +1,6 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Measurement } from '@/types/measurement';
-import { fetchMeasurementsData } from '@/services/measurementService';
-import { setupMeasurementsSubscription } from '@/services/realtimeService';
 import { useMeasurementSubscription } from '@/hooks/useMeasurementSubscription';
 
 interface MeasurementsQueryOptions {
