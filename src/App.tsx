@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +9,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/auth/AuthProvider";
 import { useEffect } from "react";
-import { enableFeedbucketInteraction } from "./utils/feedbucket-patch";
+// Removed the enableFeedbucketInteraction import
 import { setupConsoleErrorTracker } from "./utils/console-error-tracker";
 import { setupRealtime } from "./utils/setupRealtime";
 import { FloatingMeasurementTools } from "./components/measurements/FloatingMeasurementTools";
@@ -62,9 +63,9 @@ const removeUnusedPreloadTags = () => {
 };
 
 function App() {
-  // Initialize the feedbucket patch when the app mounts
+  // Initialize when the app mounts
   useEffect(() => {
-    const feedbucketCleanup = enableFeedbucketInteraction();
+    // Removed the feedbucketCleanup reference and function call
 
     // Clean up preload tags that might cause warnings
     removeUnusedPreloadTags();
@@ -86,7 +87,7 @@ function App() {
     });
     
     return () => {
-      feedbucketCleanup();
+      // Removed feedbucketCleanup function call
       errorTrackerCleanup();
     };
   }, []);
