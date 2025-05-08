@@ -1,0 +1,156 @@
+
+# Framework Switch Implementation - May 8, 2025
+
+## Overview
+
+This document outlines the approach for transitioning the Window Tracker application to an offline-first architecture with a more maintainable folder structure. The new architecture will support seamless user experiences regardless of network connectivity and prepare the codebase for future enhancements.
+
+## 1. New Folder Structure
+
+We are implementing the following structure to better organize the codebase:
+
+```
+src/
+├── app/                        # App shell and global providers
+│   ├── App.tsx                # Top-level app layout
+│   └── RootProvider.tsx       # All context/state combined
+│
+├── assets/                    # Static assets (icons, images, etc.)
+│   └── icons/
+│   └── images/
+│
+├── components/                # Global shared UI components
+│   ├── ui/                    # Buttons, inputs, dropdowns
+│   ├── layout/                # Headers, sidebars, navbars
+│   ├── feedback/              # Loaders, alerts, error states
+│   ├── data/                  # Data presentation: tables, charts
+│   └── shared/                # Other reusable UI units
+│
+├── constants/                 # App-wide constants and enums
+│   ├── routes.ts              # Central route mapping
+│   └── app.ts                 # Static config (appName, roles)
+│
+├── features/                  # Business logic by domain
+│   ├── projects/              # e.g., API, types, components
+│   │   ├── api.ts
+│   │   ├── hooks.ts
+│   │   ├── types.ts
+│   │   └── components/
+│   ├── teams/
+│   ├── reports/
+│   └── measurements/
+│
+├── pages/                     # Route-level views (screens)
+│   ├── index.tsx              # Landing page
+│   ├── dashboard/
+│   ├── usersettings/
+│   └── offline/               # Offline fallback screens
+│
+├── hooks/                     # Generic reusable logic hooks
+│   ├── useSyncQueue.ts        # Add to sync queue
+│   ├── useOfflineCache.ts     # Read/write to local store
+│   └── useOnlineStatus.ts     # Detect offline/online state
+│
+├── services/                  # Cross-feature logic
+│   ├── cache/                 # IndexedDB or localForage logic
+│   │   └── offlineStore.ts
+│   ├── sync/                  # Conflict resolution & sync batching
+│   │   └── syncQueue.ts
+│   ├── network/               # Fetching & online detection
+│   └── db/                    # Normalized data handling
+│
+├── state/                     # Global state (e.g., Zustand or Jotai)
+│   ├── userStore.ts
+│   └── syncStore.ts
+│
+├── styles/                    # Global styling and themes
+│   └── globals.css
+│
+├── types/                     # Global interfaces and type defs
+│   └── index.ts
+│
+├── utils/                     # Pure helpers/utilities
+│   ├── format.ts
+│   └── deepMerge.ts
+```
+
+## 2. Core Offline Infrastructure Implementation
+
+### Sync Queue System
+- **Purpose**: Capture operations made while offline for later synchronization
+- **Implementation**: 
+  - Track each operation with timestamp, type, and payload
+  - Store queue in IndexedDB
+  - Process queue when connectivity is restored
+  - Handle conflicts with server data
+
+### Offline Data Store
+- **Purpose**: Provide local persistence for data access without network
+- **Implementation**:
+  - Use IndexedDB for structured data storage
+  - Mirror key server data structures locally
+  - Implement read/write APIs similar to server APIs
+  - Handle versioning for conflict detection
+
+### Online/Offline Detection
+- **Purpose**: Reliably detect and respond to network status changes
+- **Implementation**:
+  - Monitor navigator.onLine with event listeners
+  - Add heartbeat checks for more reliable detection
+  - Trigger UI updates when status changes
+  - Manage application behavior during transitions
+
+## 3. Feature Migration Strategy
+
+We'll approach the migration by domain, moving each feature to the new architecture:
+
+1. **Projects Domain**:
+   - Migrate data structures
+   - Implement offline storage
+   - Add sync capabilities
+   - Update UI components
+
+2. **Measurements Domain**:
+   - Follow same pattern as projects
+   - Add conflict resolution for measurement edits
+
+3. **Teams & Reports**:
+   - Lower priority for offline capability
+   - Initially focus on clean architecture
+
+## 4. UI Adaptation
+
+- Add offline indicators in the UI
+- Implement optimistic UI updates
+- Show sync status for pending changes
+- Provide conflict resolution interfaces where needed
+
+## 5. Testing Strategy
+
+- Unit tests for each offline component
+- Integration tests for sync scenarios
+- UI tests for offline state handling
+- Network condition simulation tests
+
+## 6. Performance Considerations
+
+- Minimize bundle size through code splitting
+- Optimize IndexedDB operations
+- Implement efficient sync algorithms
+- Use service workers for offline caching
+
+## 7. Migration Timeline
+
+1. **Phase 1 (Current)**: Structure setup and core offline services
+2. **Phase 2**: Projects and Measurements domain migration
+3. **Phase 3**: Teams, Reports, and remaining features
+4. **Phase 4**: Comprehensive testing and optimization
+
+## 8. Next Steps
+
+- Set up the folder structure skeleton
+- Implement core offline services
+- Begin migration of the Projects domain
+- Develop and test conflict resolution strategies
+
+This framework transition will significantly improve application resilience and maintainability while providing a better user experience across all network conditions.
