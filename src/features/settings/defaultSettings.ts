@@ -1,38 +1,33 @@
 
 /**
- * Default settings for the application
+ * Default application settings
  */
 
-import { AppSettings, UserPreferences } from './types';
+import { AppSettings } from './types';
 
-export const DEFAULT_APP_SETTINGS: AppSettings = {
-  theme: 'system',
-  sidebar: {
-    expanded: true,
-    position: 'left',
-  },
-  notifications: {
-    enabled: true,
-    sound: true,
-    desktop: true,
-    email: false,
-  },
-  display: {
-    compactMode: false,
-    tableRows: 10,
-    dateFormat: 'MMM dd, yyyy',
-    timezone: 'America/New_York',
-  },
-  measurements: {
-    defaultUnit: 'inches',
-    showCalculatedArea: true,
-    roundTo: 2,
-  }
-};
-
-export const DEFAULT_USER_PREFERENCES: UserPreferences = {
-  language: 'en-US',
-  startPage: 'dashboard',
-  recentProjects: [],
-  savedFilters: {},
-};
+export function getDefaultSettings(): AppSettings {
+  return {
+    theme: 'dark',
+    sidebar: {
+      expanded: true,
+      position: 'left',
+    },
+    notifications: {
+      enabled: true,
+      sound: false,
+      desktop: true,
+      email: false,
+    },
+    display: {
+      compactMode: false,
+      tableRows: 10,
+      dateFormat: 'MM/dd/yyyy',
+      timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    },
+    measurements: {
+      defaultUnit: 'inches',
+      showCalculatedArea: true,
+      roundTo: 2,
+    },
+  };
+}

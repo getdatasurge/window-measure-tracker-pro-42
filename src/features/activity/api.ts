@@ -2,112 +2,210 @@
 /**
  * Activity API functions
  * 
- * These functions handle activity logging operations.
- * In public mode, activities are only stored locally.
+ * Handles fetching and adding activity entries with offline support.
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { Activity, ActivityType, ActivityLogOptions } from './types';
+import { ActivityData, TeamActivity } from './types';
+import * as offlineStore from '../../services/cache/offlineStore';
+import * as syncQueue from '../../services/sync/syncQueue';
+import { getOnlineStatus } from '../../services/network/networkStatus';
+import { transformActivityData } from './utils';
 
-// Storage key for local activities
-const ACTIVITIES_STORAGE_KEY = 'wintracker_local_activities';
-
-/**
- * Log a new activity
- * In public mode, stores the activity in localStorage
- */
-export function logActivity(
-  type: ActivityType,
-  details: Record<string, any>,
-  options: ActivityLogOptions = {}
-): Activity {
-  const { userId = 'public-user', userName = 'Public User', silent = false } = options;
-  
-  const activity: Activity = {
-    id: uuidv4(),
-    type,
-    timestamp: new Date().toISOString(),
-    userId,
-    userName,
-    details,
-    entityId: details.entityId,
-    entityType: details.entityType,
-  };
-  
-  // In a real app, this would be sent to a server
-  // In public mode, we just store it locally
-  try {
-    const storedActivities = getStoredActivities();
-    storeActivities([activity, ...storedActivities].slice(0, 100)); // Keep only the 100 most recent
-  } catch (err) {
-    console.error('Error storing activity:', err);
-  }
-  
-  if (!silent) {
-    console.log('Activity logged:', activity);
-  }
-  
-  return activity;
-}
-
-/**
- * Get all stored activities
- */
-export function getActivities(): Activity[] {
-  return getStoredActivities();
-}
-
-/**
- * Get activities filtered by type
- */
-export function getActivitiesByType(type: ActivityType): Activity[] {
-  const activities = getStoredActivities();
-  return activities.filter(activity => activity.type === type);
-}
-
-/**
- * Get activities related to a specific entity
- */
-export function getActivitiesByEntity(
-  entityType: string,
-  entityId: string
-): Activity[] {
-  const activities = getStoredActivities();
-  return activities.filter(
-    activity => activity.entityType === entityType && activity.entityId === entityId
-  );
-}
-
-/**
- * Clear all stored activities
- */
-export function clearActivities(): void {
-  try {
-    localStorage.removeItem(ACTIVITIES_STORAGE_KEY);
-  } catch (err) {
-    console.error('Error clearing activities:', err);
-  }
-}
-
-// Helper function to get stored activities from localStorage
-function getStoredActivities(): Activity[] {
-  try {
-    const storedData = localStorage.getItem(ACTIVITIES_STORAGE_KEY);
-    if (storedData) {
-      return JSON.parse(storedData) as Activity[];
+// Sample activities for demo/offline mode
+const SAMPLE_ACTIVITIES: ActivityData[] = [
+  {
+    id: 'act-1',
+    timestamp: new Date(Date.now() - 1000 * 60 * 5).toISOString(),
+    type: 'update',
+    user: {
+      id: 'user-1',
+      name: 'Jane Smith',
+      avatar: '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png'
+    },
+    content: {
+      title: 'Updated project status',
+      description: 'Changed status to In Progress',
+      project: {
+        id: 'public-project-1',
+        name: 'Residential Renovation'
+      }
     }
-  } catch (err) {
-    console.error('Error retrieving stored activities:', err);
+  },
+  {
+    id: 'act-2',
+    timestamp: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+    type: 'measurement',
+    user: {
+      id: 'user-2',
+      name: 'Mike Johnson',
+      avatar: '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png'
+    },
+    content: {
+      title: 'Added new measurement',
+      description: 'Living Room Window - 36" x 48"',
+      project: {
+        id: 'public-project-1',
+        name: 'Residential Renovation'
+      }
+    }
+  },
+  {
+    id: 'act-3',
+    timestamp: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+    type: 'complete',
+    user: {
+      id: 'user-3',
+      name: 'Sarah Adams',
+      avatar: '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png'
+    },
+    content: {
+      title: 'Completed installation',
+      description: 'Finished installing windows on 2nd floor',
+      project: {
+        id: 'public-project-2',
+        name: 'Office Building'
+      }
+    }
   }
+];
+
+/**
+ * Fetch recent activities
+ * Supports offline mode with local caching
+ */
+export async function fetchActivities(limit: number = 20): Promise<TeamActivity[]> {
+  console.log(`Fetching ${limit} most recent activities`);
   
-  return [];
+  try {
+    // Check if we have cached activities
+    const cachedActivities = await offlineStore.getAllEntities<ActivityData>('activity');
+    
+    let activities: ActivityData[];
+    
+    if (cachedActivities.length > 0) {
+      console.log('Using cached activities:', cachedActivities.length);
+      activities = cachedActivities;
+    } else {
+      // If no cached data, use sample activities
+      console.log('Using sample activities');
+      activities = SAMPLE_ACTIVITIES;
+      
+      // Cache the sample activities
+      for (const activity of activities) {
+        await offlineStore.storeEntity('activity', activity.id, activity);
+      }
+    }
+    
+    // Sort by timestamp (newest first) and limit
+    activities.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    // Limit the number of results
+    const limitedActivities = activities.slice(0, limit);
+    
+    // Transform to TeamActivity format
+    return transformActivityData(limitedActivities);
+  } catch (error) {
+    console.error('Error fetching activities:', error);
+    
+    // Fallback to sample activities in case of error
+    return transformActivityData(SAMPLE_ACTIVITIES);
+  }
 }
 
-// Helper function to store activities in localStorage
-function storeActivities(activities: Activity[]): void {
+/**
+ * Add a new activity
+ * Works offline by storing locally and syncing later
+ */
+export async function addActivity(
+  action: string,
+  type: string,
+  projectId?: string,
+  projectName?: string,
+  metadata?: Record<string, any>
+): Promise<ActivityData> {
+  const isOnline = getOnlineStatus();
+  console.log(`Adding activity (${isOnline ? 'online' : 'offline'} mode):`, { action, type, projectId });
+  
   try {
-    localStorage.setItem(ACTIVITIES_STORAGE_KEY, JSON.stringify(activities));
-  } catch (err) {
-    console.error('Error storing activities:', err);
+    const timestamp = new Date().toISOString();
+    
+    const newActivity: ActivityData = {
+      id: `activity-${uuidv4()}`,
+      timestamp,
+      performed_at: timestamp,
+      type,
+      action_type: type,
+      description: action,
+      performed_by: 'demo-user',
+      project_id: projectId,
+      metadata,
+      user: {
+        id: 'demo-user',
+        name: 'Demo User',
+        avatar: '/lovable-uploads/f1ba8f91-019b-4932-9d0e-5414aef0ed47.png'
+      },
+      content: {
+        title: type.charAt(0).toUpperCase() + type.slice(1),
+        description: action,
+        project: projectId ? {
+          id: projectId,
+          name: projectName || 'Unknown Project'
+        } : undefined
+      }
+    };
+    
+    // Store locally
+    await offlineStore.storeEntity('activity', newActivity.id, newActivity);
+    
+    // Add to sync queue if we're offline
+    if (!isOnline) {
+      await syncQueue.addToSyncQueue('activity', 'create', newActivity.id, newActivity);
+      console.log('Added activity to sync queue');
+    } else {
+      // In a real app, would send to server here
+      console.log('Activity recorded (simulated server response)');
+    }
+    
+    return newActivity;
+  } catch (error) {
+    console.error('Error adding activity:', error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch project-specific activities
+ */
+export async function fetchProjectActivities(projectId: string, limit: number = 10): Promise<TeamActivity[]> {
+  console.log(`Fetching activities for project ${projectId}`);
+  
+  try {
+    // Get all activities
+    const allActivities = await offlineStore.getAllEntities<ActivityData>('activity');
+    
+    // Filter by project ID
+    const projectActivities = allActivities.filter(activity => 
+      activity.project_id === projectId || 
+      activity.content?.project?.id === projectId
+    );
+    
+    // Sort by timestamp (newest first) and limit
+    projectActivities.sort((a, b) => 
+      new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+    );
+    
+    // Limit the number of results
+    const limitedActivities = projectActivities.slice(0, limit);
+    
+    // Transform to TeamActivity format
+    return transformActivityData(limitedActivities);
+  } catch (error) {
+    console.error(`Error fetching activities for project ${projectId}:`, error);
+    
+    // Return empty array in case of error
+    return [];
   }
 }

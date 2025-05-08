@@ -2,140 +2,166 @@
 /**
  * Settings API functions
  * 
- * These functions handle settings operations, storing data in localStorage.
- * In public mode, settings are kept only for the current session.
+ * These functions handle settings data operations, with local storage as the primary storage.
  */
 
 import { AppSettings, UserPreferences } from './types';
-import { DEFAULT_APP_SETTINGS, DEFAULT_USER_PREFERENCES } from './defaultSettings';
+import { getDefaultSettings } from './defaultSettings';
+import * as offlineStore from '../../services/cache/offlineStore';
 
-// Storage keys
-const SETTINGS_KEY = 'wintracker_app_settings';
-const PREFERENCES_KEY = 'wintracker_user_preferences';
+const SETTINGS_ID = 'app_settings';
+const PREFERENCES_ID = 'user_preferences';
 
 /**
- * Get application settings
- * In public mode, returns from localStorage or defaults
+ * Fetch application settings
+ * Always available offline from local storage
  */
-export function getAppSettings(): AppSettings {
+export async function fetchSettings(): Promise<AppSettings> {
+  console.log('Fetching settings');
+  
   try {
-    const storedSettings = localStorage.getItem(SETTINGS_KEY);
-    if (storedSettings) {
-      return JSON.parse(storedSettings) as AppSettings;
+    // First try to get from IndexedDB
+    const settings = await offlineStore.getEntity<AppSettings>('settings', SETTINGS_ID);
+    
+    if (settings) {
+      console.log('Using cached settings');
+      return settings;
     }
-  } catch (err) {
-    console.error('Error retrieving app settings:', err);
-  }
-  
-  return DEFAULT_APP_SETTINGS;
-}
-
-/**
- * Save application settings
- * In public mode, saves to localStorage
- */
-export function saveAppSettings(settings: AppSettings): void {
-  try {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
-  } catch (err) {
-    console.error('Error saving app settings:', err);
-  }
-}
-
-/**
- * Update specific settings
- * In public mode, updates localStorage
- */
-export function updateAppSettings(updates: Partial<AppSettings>): AppSettings {
-  const currentSettings = getAppSettings();
-  const updatedSettings = {
-    ...currentSettings,
-    ...updates,
-  };
-  
-  saveAppSettings(updatedSettings);
-  return updatedSettings;
-}
-
-/**
- * Get user preferences
- * In public mode, returns from localStorage or defaults
- */
-export function getUserPreferences(): UserPreferences {
-  try {
-    const storedPreferences = localStorage.getItem(PREFERENCES_KEY);
-    if (storedPreferences) {
-      return JSON.parse(storedPreferences) as UserPreferences;
+    
+    // If not in IndexedDB, try localStorage (for backwards compatibility)
+    const localSettings = localStorage.getItem('app_settings');
+    if (localSettings) {
+      try {
+        const parsed = JSON.parse(localSettings) as AppSettings;
+        
+        // Store in IndexedDB for future use
+        await offlineStore.storeEntity('settings', SETTINGS_ID, parsed);
+        
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing settings from localStorage:', e);
+      }
     }
-  } catch (err) {
-    console.error('Error retrieving user preferences:', err);
-  }
-  
-  return DEFAULT_USER_PREFERENCES;
-}
-
-/**
- * Save user preferences
- * In public mode, saves to localStorage
- */
-export function saveUserPreferences(preferences: UserPreferences): void {
-  try {
-    localStorage.setItem(PREFERENCES_KEY, JSON.stringify(preferences));
-  } catch (err) {
-    console.error('Error saving user preferences:', err);
+    
+    // If no settings found, use defaults
+    const defaultSettings = getDefaultSettings();
+    await offlineStore.storeEntity('settings', SETTINGS_ID, defaultSettings);
+    
+    return defaultSettings;
+  } catch (error) {
+    console.error('Error fetching settings:', error);
+    return getDefaultSettings();
   }
 }
 
 /**
- * Update specific preferences
- * In public mode, updates localStorage
+ * Update application settings
+ * Works offline by storing in local storage
  */
-export function updateUserPreferences(updates: Partial<UserPreferences>): UserPreferences {
-  const currentPreferences = getUserPreferences();
-  const updatedPreferences = {
-    ...currentPreferences,
-    ...updates,
-  };
+export async function updateSettings(settings: Partial<AppSettings>): Promise<AppSettings> {
+  console.log('Updating settings:', settings);
   
-  saveUserPreferences(updatedPreferences);
-  return updatedPreferences;
-}
-
-/**
- * Reset all settings to defaults
- * In public mode, clears localStorage
- */
-export function resetAllSettings(): void {
   try {
-    localStorage.removeItem(SETTINGS_KEY);
-    localStorage.removeItem(PREFERENCES_KEY);
-  } catch (err) {
-    console.error('Error resetting settings:', err);
+    // Get current settings
+    const currentSettings = await fetchSettings();
+    
+    // Merge with new settings
+    const updatedSettings: AppSettings = {
+      ...currentSettings,
+      ...settings
+    };
+    
+    // Store in IndexedDB
+    await offlineStore.storeEntity('settings', SETTINGS_ID, updatedSettings);
+    
+    // Also update localStorage for backwards compatibility
+    localStorage.setItem('app_settings', JSON.stringify(updatedSettings));
+    
+    return updatedSettings;
+  } catch (error) {
+    console.error('Error updating settings:', error);
+    throw error;
   }
 }
 
 /**
- * Add a project to recent projects list
+ * Fetch user preferences
  */
-export function addRecentProject(projectId: string, projectName: string): void {
-  const preferences = getUserPreferences();
+export async function fetchPreferences(): Promise<UserPreferences> {
+  console.log('Fetching user preferences');
   
-  // Create a new array with the project at the beginning
-  const recentProjects = [
-    projectId,
-    ...preferences.recentProjects.filter(id => id !== projectId)
-  ].slice(0, 10); // Keep only the 10 most recent
-  
-  // Save the updated preferences
-  saveUserPreferences({
-    ...preferences,
-    recentProjects
-  });
-  
-  // Also save the project name for easy lookup
   try {
-    localStorage.setItem(`project_${projectId}`, projectName);
-  } catch (err) {
-    console.error('Error saving project name:', err);
+    // First try to get from IndexedDB
+    const preferences = await offlineStore.getEntity<UserPreferences>('settings', PREFERENCES_ID);
+    
+    if (preferences) {
+      return preferences;
+    }
+    
+    // If not in IndexedDB, try localStorage
+    const localPreferences = localStorage.getItem('user_preferences');
+    if (localPreferences) {
+      try {
+        const parsed = JSON.parse(localPreferences) as UserPreferences;
+        
+        // Store in IndexedDB for future use
+        await offlineStore.storeEntity('settings', PREFERENCES_ID, parsed);
+        
+        return parsed;
+      } catch (e) {
+        console.error('Error parsing preferences from localStorage:', e);
+      }
+    }
+    
+    // Default preferences
+    const defaultPreferences: UserPreferences = {
+      language: 'en',
+      startPage: 'dashboard',
+      recentProjects: [],
+      savedFilters: {}
+    };
+    
+    await offlineStore.storeEntity('settings', PREFERENCES_ID, defaultPreferences);
+    
+    return defaultPreferences;
+  } catch (error) {
+    console.error('Error fetching user preferences:', error);
+    
+    // Return default preferences
+    return {
+      language: 'en',
+      startPage: 'dashboard',
+      recentProjects: [],
+      savedFilters: {}
+    };
+  }
+}
+
+/**
+ * Update user preferences
+ */
+export async function updatePreferences(preferences: Partial<UserPreferences>): Promise<UserPreferences> {
+  console.log('Updating user preferences:', preferences);
+  
+  try {
+    // Get current preferences
+    const currentPreferences = await fetchPreferences();
+    
+    // Merge with new preferences
+    const updatedPreferences: UserPreferences = {
+      ...currentPreferences,
+      ...preferences
+    };
+    
+    // Store in IndexedDB
+    await offlineStore.storeEntity('settings', PREFERENCES_ID, updatedPreferences);
+    
+    // Also update localStorage for backwards compatibility
+    localStorage.setItem('user_preferences', JSON.stringify(updatedPreferences));
+    
+    return updatedPreferences;
+  } catch (error) {
+    console.error('Error updating user preferences:', error);
+    throw error;
   }
 }

@@ -1,86 +1,193 @@
 
 /**
- * Offline Store Service
+ * Offline storage service using IndexedDB
  * 
- * This service provides a local cache for data that needs to be accessed
- * while offline. It handles storing and retrieving data from IndexedDB.
+ * This service provides a simple API for storing and retrieving data locally,
+ * allowing the application to function offline.
  */
 
-// Define the entity types that can be stored
-export type EntityType = 'project' | 'measurement' | 'team' | 'report' | 'user';
+import { openDB, IDBPDatabase } from 'idb';
 
-/**
- * Store an entity in the offline cache
- */
-export const storeEntity = async <T>(
-  entityType: EntityType,
-  entityId: string,
-  data: T
-): Promise<void> => {
-  // In a real implementation, we would store this in IndexedDB
-  console.log(`Storing ${entityType} with ID ${entityId} in offline cache`);
+const DB_NAME = 'window_tracker_offline';
+const DB_VERSION = 1;
+
+// Entity types that can be stored offline
+export type EntityType = 
+  | 'projects'
+  | 'measurements'
+  | 'settings'
+  | 'activity';
+
+interface StoredEntity {
+  id: string;
+  data: unknown;
+  updatedAt: string;
+  syncStatus?: 'pending' | 'synced' | 'error';
+}
+
+// Initialize IndexedDB
+let dbPromise: Promise<IDBPDatabase> | null = null;
+
+export const initDB = async (): Promise<IDBPDatabase> => {
+  if (!dbPromise) {
+    dbPromise = openDB(DB_NAME, DB_VERSION, {
+      upgrade(db) {
+        // Create stores for each entity type
+        if (!db.objectStoreNames.contains('projects')) {
+          db.createObjectStore('projects', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('measurements')) {
+          db.createObjectStore('measurements', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('settings')) {
+          db.createObjectStore('settings', { keyPath: 'id' });
+        }
+        if (!db.objectStoreNames.contains('activity')) {
+          db.createObjectStore('activity', { keyPath: 'id' });
+        }
+        
+        console.log('IndexedDB initialized with stores:', db.objectStoreNames);
+      },
+    });
+  }
+  return dbPromise;
 };
 
-/**
- * Get an entity from the offline cache
- */
-export const getEntity = async <T>(
-  entityType: EntityType,
-  entityId: string
-): Promise<T | null> => {
-  // In a real implementation, we would retrieve this from IndexedDB
-  console.log(`Getting ${entityType} with ID ${entityId} from offline cache`);
-  return null;
-};
+// Get a single entity by ID
+export async function getEntity<T>(entityType: EntityType, id: string): Promise<T | null> {
+  try {
+    const db = await initDB();
+    const stored = await db.get(entityType, id) as StoredEntity | undefined;
+    
+    if (!stored) return null;
+    return stored.data as T;
+  } catch (error) {
+    console.error(`Error getting ${entityType} with id ${id}:`, error);
+    throw error;
+  }
+}
 
-/**
- * Get all entities of a specific type from the offline cache
- */
-export const getAllEntities = async <T>(
-  entityType: EntityType
-): Promise<T[]> => {
-  // In a real implementation, we would retrieve these from IndexedDB
-  console.log(`Getting all ${entityType}s from offline cache`);
-  return [];
-};
+// Get all entities of a specific type
+export async function getAllEntities<T>(entityType: EntityType): Promise<T[]> {
+  try {
+    const db = await initDB();
+    const all = await db.getAll(entityType) as StoredEntity[];
+    
+    return all.map(item => item.data as T);
+  } catch (error) {
+    console.error(`Error getting all ${entityType}:`, error);
+    throw error;
+  }
+}
 
-/**
- * Update an entity in the offline cache
- */
-export const updateEntity = async <T>(
-  entityType: EntityType,
-  entityId: string,
-  data: Partial<T>
-): Promise<void> => {
-  // In a real implementation, we would update this in IndexedDB
-  console.log(`Updating ${entityType} with ID ${entityId} in offline cache`);
-};
+// Store an entity
+export async function storeEntity<T>(entityType: EntityType, id: string, data: T): Promise<void> {
+  try {
+    const db = await initDB();
+    const storedEntity: StoredEntity = {
+      id,
+      data,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending'
+    };
+    
+    await db.put(entityType, storedEntity);
+  } catch (error) {
+    console.error(`Error storing ${entityType}:`, error);
+    throw error;
+  }
+}
 
-/**
- * Remove an entity from the offline cache
- */
-export const removeEntity = async (
-  entityType: EntityType,
-  entityId: string
-): Promise<void> => {
-  // In a real implementation, we would remove this from IndexedDB
-  console.log(`Removing ${entityType} with ID ${entityId} from offline cache`);
-};
+// Update an entity (partial update)
+export async function updateEntity<T>(entityType: EntityType, id: string, partialData: Partial<T>): Promise<void> {
+  try {
+    const db = await initDB();
+    const stored = await db.get(entityType, id) as StoredEntity | undefined;
+    
+    if (!stored) {
+      throw new Error(`${entityType} with id ${id} not found`);
+    }
+    
+    const updatedData = {
+      ...stored.data as object,
+      ...partialData
+    };
+    
+    const updatedEntity: StoredEntity = {
+      ...stored,
+      data: updatedData,
+      updatedAt: new Date().toISOString(),
+      syncStatus: 'pending'
+    };
+    
+    await db.put(entityType, updatedEntity);
+  } catch (error) {
+    console.error(`Error updating ${entityType} with id ${id}:`, error);
+    throw error;
+  }
+}
 
-/**
- * Clear all entities of a specific type from the offline cache
- */
-export const clearEntities = async (
-  entityType: EntityType
-): Promise<void> => {
-  // In a real implementation, we would clear these from IndexedDB
-  console.log(`Clearing all ${entityType}s from offline cache`);
-};
+// Remove an entity
+export async function removeEntity(entityType: EntityType, id: string): Promise<void> {
+  try {
+    const db = await initDB();
+    await db.delete(entityType, id);
+  } catch (error) {
+    console.error(`Error removing ${entityType} with id ${id}:`, error);
+    throw error;
+  }
+}
 
-/**
- * Initialize the offline store
- */
-export const initOfflineStore = async (): Promise<void> => {
-  // In a real implementation, we would set up IndexedDB
-  console.log('Offline store initialized');
-};
+// Clear all entities of a specific type
+export async function clearEntities(entityType: EntityType): Promise<void> {
+  try {
+    const db = await initDB();
+    await db.clear(entityType);
+  } catch (error) {
+    console.error(`Error clearing all ${entityType}:`, error);
+    throw error;
+  }
+}
+
+// Mark an entity as synced
+export async function markEntitySynced(entityType: EntityType, id: string): Promise<void> {
+  try {
+    const db = await initDB();
+    const stored = await db.get(entityType, id) as StoredEntity | undefined;
+    
+    if (!stored) return;
+    
+    const updatedEntity: StoredEntity = {
+      ...stored,
+      syncStatus: 'synced'
+    };
+    
+    await db.put(entityType, updatedEntity);
+  } catch (error) {
+    console.error(`Error marking ${entityType} with id ${id} as synced:`, error);
+    throw error;
+  }
+}
+
+// Get all entities that need to be synced
+export async function getPendingSyncEntities<T>(entityType: EntityType): Promise<Array<{id: string, data: T}>> {
+  try {
+    const db = await initDB();
+    const all = await db.getAll(entityType) as StoredEntity[];
+    
+    return all
+      .filter(item => item.syncStatus === 'pending')
+      .map(item => ({
+        id: item.id,
+        data: item.data as T
+      }));
+  } catch (error) {
+    console.error(`Error getting pending sync ${entityType}:`, error);
+    throw error;
+  }
+}
+
+// Initialize the database on module import
+initDB().catch(error => {
+  console.error('Failed to initialize IndexedDB:', error);
+});

@@ -1,38 +1,66 @@
 
 /**
- * Activity tracking types
+ * Activity types definition
  */
 
-export type ActivityType = 
-  | 'project_created'
-  | 'project_updated'
-  | 'project_deleted'
-  | 'measurement_created'
-  | 'measurement_updated'
-  | 'measurement_deleted'
-  | 'user_login'
-  | 'user_logout'
-  | 'report_generated'
-  | 'settings_changed'
-  | 'view_page'
-  | 'search'
-  | 'filter_applied'
-  | 'export_data'
-  | 'import_data';
-
-export interface Activity {
+export interface ActivityData {
   id: string;
-  type: ActivityType;
   timestamp: string;
-  userId: string;
-  userName?: string;
-  details: Record<string, any>;
-  entityId?: string;
-  entityType?: 'project' | 'measurement' | 'user' | 'report';
+  type: string;
+  user: {
+    id: string;
+    name: string;
+    avatar?: string;
+  };
+  content: {
+    title: string;
+    description: string;
+    project?: {
+      id: string;
+      name: string;
+    };
+    meta?: Record<string, any>;
+  };
+  status?: string;
+  priority?: 'low' | 'medium' | 'high';
+  // Additional properties from Supabase data structure
+  profiles?: { 
+    full_name?: string; 
+    avatar_url?: string;
+  };
+  projects?: { 
+    name?: string;
+  };
+  action_type?: string;
+  description?: string;
+  metadata?: any;
+  performed_at?: string;
+  performed_by?: string;
+  project_id?: string;
 }
 
-export interface ActivityLogOptions {
-  userId?: string;
-  userName?: string;
-  silent?: boolean;  // If true, don't show toasts or other notifications
+export interface TeamActivity {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    avatar?: string;
+    role?: string;
+  };
+  action: string;
+  timestamp: string;
+  timeAgo: string;
+  avatar?: string;
+  name?: string;
+  icon?: 'measurement' | 'team' | 'complete' | 'issue' | 'update';
+  target?: string;
+  targetType?: 'project' | 'team' | 'measurement';
+  metadata?: Record<string, any>;
+  project?: {
+    id: string;
+    name: string;
+  };
+  status?: string;
+  priority?: 'low' | 'medium' | 'high';
+  details?: Record<string, any>;
 }

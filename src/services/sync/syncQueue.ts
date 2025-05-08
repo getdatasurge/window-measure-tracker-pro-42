@@ -2,129 +2,195 @@
 /**
  * Sync Queue Service
  * 
- * This service manages the queue of operations that need to be synchronized 
- * with the server once connectivity is restored. It handles storing operations
- * while offline and processing them when online.
+ * This service manages the queue of operations that need to be synchronized with
+ * the backend when the application comes online.
  */
 
+import { openDB, IDBPDatabase } from 'idb';
 import { v4 as uuidv4 } from 'uuid';
 
-export type SyncOperation = {
+const SYNC_DB_NAME = 'window_tracker_sync_queue';
+const SYNC_DB_VERSION = 1;
+const SYNC_STORE_NAME = 'operations';
+
+export type SyncOperationType = 'create' | 'update' | 'delete';
+export type SyncEntityType = 'projects' | 'measurements' | 'settings' | 'activity';
+export type SyncStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
+export interface SyncOperation {
   id: string;
-  entityType: 'project' | 'measurement' | 'team' | 'report';
-  operationType: 'create' | 'update' | 'delete';
+  entityType: SyncEntityType;
   entityId: string;
-  data: unknown;
-  timestamp: number;
+  operationType: SyncOperationType;
+  data?: any;
+  timestamp: string;
+  status: SyncStatus;
   retryCount: number;
-  status: 'pending' | 'processing' | 'failed' | 'completed';
-  errorMessage?: string;
+  error?: string;
+}
+
+let syncDBPromise: Promise<IDBPDatabase> | null = null;
+
+// Initialize the sync queue database
+const initSyncDB = async (): Promise<IDBPDatabase> => {
+  if (!syncDBPromise) {
+    syncDBPromise = openDB(SYNC_DB_NAME, SYNC_DB_VERSION, {
+      upgrade(db) {
+        if (!db.objectStoreNames.contains(SYNC_STORE_NAME)) {
+          const store = db.createObjectStore(SYNC_STORE_NAME, { keyPath: 'id' });
+          store.createIndex('status', 'status');
+          store.createIndex('entityType', 'entityType');
+          store.createIndex('timestamp', 'timestamp');
+        }
+      },
+    });
+  }
+  return syncDBPromise;
 };
 
-/**
- * Add an operation to the sync queue
- */
-export const addToSyncQueue = async (
-  entityType: SyncOperation['entityType'],
-  operationType: SyncOperation['operationType'],
+// Add an operation to the sync queue
+export async function addToSyncQueue<T>(
+  entityType: SyncEntityType,
+  operationType: SyncOperationType,
   entityId: string,
-  data: unknown
-): Promise<string> => {
+  data?: T
+): Promise<string> {
+  const db = await initSyncDB();
+  
   const operation: SyncOperation = {
     id: uuidv4(),
     entityType,
-    operationType,
     entityId,
+    operationType,
     data,
-    timestamp: Date.now(),
-    retryCount: 0,
-    status: 'pending'
+    timestamp: new Date().toISOString(),
+    status: 'pending',
+    retryCount: 0
   };
   
-  // In a real implementation, we would store this in IndexedDB
-  console.log('Added to sync queue:', operation);
+  await db.add(SYNC_STORE_NAME, operation);
+  console.log(`Added ${operationType} operation for ${entityType}:${entityId} to sync queue`);
   
-  // For now, we'll just simulate the operation being queued
-  // and return the operation ID
   return operation.id;
-};
+}
 
-/**
- * Get all pending sync operations
- */
-export const getPendingSyncOperations = async (): Promise<SyncOperation[]> => {
-  // In a real implementation, we would retrieve this from IndexedDB
-  return [];
-};
+// Get all operations with a specific status
+export async function getOperationsByStatus(status: SyncStatus): Promise<SyncOperation[]> {
+  const db = await initSyncDB();
+  return db.getAllFromIndex(SYNC_STORE_NAME, 'status', status);
+}
 
-/**
- * Process all pending sync operations
- */
-export const processSyncQueue = async (): Promise<{
+// Update an operation's status
+export async function updateOperationStatus(
+  id: string, 
+  status: SyncStatus, 
+  error?: string
+): Promise<void> {
+  const db = await initSyncDB();
+  const operation = await db.get(SYNC_STORE_NAME, id);
+  
+  if (!operation) {
+    throw new Error(`Operation with id ${id} not found`);
+  }
+  
+  const updatedOperation: SyncOperation = {
+    ...operation,
+    status,
+    error,
+    retryCount: status === 'failed' ? operation.retryCount + 1 : operation.retryCount
+  };
+  
+  await db.put(SYNC_STORE_NAME, updatedOperation);
+}
+
+// Process the sync queue
+export async function processSyncQueue(): Promise<{
   success: boolean;
   processed: number;
   failed: number;
-}> => {
-  // Get all pending operations
-  const pendingOperations = await getPendingSyncOperations();
+}> {
+  const pendingOperations = await getOperationsByStatus('pending');
   
-  // This would normally process each operation in sequence
-  // making API calls to the server
-  console.log(`Processing ${pendingOperations.length} operations`);
-  
-  // For now, just return simulated results
-  return {
-    success: true,
-    processed: pendingOperations.length,
-    failed: 0
-  };
-};
-
-/**
- * Update the status of a sync operation
- */
-export const updateSyncOperationStatus = async (
-  operationId: string,
-  status: SyncOperation['status'],
-  errorMessage?: string
-): Promise<void> => {
-  // In a real implementation, we would update the operation in IndexedDB
-  console.log(`Updating operation ${operationId} status to ${status}`);
-  if (errorMessage) {
-    console.log(`Error: ${errorMessage}`);
+  if (pendingOperations.length === 0) {
+    return { success: true, processed: 0, failed: 0 };
   }
-};
+  
+  let processed = 0;
+  let failed = 0;
+  
+  for (const operation of pendingOperations) {
+    try {
+      // Mark as processing
+      await updateOperationStatus(operation.id, 'processing');
+      
+      // In a real implementation, this would call an API
+      // For now, we'll just simulate a successful sync
+      // await syncWithBackend(operation);
+      console.log(`Processing operation: ${operation.operationType} on ${operation.entityType}:${operation.entityId}`);
+      
+      // Simulate network request
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
+      // Mark as completed
+      await updateOperationStatus(operation.id, 'completed');
+      processed++;
+    } catch (error) {
+      console.error(`Failed to process operation ${operation.id}:`, error);
+      await updateOperationStatus(
+        operation.id, 
+        'failed', 
+        error instanceof Error ? error.message : String(error)
+      );
+      failed++;
+    }
+  }
+  
+  return {
+    success: failed === 0,
+    processed,
+    failed
+  };
+}
 
-/**
- * Clear completed operations from the queue
- */
-export const clearCompletedOperations = async (): Promise<number> => {
-  // In a real implementation, we would remove completed operations from IndexedDB
-  return 0;
-};
-
-/**
- * Get the count of operations by status
- */
-export const getSyncQueueStats = async (): Promise<{
+// Get statistics about the queue
+export async function getSyncQueueStats(): Promise<{
   pending: number;
   processing: number;
   failed: number;
   completed: number;
-}> => {
-  // In a real implementation, we would query IndexedDB for these counts
+}> {
+  const db = await initSyncDB();
+  
+  const [pending, processing, failed, completed] = await Promise.all([
+    db.countFromIndex(SYNC_STORE_NAME, 'status', 'pending'),
+    db.countFromIndex(SYNC_STORE_NAME, 'status', 'processing'),
+    db.countFromIndex(SYNC_STORE_NAME, 'status', 'failed'),
+    db.countFromIndex(SYNC_STORE_NAME, 'status', 'completed')
+  ]);
+  
   return {
-    pending: 0,
-    processing: 0,
-    failed: 0,
-    completed: 0
+    pending,
+    processing,
+    failed,
+    completed
   };
-};
+}
 
-/**
- * Initialize the sync queue system
- */
-export const initSyncQueue = async (): Promise<void> => {
-  // In a real implementation, we would set up IndexedDB and listeners for online/offline events
-  console.log('Sync queue initialized');
-};
+// Clear completed operations
+export async function clearCompletedOperations(): Promise<number> {
+  const db = await initSyncDB();
+  const completedOps = await db.getAllFromIndex(SYNC_STORE_NAME, 'status', 'completed');
+  
+  let count = 0;
+  for (const op of completedOps) {
+    await db.delete(SYNC_STORE_NAME, op.id);
+    count++;
+  }
+  
+  return count;
+}
+
+// Initialize the sync queue on module import
+initSyncDB().catch(error => {
+  console.error('Failed to initialize sync queue database:', error);
+});

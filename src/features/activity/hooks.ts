@@ -1,68 +1,138 @@
-
 /**
- * Activity tracking hooks
+ * React hooks for activity management
  */
 
-import { useState, useEffect, useCallback } from 'react';
-import { Activity, ActivityType } from './types';
-import { getActivities, getActivitiesByType, getActivitiesByEntity, logActivity } from './api';
+import { useState, useCallback, useEffect } from 'react';
+import { TeamActivity } from './types';
+import { fetchActivities, fetchProjectActivities, addActivity } from './api';
+import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
 /**
- * Hook for accessing and logging activities
+ * Hook for accessing the activity feed with offline support
  */
-export function useActivityTracking() {
-  const [activities, setActivities] = useState<Activity[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function useActivityFeed(limit: number = 20) {
+  const [activities, setActivities] = useState<TeamActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
+  const { isOnline, wasOffline } = useOnlineStatus();
   
-  // Load activities on initial render
-  useEffect(() => {
-    setActivities(getActivities());
-    setIsLoading(false);
-  }, []);
+  const loadActivities = useCallback(async () => {
+    setLoading(true);
+    try {
+      const data = await fetchActivities(limit);
+      setActivities(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch activities'));
+    } finally {
+      setLoading(false);
+    }
+  }, [limit]);
   
-  // Log a new activity
-  const logNewActivity = useCallback((
-    type: ActivityType,
-    details: Record<string, any>,
-    options = {}
+  const logActivity = useCallback(async (
+    action: string, 
+    type: string,
+    projectId?: string,
+    projectName?: string,
+    metadata?: Record<string, any>
   ) => {
-    const newActivity = logActivity(type, details, options);
-    setActivities(prevActivities => [newActivity, ...prevActivities]);
-    return newActivity;
-  }, []);
+    try {
+      const newActivity = await addActivity(action, type, projectId, projectName, metadata);
+      
+      // Update the local state with the new activity (at the beginning)
+      setActivities(prev => {
+        const copy = [...prev];
+        
+        // Transform the new activity to TeamActivity format
+        const transformed = {
+          id: newActivity.id,
+          user: { ...newActivity.user },
+          action: newActivity.description || action,
+          timestamp: newActivity.timestamp,
+          timeAgo: 'just now',
+          avatar: newActivity.user?.avatar,
+          name: newActivity.user?.name,
+          icon: type as "measurement" | "team" | "complete" | "issue" | "update",
+          target: projectName,
+          targetType: 'project' as const,
+          metadata,
+          project: projectId ? {
+            id: projectId, 
+            name: projectName || 'Unknown Project'
+          } : undefined
+        };
+        
+        // Add to the beginning (newest first)
+        copy.unshift(transformed);
+        
+        // Keep only the specified limit
+        return copy.slice(0, limit);
+      });
+      
+      return newActivity;
+    } catch (error) {
+      console.error('Error logging activity:', error);
+      throw error;
+    }
+  }, [limit]);
   
-  // Get activities by type
-  const getByType = useCallback((type: ActivityType) => {
-    return getActivitiesByType(type);
-  }, []);
+  // Load initial data
+  useEffect(() => {
+    loadActivities();
+  }, [loadActivities]);
   
-  // Get activities by entity
-  const getByEntity = useCallback((entityType: string, entityId: string) => {
-    return getActivitiesByEntity(entityType, entityId);
-  }, []);
+  // Refresh when coming back online
+  useEffect(() => {
+    if (isOnline && wasOffline) {
+      loadActivities();
+    }
+  }, [isOnline, wasOffline, loadActivities]);
   
   return {
     activities,
-    isLoading,
-    logActivity: logNewActivity,
-    getByType,
-    getByEntity
+    loading,
+    error,
+    refreshActivities: loadActivities,
+    logActivity
   };
 }
 
 /**
- * Hook for tracking page views
+ * Hook for accessing project-specific activities
  */
-export function usePageViewTracking() {
-  const { logActivity } = useActivityTracking();
+export function useProjectActivities(projectId: string, limit: number = 10) {
+  const [activities, setActivities] = useState<TeamActivity[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
   
+  const loadActivities = useCallback(async () => {
+    if (!projectId) {
+      setActivities([]);
+      setLoading(false);
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const data = await fetchProjectActivities(projectId, limit);
+      setActivities(data);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error('Failed to fetch project activities'));
+    } finally {
+      setLoading(false);
+    }
+  }, [projectId, limit]);
+  
+  // Load initial data
   useEffect(() => {
-    // Log a page view when the component mounts
-    const path = window.location.pathname;
-    logActivity('view_page', {
-      path,
-      title: document.title,
-      referrer: document.referrer
-    });
-  }, [logActivity]);
+    loadActivities();
+  }, [loadActivities]);
+  
+  return {
+    activities,
+    loading,
+    error,
+    refreshActivities: loadActivities
+  };
 }

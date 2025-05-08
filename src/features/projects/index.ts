@@ -3,19 +3,13 @@
  * Projects feature module
  * 
  * This module provides functionality for managing projects in the application.
- * In public mode, it provides read-only access to project data.
+ * Supports offline-first architecture with local caching and sync queue.
  */
 
 // Re-export components and hooks
 export * from './api';
 export * from './types';
+export * from './hooks';
 
 // Export default mock project for public mode
-export const DEFAULT_PUBLIC_PROJECT = {
-  id: 'public-project',
-  name: 'Sample Project',
-  client: 'Public Demo',
-  location: 'Demo Location',
-  status: 'active' as const,
-  createdAt: new Date().toISOString(),
-};
+export { DEFAULT_PUBLIC_PROJECT } from './api';

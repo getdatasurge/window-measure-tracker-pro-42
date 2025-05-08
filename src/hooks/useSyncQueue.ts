@@ -15,8 +15,8 @@ export function useSyncQueue() {
   // Add an operation to the sync queue
   const addOperation = useCallback(
     async <T>(
-      entityType: syncQueue.SyncOperation['entityType'],
-      operationType: syncQueue.SyncOperation['operationType'],
+      entityType: syncQueue.SyncEntityType,
+      operationType: syncQueue.SyncOperationType,
       entityId: string,
       data: T
     ): Promise<string> => {

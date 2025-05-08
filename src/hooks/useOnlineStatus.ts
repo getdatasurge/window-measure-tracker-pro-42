@@ -4,6 +4,11 @@
  */
 
 import { useState, useEffect, useCallback } from 'react';
+import { 
+  subscribeToNetworkStatus, 
+  getOnlineStatus, 
+  checkNetworkQuality 
+} from '../services/network/networkStatus';
 
 export interface OnlineStatusState {
   isOnline: boolean;
@@ -13,7 +18,7 @@ export interface OnlineStatusState {
 
 export function useOnlineStatus() {
   const [status, setStatus] = useState<OnlineStatusState>({
-    isOnline: navigator.onLine,
+    isOnline: getOnlineStatus(),
     wasOffline: false,
     lastChanged: null
   });
@@ -44,30 +49,18 @@ export function useOnlineStatus() {
 
   // Set up event listeners for online/offline events
   useEffect(() => {
-    const handleOnline = () => handleOnlineStatusChange(true);
-    const handleOffline = () => handleOnlineStatusChange(false);
-    
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
-    
-    return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
-    };
+    const unsubscribe = subscribeToNetworkStatus(handleOnlineStatusChange);
+    return unsubscribe;
   }, [handleOnlineStatusChange]);
 
   // Additional heartbeat check for more reliable detection
   useEffect(() => {
-    // This would normally ping a lightweight endpoint to verify connection
-    // For now, we'll just use the built-in navigator.onLine
-    
+    // This checks network quality periodically
     const checkConnection = async () => {
-      // In a real implementation, we would make a tiny request to verify
-      // Instead, we'll just use the navigator.onLine value
-      const online = navigator.onLine;
+      const result = await checkNetworkQuality();
       
-      if (online !== status.isOnline) {
-        handleOnlineStatusChange(online);
+      if (result.online !== status.isOnline) {
+        handleOnlineStatusChange(result.online);
       }
     };
     
