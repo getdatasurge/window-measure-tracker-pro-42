@@ -1,11 +1,12 @@
-
 import React from 'react';
-import { ArrowRight, BarChart, Clock, FileCode, Users, ArrowRightCircle } from 'lucide-react';
+import { ArrowRight, BarChart, Clock, FileCode, Users, ArrowRightCircle, LogIn, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
+import useAuthModalStore from '@/stores/useAuthModalStore';
 
 const LandingPage = () => {
   const navigate = useNavigate();
+  const { openLogin, openSignup } = useAuthModalStore();
   
   const goToDashboard = () => {
     navigate('/dashboard');
@@ -38,6 +39,26 @@ const LandingPage = () => {
             Explore Demo
             <ArrowRight size={18} />
           </Button>
+          
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={openLogin} 
+              className="border-zinc-600 text-white hover:bg-zinc-800 px-6 py-2 rounded-md font-medium flex items-center gap-2 transition-all"
+            >
+              <LogIn size={18} />
+              Sign In
+            </Button>
+            
+            <Button 
+              variant="outline" 
+              onClick={openSignup}
+              className="border-zinc-600 text-white hover:bg-zinc-800 px-6 py-2 rounded-md font-medium flex items-center gap-2 transition-all"
+            >
+              <UserPlus size={18} />
+              Sign Up
+            </Button>
+          </div>
         </div>
         
         <div className="flex flex-wrap justify-center gap-8 text-sm">

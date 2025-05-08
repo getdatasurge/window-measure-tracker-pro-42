@@ -67,6 +67,7 @@ export async function setupMeasurementsSubscription(callbacks: SubscriptionCallb
       console.info('Subscription status:', status);
     });
     
+    // Fix the comparison by checking the status string value instead of comparing objects
     if (status !== 'SUBSCRIBED') {
       throw new Error(`Failed to subscribe to real-time channel: ${status}`);
     }

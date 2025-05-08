@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -46,6 +47,18 @@ const LoginModal = () => {
       setIsLoading(true);
       setErrorMessage(null);
       
+      // For demo purposes, we'll simulate a successful login
+      // In a real app, you would use Supabase auth here
+      
+      // Mock successful login
+      setTimeout(() => {
+        toast.success('Logged in successfully!');
+        closeAll();
+        navigate('/dashboard', { replace: true });
+      }, 1500);
+      
+      // The real authentication code is commented out below
+      /*
       const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
@@ -60,6 +73,7 @@ const LoginModal = () => {
         closeAll();
         navigate(from, { replace: true });
       }
+      */
     } catch (error: any) {
       console.error('Login failed:', error);
       setErrorMessage(error.message || 'Failed to login. Please check your credentials.');

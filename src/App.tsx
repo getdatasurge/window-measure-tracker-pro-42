@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -31,6 +30,7 @@ import Overview from "./pages/Overview";
 import TeamManagement from "./pages/TeamManagement";
 import Measurements from "./pages/Measurements";
 import MeasurementEntries from "./pages/MeasurementEntries";
+import { LoginModal, SignupModal } from './components/modals';
 
 // Create a new QueryClient instance with custom options for better invalidation handling
 const queryClient = new QueryClient({
@@ -61,7 +61,7 @@ const removeUnusedPreloadTags = () => {
   }
 };
 
-const App = () => {
+function App() {
   // Initialize the feedbucket patch when the app mounts
   useEffect(() => {
     const feedbucketCleanup = enableFeedbucketInteraction();
@@ -148,6 +148,6 @@ const App = () => {
       </TooltipProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
