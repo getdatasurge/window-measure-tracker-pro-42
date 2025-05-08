@@ -2,9 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/auth';
 import { useIsMobile } from '@/hooks/use-mobile';
-import LogoutButton from '@/components/auth/LogoutButton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface NavItem {
@@ -15,7 +13,6 @@ interface NavItem {
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
-  const { isAuthenticated } = useAuth();
   const isMobile = useIsMobile();
 
   // Define navigation items
@@ -75,28 +72,6 @@ const Sidebar: React.FC = () => {
           ))}
         </div>
       </div>
-      {isAuthenticated && !isMobile && (
-        <div className="p-4 border-t flex items-center justify-between">
-          <p className="text-sm text-gray-500">Logged in</p>
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <LogoutButton 
-                  showIcon={true}
-                  labelText="" 
-                  variant="ghost" 
-                  size="icon"
-                  className="h-8 w-8 p-2 rounded-md text-red-500 hover:bg-gray-100 hover:text-red-600 transition-colors"
-                  aria-label="Log out"
-                />
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Log out</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
-        </div>
-      )}
     </div>
   );
 };
