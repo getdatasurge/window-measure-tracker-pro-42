@@ -2,55 +2,46 @@
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Setup realtime functionality for the measurements table
- * This needs to be called before subscribing to realtime updates
+ * Set up realtime subscriptions for the app
+ * This version works without authentication requirements
  */
-export const setupRealtime = async (): Promise<boolean> => {
+export async function setupRealtime(): Promise<boolean> {
   try {
-    console.log('Setting up realtime for measurements table...');
+    // Basic channel test to see if realtime is working
+    const channel = supabase.channel('system');
     
-    // First, check if the table exists to avoid errors
-    const { data, error } = await supabase
-      .from('measurements')
-      .select('id')
-      .limit(1);
+    // Listen for system broadcast messages
+    channel
+      .on('broadcast', { event: 'system-wide' }, (payload) => {
+        console.log('System broadcast received:', payload);
+      })
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED') {
+          console.log('Realtime connection established');
+          return true;
+        }
+        
+        if (status === 'CHANNEL_ERROR') {
+          console.error('Failed to establish realtime connection');
+          return false;
+        }
+        
+        if (status === 'TIMED_OUT') {
+          console.warn('Realtime connection timed out');
+          return false;
+        }
+      });
+      
+    // Additional channel for measurements
+    const measurementsChannel = supabase
+      .channel('public:measurements')
+      .subscribe();
+      
+    console.log('Measurement channel subscription status:', measurementsChannel);
     
-    // If there's an error or no data, the table might not exist yet
-    if (error) {
-      console.log('Error checking measurements table:', error.message);
-      return false;
-    }
-    
-    const tableExists = Array.isArray(data) && data.length >= 0;
-    
-    if (!tableExists) {
-      console.log('Measurements table does not exist yet - skipping realtime setup');
-      return false;
-    }
-    
-    // Call the Edge Function to enable realtime for the measurements table
-    const { data: funcData, error: funcError } = await supabase.functions.invoke('enable-realtime', {
-      body: {
-        tableName: 'measurements'
-      }
-    });
-    
-    if (funcError) {
-      console.warn('Error setting up realtime, falling back to polling:', funcError);
-      return false;
-    }
-    
-    console.log('Realtime setup result:', funcData);
     return true;
-  } catch (err) {
-    console.error('Failed to setup realtime, will use polling instead:', err);
+  } catch (error) {
+    console.error('Error setting up realtime:', error);
     return false;
   }
-};
-
-// Add a local mock implementation that always returns success
-// This helps during development when the edge function may not be available
-export const mockSetupRealtime = async (): Promise<boolean> => {
-  console.log('[MOCK] Setting up realtime for measurements table...');
-  return true;
-};
+}

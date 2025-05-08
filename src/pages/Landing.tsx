@@ -1,15 +1,18 @@
+
 import React from 'react';
 import { ArrowRight, BarChart, Clock, FileCode, Users, ArrowRightCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import useAuthModalStore from '@/stores/useAuthModalStore';
-import SignupModal from '@/components/modals/SignupModal';
-import LoginModal from '@/components/modals/LoginModal';
+import { useNavigate } from 'react-router-dom';
+
 const LandingPage = () => {
-  const {
-    openSignup,
-    openLogin
-  } = useAuthModalStore();
-  return <div className="min-h-screen bg-black text-white flex flex-col">
+  const navigate = useNavigate();
+  
+  const goToDashboard = () => {
+    navigate('/dashboard');
+  };
+  
+  return (
+    <div className="min-h-screen bg-black text-white flex flex-col">
       {/* Header/Hero Section */}
       <header className="flex flex-col items-center justify-center text-center px-6 pt-20 pb-16 md:pt-32 md:pb-24">
         <div className="logo-container mb-6">
@@ -28,28 +31,27 @@ const LandingPage = () => {
         </p>
         
         <div className="flex flex-col sm:flex-row gap-4 mb-10">
-          <Button onClick={openSignup} className="bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-all transform hover:scale-105">
-            Get Started Free
+          <Button 
+            onClick={goToDashboard}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-2 rounded-md font-medium flex items-center gap-2 transition-all transform hover:scale-105"
+          >
+            Explore Demo
             <ArrowRight size={18} />
-          </Button>
-          
-          <Button onClick={openLogin} variant="outline" className="border-gray-700 text-white hover:bg-gray-800 px-8 py-2 rounded-md font-medium transition-all">
-            Login
           </Button>
         </div>
         
         <div className="flex flex-wrap justify-center gap-8 text-sm">
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-gray-300">30-day free trial</span>
+            <span className="text-gray-300">Free demo version</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-gray-300">No credit card required</span>
+            <span className="text-gray-300">No registration required</span>
           </div>
           <div className="flex items-center gap-2">
             <div className="h-2 w-2 rounded-full bg-green-500" />
-            <span className="text-gray-300">Cancel anytime</span>
+            <span className="text-gray-300">Read-only access</span>
           </div>
         </div>
       </header>
@@ -143,14 +145,17 @@ const LandingPage = () => {
       <section className="py-20 px-6">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-3xl md:text-4xl font-bold mb-6">
-            Ready to Transform Your Window Installation Workflow?
+            Ready to Explore WindowTracker?
           </h2>
           <p className="text-gray-400 mb-10">
-            Join thousands of professionals who trust WindowTracker for their measurement and installation needs.
+            Explore our demo to see how WindowTracker can help your measurement and installation workflows.
           </p>
           
-          <Button onClick={openSignup} className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 rounded-md font-medium flex items-center gap-2 mx-auto transition-all transform hover:scale-105">
-            Get Started Today
+          <Button 
+            onClick={goToDashboard}
+            className="bg-green-500 hover:bg-green-600 text-white px-8 py-6 rounded-md font-medium flex items-center gap-2 mx-auto transition-all transform hover:scale-105"
+          >
+            Continue to Demo
             <ArrowRightCircle size={18} />
           </Button>
         </div>
@@ -176,10 +181,8 @@ const LandingPage = () => {
           © 2025 WindowTracker. All rights reserved.
         </div>
       </footer>
-      
-      {/* Auth Modals */}
-      <SignupModal />
-      <LoginModal />
-    </div>;
+    </div>
+  );
 };
+
 export default LandingPage;

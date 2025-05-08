@@ -30,6 +30,35 @@ export interface Measurement {
   input_source?: string; // Adding input source field
 }
 
+export interface MeasurementFormData {
+  projectId?: string;
+  projectName: string;
+  location: string;
+  width: string;
+  height: string;
+  area: string;
+  quantity: number;
+  recordedBy: string;
+  direction: Direction;
+  notes?: string;
+  status: MeasurementStatus;
+  measurementDate: string;
+  film_required?: boolean;
+  installationDate?: string;
+}
+
+// Helper functions for safely parsing potentially untyped string values
+export function parseDirection(directionString: string | undefined): Direction {
+  if (!directionString || !DIRECTION_OPTIONS.includes(directionString as Direction)) {
+    return 'N/A';
+  }
+  return directionString as Direction;
+}
+
+export function parseInputSource(source: string | undefined): string | undefined {
+  return source;
+}
+
 export interface MeasurementFilter {
   projectId?: string;
   location?: string;
