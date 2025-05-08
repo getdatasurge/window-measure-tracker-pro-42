@@ -55,30 +55,52 @@ This document outlines the cleanup and refactoring recommendations for convertin
 ```
 src/
 ├── app/                        # App shell and global providers
-├── assets/                     # Static assets (images, icons, etc.)
-├── components/                 # Global shared UI components
-│   ├── ui/                     # Buttons, inputs, dropdowns
-│   ├── layout/                 # Headers, sidebars, navbars
-│   ├── feedback/               # Loaders, alerts, error states
-│   ├── data/                   # Data presentation: tables, charts
-│   └── shared/                 # Other reusable UI units
-├── constants/                  # App-wide constants and enums
-├── features/                   # Business logic by domain
-│   ├── projects/               # Project-specific logic and components
-│   ├── measurements/           # Measurement-specific logic
-│   ├── teams/                  # Team management functionality
-│   └── reports/                # Reporting features
-├── pages/                      # Route-level views (screens)
-├── hooks/                      # Generic reusable logic hooks
-├── services/                   # Cross-feature logic
-│   ├── cache/                  # Local data persistence
-│   ├── sync/                   # Data synchronization
-│   ├── network/                # Network status and API handling
-│   └── db/                     # Data normalization and management
-├── state/                      # Global state management
-├── styles/                     # Global styling and themes
-├── types/                      # Global type definitions
-└── utils/                      # Pure helper functions
+│   ├── App.tsx                # Top-level app layout
+│   └── RootProvider.tsx       # All context/state combined
+│
+├── assets/                    # Static assets (icons, images, etc.)
+│   └── icons/
+│   └── images/
+│
+├── components/                # Global shared UI components
+│   ├── ui/                    # Buttons, inputs, dropdowns
+│   ├── layout/                # Headers, sidebars, navbars
+│   ├── feedback/              # Loaders, alerts, error states
+│   ├── data/                  # Data presentation: tables, charts
+│   └── shared/                # Other reusable UI units
+│
+├── constants/                 # App-wide constants and enums
+│   ├── routes.ts              # Central route mapping
+│   └── app.ts                 # Static config (appName, roles)
+│
+├── features/                  # Business logic by domain
+│   ├── projects/              # e.g., API, types, components
+│   │   ├── api.ts
+│   │   ├── hooks.ts
+│   │   ├── types.ts
+│   │   └── components/
+│   ├── teams/
+│   ├── reports/
+│   └── measurements/
+│
+├── pages/                     # Route-level views (screens)
+│   ├── index.tsx              # Landing page
+│   ├── dashboard/
+│   ├── usersettings/
+│   └── offline/               # Offline fallback screens
+│
+├── hooks/                     # Generic reusable logic hooks
+│   ├── useSyncQueue.ts        # Add to sync queue
+│   ├── useOfflineCache.ts     # Read/write to local store
+│   └── useOnlineStatus.ts     # Detect offline/online state
+│
+├── services/                  # Cross-feature logic
+│   ├── cache/                 # IndexedDB or localForage logic
+│   │   └── offlineStore.ts
+│   ├── sync/                  # Conflict resolution & sync batching
+│   │   └── syncQueue.ts
+│   ├── network/               # Fetching & online detection
+│   └── db/                    # Normalized data handling
 ```
 
 ### Renaming Recommendations:

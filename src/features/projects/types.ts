@@ -3,13 +3,15 @@
  * Project types definition
  */
 
+export type ProjectStatus = 'active' | 'pending' | 'completed' | 'archived';
+
 export interface Project {
   id: string;
   name: string;
   client: string;
   location?: string;
   deadline?: string;
-  status: 'active' | 'pending' | 'completed' | 'archived';
+  status: ProjectStatus;
   createdAt: string;
   entries_count?: number;
   description?: string;

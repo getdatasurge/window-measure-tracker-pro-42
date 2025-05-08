@@ -16,6 +16,6 @@ export const DEFAULT_PUBLIC_PROJECT = {
   name: 'Sample Project',
   client: 'Public Demo',
   location: 'Demo Location',
-  status: 'active',
+  status: 'active' as const,
   createdAt: new Date().toISOString(),
 };
