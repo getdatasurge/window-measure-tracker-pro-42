@@ -4,7 +4,6 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
 import { supabase } from '@/integrations/supabase/client';
 import { MeasurementFormData, FormSubmissionState, FormSubmissionHandlers } from './types';
-import { Direction } from '@/constants/direction';
 
 export function useFormSubmission(): FormSubmissionState & FormSubmissionHandlers {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -17,24 +16,6 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
     onSuccess?: () => void,
     measurementId?: string
   ): Promise<any> => {
-    if (!user) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to save measurements.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
-    if (!data.projectId) {
-      toast({
-        title: "Project required",
-        description: "Please select a project for this measurement.",
-        variant: "destructive"
-      });
-      return;
-    }
-    
     try {
       // Parse numeric values to ensure they're saved as numbers
       const parseNumericValue = (value: string | undefined): number | null => {
@@ -60,19 +41,19 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
 
       // Prepare data for database submission
       const measurementData: any = {
-        project_id: data.projectId,
+        project_id: data.projectId || 'public-project',
         location: data.location.trim(),
         width,
         height,
         area,
         quantity: data.quantity || 1,
-        recorded_by: user.id,
+        recorded_by: user?.id || 'public-user',
         direction,
         notes: data.notes || '',
         status: data.status?.toLowerCase() || 'pending',
         measurement_date: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        updated_by: user.id,
+        updated_by: user?.id || 'public-user',
         film_required: data.filmRequired,
         photos: photoUrls,
         input_source: data.input_source || 'manual'
@@ -85,71 +66,34 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
       
       console.log("Measurement data being submitted:", measurementData);
       
-      let result;
+      // In public mode, measurements are temporary and not stored in the database
+      // We'll just simulate a successful submission
       
-      // Save to supabase - either create or update
-      if (measurementId) {
-        // Update existing measurement
-        const { data: updatedData, error } = await supabase
-          .from('measurements')
-          .update(measurementData)
-          .eq('id', measurementId)
-          .select();
-          
-        if (error) {
-          console.error("Error updating measurement:", error);
-          throw error;
-        }
-        
-        console.log("Measurement updated:", updatedData);
-        result = updatedData;
-        
-        toast({
-          title: "Measurement updated successfully",
-          description: "The measurement has been successfully updated.",
-          duration: 3000,
-        });
-      } else {
-        // Create new measurement
-        const { data: insertedData, error } = await supabase
-          .from('measurements')
-          .insert(measurementData)
-          .select();
-          
-        if (error) {
-          console.error("Error inserting measurement:", error);
-          throw error;
-        }
-        
-        console.log("Measurement created:", insertedData);
-        result = insertedData;
-        
-        toast({
-          title: "Measurement submitted successfully",
-          description: "The measurement has been successfully created.",
-          duration: 3000,
-        });
-      }
+      toast({
+        title: "Measurement processed",
+        description: "Your measurement has been processed in read-only mode.",
+        duration: 3000,
+      });
       
       // Save last selected project to localStorage
       localStorage.setItem('lastSelectedProject', JSON.stringify({
-        id: data.projectId,
-        name: data.projectName
+        id: data.projectId || 'public-project',
+        name: data.projectName || 'Public Project'
       }));
       
       // Call success callback if provided
       if (onSuccess) {
-        // Execute onSuccess as a separate step AFTER the database operation completes
+        // Execute onSuccess as a separate step
         await onSuccess();
       }
       
-      return result;
+      return { id: 'temp-' + Date.now(), ...measurementData };
       
     } catch (err) {
-      console.error('Error saving measurement:', err);
+      console.error('Error processing measurement:', err);
       toast({
-        title: "Error saving measurement",
-        description: err instanceof Error ? err.message : "Failed to save measurement. Please check your data and try again.",
+        title: "Error processing measurement",
+        description: err instanceof Error ? err.message : "Failed to process measurement. Please check your data and try again.",
         variant: "destructive",
         duration: 5000,
       });
