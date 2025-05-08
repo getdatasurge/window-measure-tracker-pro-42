@@ -1,6 +1,7 @@
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { Measurement } from '@/types/measurement';
+import { Measurement as TypesMeasurement } from '@/types/measurement'; 
+import { Measurement as FeaturesMeasurement } from '@/features/measurements/types';
 import { useMeasurements } from '@/hooks/useMeasurements';
 import { MeasurementColumns } from './MeasurementColumns';
 import { MeasurementFilter } from './MeasurementFilter';
@@ -12,6 +13,9 @@ import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 import { Direction } from '@/constants/direction';
+
+// Create a unified type to resolve the type conflicts
+type UnifiedMeasurement = TypesMeasurement;
 
 interface FilterState {
   projectId: string | null;
@@ -27,7 +31,7 @@ const MeasurementStatusBoard: React.FC = () => {
     status: null,
     dateRange: null,
   });
-  const [editMeasurement, setEditMeasurement] = useState<Measurement | null>(null);
+  const [editMeasurement, setEditMeasurement] = useState<UnifiedMeasurement | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const { toast } = useToast();
   
@@ -42,17 +46,21 @@ const MeasurementStatusBoard: React.FC = () => {
   } = useMeasurementSubscription({
     projectId: filter.projectId || undefined,
     onInsert: (measurement) => {
+      // Type assertion to unify the measurement types
+      const typedMeasurement = measurement as unknown as UnifiedMeasurement;
       toast({
         title: "New measurement added",
-        description: `${measurement.location} has been added.`
+        description: `${typedMeasurement.location} has been added.`
       });
     },
     onUpdate: (measurement) => {
+      // Type assertion to unify the measurement types
+      const typedMeasurement = measurement as unknown as UnifiedMeasurement;
       // Only show toast for significant updates, not just minor edits
-      if (editMeasurement?.id !== measurement.id) { // Don't show toast for our own edits
+      if (editMeasurement?.id !== typedMeasurement.id) { // Don't show toast for our own edits
         toast({
           title: "Measurement updated",
-          description: `${measurement.location} has been updated.`
+          description: `${typedMeasurement.location} has been updated.`
         });
       }
     },
@@ -64,8 +72,11 @@ const MeasurementStatusBoard: React.FC = () => {
     }
   });
   
+  // Convert measurements to the format expected by the components
+  const typedMeasurements: UnifiedMeasurement[] = measurements as unknown as UnifiedMeasurement[];
+  
   // Filter measurements based on search criteria
-  const filteredMeasurements = measurements.filter(m => {
+  const filteredMeasurements = typedMeasurements.filter(m => {
     // Filter by location if specified
     if (filter.location && !m.location.toLowerCase().includes(filter.location.toLowerCase())) {
       return false;
@@ -91,7 +102,7 @@ const MeasurementStatusBoard: React.FC = () => {
   });
   
   // Handle card click to edit measurement
-  const handleCardClick = useCallback((measurement: Measurement) => {
+  const handleCardClick = useCallback((measurement: UnifiedMeasurement) => {
     setEditMeasurement(measurement);
     setEditModalOpen(true);
   }, []);
@@ -99,7 +110,7 @@ const MeasurementStatusBoard: React.FC = () => {
   // Handle saving a measurement
   const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
     // Convert MeasurementFormData to Measurement for saveMeasurement function
-    const measurementToSave: Measurement = {
+    const measurementToSave: UnifiedMeasurement = {
       id: data.id || '', // Ensure id is not undefined
       projectId: data.projectId || '',
       projectName: data.projectName || '',

@@ -12,7 +12,7 @@ export interface Measurement {
   location: string;
   width: string;
   height: string;
-  area?: string;
+  area: string; // Changed from optional to required to match the type in types/measurement.ts
   quantity: number;
   recordedBy: string;
   direction: Direction;

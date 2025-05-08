@@ -54,7 +54,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         location: 'Living Room Window',
         width: '36',
         height: '48',
-        area: '12',
+        area: '12', // Making sure area is not optional to match the type
         quantity: 1,
         recordedBy: 'demo-user',
         direction: 'N',
@@ -71,7 +71,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         location: 'Kitchen Window',
         width: '24',
         height: '36',
-        area: '6',
+        area: '6', // Making sure area is not optional to match the type
         quantity: 2,
         recordedBy: 'demo-user',
         direction: 'S',

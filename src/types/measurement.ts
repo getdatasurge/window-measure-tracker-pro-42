@@ -1,8 +1,7 @@
-
 // Define measurement related types
 export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
 // Import Direction type from constants instead of defining it here
-import { Direction, DIRECTION_OPTIONS } from '@/constants/direction';
+import { Direction } from '@/constants/direction';
 export type { Direction }; // Changed to "export type" to fix the isolatedModules error
 
 export interface Measurement {
