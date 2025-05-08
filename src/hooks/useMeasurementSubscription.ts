@@ -5,7 +5,8 @@
 
 // This file now re-exports the hook from the measurements directory
 // to maintain backward compatibility with existing code
-import { useMeasurementSubscription as useSubscription, SubscriptionState } from '../features/measurements/hooks';
+import { useMeasurementSubscription as useSubscription } from '../features/measurements/hooks';
+import type { SubscriptionState } from '../features/measurements/hooks';
 
-export { SubscriptionState };
+export type { SubscriptionState };
 export const useMeasurementSubscription = useSubscription;

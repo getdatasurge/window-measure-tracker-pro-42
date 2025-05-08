@@ -4,10 +4,11 @@
  */
 
 import { Direction } from '@/constants/direction';
+import { MeasurementStatus } from '@/types/measurement';
 
 export interface Measurement {
   id: string;
-  projectId: string;
+  projectId: string; // Changed from optional to required
   projectName: string;
   location: string;
   width: string;
@@ -18,7 +19,7 @@ export interface Measurement {
   direction: Direction;
   notes: string;
   film_required?: boolean;
-  status: string;
+  status: MeasurementStatus; // Update to use MeasurementStatus enum
   photos?: string[];
   updatedAt: string;
   updatedBy: string;
@@ -30,8 +31,8 @@ export interface Measurement {
 
 export interface MeasurementFormData {
   id?: string;
-  projectId?: string;
-  projectName?: string;
+  projectId: string; // Changed from optional to required
+  projectName: string; // Changed from optional to required
   location: string;
   width?: string;
   height?: string;
@@ -41,7 +42,7 @@ export interface MeasurementFormData {
   direction?: string;
   notes?: string;
   filmRequired?: boolean;
-  status?: string;
+  status?: MeasurementStatus; // Update to use MeasurementStatus enum
   photos?: string[];
   updatedAt?: string;
   updatedBy?: string;

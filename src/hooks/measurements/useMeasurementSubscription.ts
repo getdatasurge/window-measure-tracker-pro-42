@@ -1,7 +1,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Measurement } from '@/types/measurement';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 import { setupRealtime } from '@/utils/setupRealtime';
 import { formatMeasurement } from '@/utils/formatters/measurementFormatter';
 
@@ -82,7 +82,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
           // Convert numeric fields to strings to match the Measurement interface
           return {
             id: item.id,
-            projectId: item.project_id,
+            projectId: item.project_id || '', // Ensure projectId is not undefined
             measurementDate: item.measurement_date,
             projectName: projectName || '',
             createdAt: item.created_at,
@@ -91,14 +91,15 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             width: String(item.width || ''), // Convert to string
             height: String(item.height || ''), // Convert to string
             area: String(item.area || ''), // Convert to string
-            status: item.status || 'Pending',
+            status: (item.status || 'Pending') as MeasurementStatus, // Cast to MeasurementStatus
             location: item.location || '',
             direction: item.direction || 'N/A',
             notes: item.notes || '',
             quantity: item.quantity || 1,
             film_required: item.film_required,
             installationDate: item.installation_date,
-            photos: Array.isArray(item.photos) ? item.photos : [] // Ensure photos is always an array
+            photos: Array.isArray(item.photos) ? item.photos : [], // Ensure photos is always an array
+            updatedBy: item.updated_by || ''
           } as Measurement;
         });
       }
@@ -182,22 +183,26 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
             // Handle the update based on the event type
             switch(payload.eventType) {
               case 'INSERT': {
-                if (options.onInsert && payload.new) {
-                  const newMeasurement = formatMeasurement(payload.new);
+                const newMeasurement = formatMeasurement(payload.new) as Measurement;
+                
+                if (options.onInsert) {
                   options.onInsert(newMeasurement);
                 }
-                setMeasurements(prev => [formatMeasurement(payload.new), ...prev]);
+                
+                setMeasurements(prev => [newMeasurement, ...prev]);
                 break;
               }
                 
               case 'UPDATE': {
-                if (options.onUpdate && payload.new) {
-                  const updatedMeasurement = formatMeasurement(payload.new);
+                const updatedMeasurement = formatMeasurement(payload.new) as Measurement;
+                
+                if (options.onUpdate) {
                   options.onUpdate(updatedMeasurement);
                 }
+                
                 setMeasurements(prev => 
                   prev.map(item => 
-                    item.id === payload.new.id ? formatMeasurement(payload.new) : item
+                    item.id === payload.new.id ? updatedMeasurement : item
                   )
                 );
                 break;
@@ -207,6 +212,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
                 if (options.onDelete && payload.old?.id) {
                   options.onDelete(payload.old.id);
                 }
+                
                 setMeasurements(prev => 
                   prev.filter(item => item.id !== payload.old?.id)
                 );

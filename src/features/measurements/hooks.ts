@@ -9,7 +9,7 @@ import { useOfflineCache } from '../../hooks/useOfflineCache';
 import { useSyncQueue } from '../../hooks/useSyncQueue';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
 
-interface MeasurementSubscriptionOptions {
+export interface MeasurementSubscriptionOptions {
   projectId?: string;
   status?: string;
   startDate?: Date;

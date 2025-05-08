@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { formatMeasurement } from '@/utils/formatters/measurementFormatter';
-import { Measurement } from '@/types/measurement';
+import { Measurement, MeasurementStatus } from '@/types/measurement';
 import { safeFrom } from '@/utils/db/safeQueryBuilder';
 import { validateColumns, getAvailableColumns } from '@/utils/db/schemaValidator';
 
@@ -118,7 +118,16 @@ export const fetchMeasurementsData = async (
     console.log(`Fetched ${data?.length || 0} measurements`);
     
     // Transform the data to match our Measurement type
-    return (data || []).map(item => formatMeasurement(item));
+    const typedMeasurements = (data || []).map(item => {
+      const formattedMeasurement = formatMeasurement(item);
+      // Explicitly cast to the correct type
+      return {
+        ...formattedMeasurement,
+        status: formattedMeasurement.status as MeasurementStatus
+      } as Measurement;
+    });
+    
+    return typedMeasurements;
   } catch (err) {
     console.error('Error fetching measurements:', err);
     throw err instanceof Error ? err : new Error('Failed to fetch measurements');

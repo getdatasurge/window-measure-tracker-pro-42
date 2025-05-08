@@ -1,4 +1,6 @@
-import { Direction, MeasurementStatus } from '@/types/measurement';
+
+import { Direction } from '@/constants/direction'; 
+import { MeasurementStatus } from '@/types/measurement';
 
 export const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 export const MAX_FILES = 3;
@@ -10,8 +12,8 @@ export type { ProjectOption };
 
 export interface MeasurementFormData {
   id?: string;
-  projectId: string;
-  projectName: string;
+  projectId: string; // Changed from optional to required
+  projectName: string; // Changed from optional to required
   location: string;
   width: string;
   height: string;
@@ -37,8 +39,8 @@ export interface MeasurementFormData {
 
 export interface MeasurementFormState {
   id?: string;
-  projectId: string;
-  projectName: string;
+  projectId: string; // Changed from optional to required
+  projectName: string; // Changed from optional to required
   location: string;
   width: string;
   height: string;
