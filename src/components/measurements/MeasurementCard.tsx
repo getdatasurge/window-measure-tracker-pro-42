@@ -37,9 +37,11 @@ const MeasurementCard: React.FC<MeasurementCardProps> = ({ measurement, onEdit, 
     direction,
     notes,
     status,
-    approvalBy,
     updatedAt
   } = measurement;
+  
+  // Approval is optional and may not exist on all measurements
+  const approvalBy = (measurement as any).approvalBy;
   
   const formattedDate = new Date(measurementDate).toLocaleDateString();
   const formattedUpdatedAt = new Date(updatedAt).toLocaleString();

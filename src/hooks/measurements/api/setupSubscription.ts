@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { RealtimeChannel } from '@supabase/supabase-js';
 
 /**
  * Callback interface for subscription events
@@ -67,7 +68,7 @@ export async function setupMeasurementsSubscription(callbacks: SubscriptionCallb
       console.info('Subscription status:', status);
     });
     
-    // Fix the comparison by checking the status string value instead of comparing objects
+    // Fix the comparison by checking if status is not the expected value
     if (status !== 'SUBSCRIBED') {
       throw new Error(`Failed to subscribe to real-time channel: ${status}`);
     }

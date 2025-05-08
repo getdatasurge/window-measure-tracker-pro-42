@@ -27,8 +27,8 @@ export function formatMeasurement(data: any): Measurement {
     updatedBy: data.updated_by || '',
     installationDate: data.installation_date,
     input_source: data.input_source || 'manual',
-    measurementDate: data.measurement_date || new Date().toISOString(),
-    createdAt: data.created_at
+    measurementDate: data.measurement_date || new Date().toISOString()
+    // Removed createdAt as it's not in the Measurement interface
   };
 }
 

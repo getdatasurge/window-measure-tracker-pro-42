@@ -48,7 +48,7 @@ const MeasurementEditModalWrapper: React.FC<MeasurementEditModalWrapperProps> = 
     input_source: measurement.input_source || 'manual',
     updatedAt: measurement.updatedAt || new Date().toISOString(),
     updatedBy: measurement.updatedBy || '',
-    recorded_by: measurement.recorded_by,
+    recorded_by: measurement.recordedBy, // Using recordedBy instead of recorded_by
     recordedBy: measurement.recordedBy || '',
     area: measurement.area || '',
     measurementDate: measurement.measurementDate || new Date().toISOString()

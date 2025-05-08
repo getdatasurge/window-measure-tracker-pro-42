@@ -28,6 +28,7 @@ export interface Measurement {
   installationDate?: string;
   photos?: string[];
   input_source?: string;
+  approvalBy?: string; // Added missing property
 }
 
 export interface MeasurementCreateInput {
@@ -53,4 +54,20 @@ export interface MeasurementUpdateInput {
   quantity?: number;
   status?: MeasurementStatus;
   installationDate?: string;
+}
+
+// Adding the missing exported types
+export interface Project {
+  id: string;
+  name: string;
+}
+
+export interface Installer {
+  id: string;
+  name: string;
+}
+
+export interface StatusOption {
+  value: string;
+  label: string;
 }
