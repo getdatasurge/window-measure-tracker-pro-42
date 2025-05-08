@@ -138,7 +138,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         cleanup();
       }
     };
-  }, [refreshData]);
+  }, [refreshData, subscriptionCallbacks]);
   
   // Return the hook API
   return {
@@ -151,5 +151,4 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
 }
 
 // Re-export types for backward compatibility
-export { SubscriptionState };
-export type { MeasurementSubscriptionOptions };
+export type { SubscriptionState, MeasurementSubscriptionOptions };

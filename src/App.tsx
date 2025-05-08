@@ -26,7 +26,6 @@ import Settings from "./pages/Settings";
 import UserSettingsPage from "./pages/User/[id]/settings";
 import ActionViewer from "./pages/ActionViewer";
 import NotFound from "./pages/NotFound";
-import PromptHistoryViewer from "./components/prompt-history";
 import DebugPage from "./pages/__debug";
 import Overview from "./pages/Overview";
 import TeamManagement from "./pages/TeamManagement";
@@ -47,10 +46,28 @@ const queryClient = new QueryClient({
 // Only show debug route in development
 const isDev = process.env.NODE_ENV === 'development';
 
+// Remove any preload link tags that might cause warnings
+const removeUnusedPreloadTags = () => {
+  if (typeof document !== 'undefined') {
+    const preloads = document.querySelectorAll('link[rel="preload"]');
+    preloads.forEach(preload => {
+      const linkElement = preload as HTMLLinkElement;
+      // If it doesn't have an 'as' attribute or is for an external domain, consider removing
+      if (!linkElement.hasAttribute('as') || linkElement.href.includes('facebook') || 
+          linkElement.href.includes('analytics') || linkElement.href.includes('pixel')) {
+        linkElement.parentNode?.removeChild(linkElement);
+      }
+    });
+  }
+};
+
 const App = () => {
   // Initialize the feedbucket patch when the app mounts
   useEffect(() => {
     const feedbucketCleanup = enableFeedbucketInteraction();
+
+    // Clean up preload tags that might cause warnings
+    removeUnusedPreloadTags();
 
     // Setup console error tracker
     const errorTrackerCleanup = setupConsoleErrorTracker({
@@ -78,7 +95,7 @@ const App = () => {
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
         <ThemeProvider>
-          <AuthProvider> {/* Added AuthProvider here */}
+          <AuthProvider>
             <BrowserRouter>
               <Toaster />
               <Sonner />

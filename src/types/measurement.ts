@@ -1,86 +1,56 @@
 
-// Define measurement related types
-export type MeasurementStatus = 'Pending' | 'Film_Cut' | 'Installed' | 'Completed';
-// Import Direction type from constants instead of defining it here
-import { Direction, DIRECTION_OPTIONS } from '@/constants/direction';
-export type { Direction }; // Changed to "export type" to fix the isolatedModules error
+export type MeasurementStatus = 
+  | 'Pending'
+  | 'In Progress'
+  | 'Completed'
+  | 'Under Review'
+  | 'Film Cut'
+  | 'Installed'
+  | 'Cancelled';
 
 export interface Measurement {
   id: string;
-  projectId: string; // Changed from optional to required to match features/measurements/types.ts
-  projectName: string;
-  location: string;
-  width: string; 
-  height: string;
-  area: string;
-  quantity: number;
-  recordedBy: string;
-  direction: Direction;
-  notes?: string;
-  status: MeasurementStatus;
-  measurementDate: string;
-  updatedAt: string;
-  updatedBy?: string;
-  approvalBy?: string;
-  reviewComments?: string;
-  film_required?: boolean;
-  photos?: string[];
-  recorded_by?: string; // User ID for database purposes
-  installationDate?: string; // Installation date property
-  input_source?: string; // Adding input source field
-}
-
-export interface MeasurementFormData {
-  projectId: string; // Changed from optional to required
+  projectId: string;
   projectName: string;
   location: string;
   width: string;
   height: string;
-  area: string;
+  area: string; // Making area required, not optional
+  direction?: string;
   quantity: number;
-  recordedBy: string;
-  direction: Direction;
+  measurementDate: string;
   notes?: string;
   status: MeasurementStatus;
-  measurementDate: string;
+  recordedBy: string;
+  updatedAt: string;
+  updatedBy: string;
   film_required?: boolean;
   installationDate?: string;
+  photos?: string[];
+  input_source?: string;
 }
 
-// Helper functions for safely parsing potentially untyped string values
-export function parseDirection(directionString: string | undefined): Direction {
-  if (!directionString || !DIRECTION_OPTIONS.includes(directionString as Direction)) {
-    return 'N/A';
-  }
-  return directionString as Direction;
+export interface MeasurementCreateInput {
+  projectId: string;
+  location: string;
+  width: string;
+  height: string;
+  direction?: string;
+  notes?: string;
+  film_required?: boolean;
+  quantity: number;
+  recordedBy: string;
 }
 
-export function parseInputSource(source: string | undefined): string | undefined {
-  return source;
-}
-
-export interface MeasurementFilter {
-  projectId?: string;
+export interface MeasurementUpdateInput {
+  id: string;
   location?: string;
-  status?: string;
-  dateRange?: {
-    from?: Date;
-    to?: Date;
-  };
-  installer?: string;
-}
-
-export interface Project {
-  id: string;
-  name: string;
-}
-
-export interface Installer {
-  id: string;
-  name: string;
-}
-
-export interface StatusOption {
-  value: string;
-  label: string;
+  width?: string;
+  height?: string;
+  direction?: string;
+  notes?: string;
+  film_required?: boolean;
+  quantity?: number;
+  status?: MeasurementStatus;
+  installationDate?: string;
 }

@@ -1,72 +1,45 @@
 
 /**
- * Measurement types definition
+ * Measurement interface for the measurement feature
  */
-
-import { Direction } from '@/constants/direction';
-import { MeasurementStatus } from '@/types/measurement';
-
 export interface Measurement {
   id: string;
-  projectId: string; // Changed from optional to required
+  projectId: string;
   projectName: string;
-  location: string;
+  measurementDate: string;
+  recordedBy: string;
   width: string;
   height: string;
-  area: string; // Changed from optional to required to match the type in types/measurement.ts
+  area: string; // Making area non-optional to match other implementations
   quantity: number;
-  recordedBy: string;
-  direction: Direction;
-  notes: string;
-  film_required?: boolean;
-  status: MeasurementStatus; // Update to use MeasurementStatus enum
-  photos?: string[];
+  direction: string;
+  notes?: string;
+  status: string;
   updatedAt: string;
   updatedBy: string;
+  film_required?: boolean;
   installationDate?: string;
-  input_source?: string;
-  measurementDate: string;
-  createdAt?: string;
-}
-
-export interface MeasurementFormData {
-  id?: string;
-  projectId: string; // Changed from optional to required
-  projectName: string; // Changed from optional to required
-  location: string;
-  width?: string;
-  height?: string;
-  area?: string;
-  quantity?: number;
-  recordedBy?: string;
-  direction?: string;
-  notes?: string;
-  filmRequired?: boolean;
-  status?: MeasurementStatus; // Update to use MeasurementStatus enum
   photos?: string[];
-  updatedAt?: string;
-  updatedBy?: string;
-  installationDate?: string;
+  location: string;
   input_source?: string;
-  measurementDate?: string;
 }
 
-export interface FormSubmissionState {
-  isSubmitting: boolean;
-  setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
+/**
+ * Measurement filter options
+ */
+export interface MeasurementFilter {
+  projectId?: string;
+  startDate?: Date;
+  endDate?: Date;
+  status?: string;
 }
 
-export interface FormSubmissionHandlers {
-  handleSubmission: (
-    data: MeasurementFormData,
-    photoUrls: string[],
-    onSuccess?: () => void,
-    measurementId?: string
-  ) => Promise<any>;
-}
-
-export interface MeasurementStat {
-  count: number;
-  status: string;
-  color: string;
+/**
+ * Basic measurement analytics data interface
+ */
+export interface MeasurementAnalytics {
+  totalCount: number;
+  pendingCount: number;
+  completedCount: number;
+  lastUpdatedAt: Date | null;
 }

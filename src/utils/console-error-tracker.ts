@@ -20,11 +20,81 @@ export const setupConsoleErrorTracker = (options = {
   const errorLogs: ErrorLogEntry[] = [];
   let hasShownToast = false;
 
+  // Fix potential querySelector issues with escaped selectors
+  const fixQuerySelectors = () => {
+    const originalQuerySelector = Element.prototype.querySelector;
+    const originalQuerySelectorAll = Element.prototype.querySelectorAll;
+
+    // Fix the querySelector method to properly handle CSS classes with dots
+    Element.prototype.querySelector = function(selector: string) {
+      try {
+        return originalQuerySelector.call(this, selector);
+      } catch (err) {
+        // Try to fix common selector issues
+        if (selector.includes('.gap-1.5')) {
+          return originalQuerySelector.call(this, '.gap-1\\.5');
+        }
+        // If any other selector with dots, try escaping them
+        const fixedSelector = selector.replace(/\.([0-9])/g, '\\.$1');
+        if (fixedSelector !== selector) {
+          try {
+            return originalQuerySelector.call(this, fixedSelector);
+          } catch {
+            // Fallback to original error
+            throw err;
+          }
+        }
+        throw err;
+      }
+    };
+
+    // Fix the querySelectorAll method similarly
+    Element.prototype.querySelectorAll = function(selector: string) {
+      try {
+        return originalQuerySelectorAll.call(this, selector);
+      } catch (err) {
+        // Try to fix common selector issues
+        if (selector.includes('.gap-1.5')) {
+          return originalQuerySelectorAll.call(this, '.gap-1\\.5');
+        }
+        // If any other selector with dots, try escaping them
+        const fixedSelector = selector.replace(/\.([0-9])/g, '\\.$1');
+        if (fixedSelector !== selector) {
+          try {
+            return originalQuerySelectorAll.call(this, fixedSelector);
+          } catch {
+            // Fallback to original error
+            throw err;
+          }
+        }
+        throw err;
+      }
+    };
+
+    return () => {
+      Element.prototype.querySelector = originalQuerySelector;
+      Element.prototype.querySelectorAll = originalQuerySelectorAll;
+    };
+  };
+
+  // Apply fixes for DOM querySelector issues
+  const queryFixCleanup = fixQuerySelectors();
+
   // Save original console methods
   const originalWarn = console.warn;
   const originalError = console.error;
 
   const checkErrorThreshold = (message: string) => {
+    // Skip Chrome extension errors
+    if (
+      message.includes('chrome-extension://') || 
+      message.includes('extension context') ||
+      message.includes('Extension manifest') ||
+      message.includes('Content script')
+    ) {
+      return;
+    }
+    
     const now = Date.now();
     
     // Add new error to log
@@ -105,5 +175,6 @@ export const setupConsoleErrorTracker = (options = {
   return () => {
     console.warn = originalWarn;
     console.error = originalError;
+    queryFixCleanup();
   };
 };

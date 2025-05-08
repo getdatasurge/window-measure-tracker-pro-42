@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement, MeasurementStatus } from '@/types/measurement'; 
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -108,7 +109,7 @@ const MeasurementStatusBoard: React.FC = () => {
       height: data.height || '',
       area: data.area || '',
       quantity: data.quantity || 1,
-      recordedBy: data.recordedBy || '',
+      recordedBy: data.recordedBy || data.recorded_by || '', // Fixed here - use recordedBy
       // Ensure direction is valid by casting it to Direction type
       direction: (data.direction as Direction) || 'N/A',
       notes: data.notes || '',
@@ -117,7 +118,6 @@ const MeasurementStatusBoard: React.FC = () => {
       photos: Array.isArray(data.photos) ? data.photos : [],
       updatedAt: data.updatedAt || new Date().toISOString(),
       updatedBy: data.updatedBy || '',
-      recorded_by: data.recorded_by,
       installationDate: data.installationDate || '',
       input_source: data.input_source || 'manual',
       measurementDate: data.measurementDate || new Date().toISOString()
