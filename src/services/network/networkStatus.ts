@@ -14,8 +14,8 @@ type NetworkStatusListener = (isOnline: boolean) => void;
 const listeners: NetworkStatusListener[] = [];
 
 // Initialize event listeners for online/offline events
-export function initNetworkListeners(): void {
-  if (typeof window === 'undefined') return;
+export function initNetworkListeners(): () => void {
+  if (typeof window === 'undefined') return () => {}; // Return empty function if not in browser
   
   const handleOnline = () => {
     isOnlineCache = true;

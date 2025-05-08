@@ -14,7 +14,7 @@ const SYNC_DB_VERSION = 1;
 const SYNC_STORE_NAME = 'operations';
 
 export type SyncOperationType = 'create' | 'update' | 'delete';
-export type SyncEntityType = 'projects' | 'measurements' | 'settings' | 'activity';
+export type SyncEntityType = 'projects' | 'measurements' | 'settings' | 'activity' | 'measurement';
 export type SyncStatus = 'pending' | 'processing' | 'completed' | 'failed';
 
 export interface SyncOperation {

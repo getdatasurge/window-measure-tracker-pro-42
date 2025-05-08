@@ -1,60 +1,58 @@
 
-import { Measurement, MeasurementStatus } from '@/types/measurement';
+/**
+ * Utility functions for formatting measurement data
+ */
+import { Measurement } from '@/features/measurements/types';
 
 /**
- * Safely formats measurement data from the database, handling missing columns gracefully
+ * Format raw database measurement data to the Measurement interface format
  */
-export const formatMeasurement = (dbMeasurement: any): Measurement => {
-  // Safely get numeric values and format them
-  const safeNumber = (value: any): string => {
-    if (typeof value === 'number') {
-      return value.toFixed(2);
-    }
-    return value?.toString() || '0';
+export function formatMeasurement(data: any): Measurement {
+  return {
+    id: data.id,
+    projectId: data.project_id,
+    projectName: data.projects?.name || '',
+    location: data.location || '',
+    width: String(data.width || ''),
+    height: String(data.height || ''),
+    area: String(data.area || ''),
+    quantity: data.quantity || 1,
+    recordedBy: data.recorded_by || '',
+    direction: data.direction || 'N/A',
+    notes: data.notes || '',
+    film_required: data.film_required,
+    status: data.status || 'Pending',
+    photos: Array.isArray(data.photos) ? data.photos : [],
+    updatedAt: data.updated_at || new Date().toISOString(),
+    updatedBy: data.updated_by || '',
+    installationDate: data.installation_date,
+    input_source: data.input_source || 'manual',
+    measurementDate: data.measurement_date || new Date().toISOString(),
+    createdAt: data.created_at
   };
+}
 
-  // Format status with proper capitalization and type safety
-  const formatStatus = (status: string): MeasurementStatus => {
-    if (!status) return 'Pending';
-    
-    // Capitalize first letter
-    const formattedStatus = status.charAt(0).toUpperCase() + status.slice(1);
-    
-    // Ensure it's a valid MeasurementStatus
-    const validStatuses: MeasurementStatus[] = ['Pending', 'Film_Cut', 'Installed', 'Completed'];
-    return validStatuses.includes(formattedStatus as MeasurementStatus) 
-      ? (formattedStatus as MeasurementStatus) 
-      : 'Pending';
+/**
+ * Format front-end measurement data to database format for submission
+ */
+export function formatMeasurementForSubmission(measurement: Measurement): any {
+  return {
+    project_id: measurement.projectId,
+    location: measurement.location,
+    width: parseFloat(measurement.width) || null,
+    height: parseFloat(measurement.height) || null,
+    area: parseFloat(measurement.area || '') || null,
+    quantity: measurement.quantity,
+    recorded_by: measurement.recordedBy,
+    direction: measurement.direction,
+    notes: measurement.notes,
+    film_required: measurement.film_required,
+    status: measurement.status,
+    photos: measurement.photos,
+    updated_at: measurement.updatedAt,
+    updated_by: measurement.updatedBy,
+    installation_date: measurement.installationDate,
+    input_source: measurement.input_source,
+    measurement_date: measurement.measurementDate
   };
-
-  // Format all measurement values for display
-  const formattedMeasurement: Measurement = {
-    id: dbMeasurement.id,
-    projectId: dbMeasurement.project_id,
-    projectName: dbMeasurement.projects?.name || 'Unknown Project',
-    location: dbMeasurement.location || '',
-    width: safeNumber(dbMeasurement.width),
-    height: safeNumber(dbMeasurement.height),
-    area: dbMeasurement.area ? `${safeNumber(dbMeasurement.area)} ft²` : '0 ft²',
-    quantity: dbMeasurement.quantity || 1,
-    recordedBy: dbMeasurement.recorded_by || '',
-    direction: (dbMeasurement.direction || 'N/A'),
-    notes: dbMeasurement.notes || '',
-    status: formatStatus(dbMeasurement.status),
-    measurementDate: dbMeasurement.measurement_date || new Date().toISOString(),
-    updatedAt: dbMeasurement.updated_at || new Date().toISOString(),
-    updatedBy: dbMeasurement.updated_by || '',
-    photos: dbMeasurement.photos || [],
-    film_required: dbMeasurement.film_required !== false,
-    // Safely handle potentially missing columns
-    input_source: dbMeasurement.input_source || 'manual'
-  };
-
-  // Add depth if it exists in the database but not explicitly in the type
-  if (dbMeasurement.depth !== undefined) {
-    (formattedMeasurement as any).depth = dbMeasurement.depth ? 
-      `${safeNumber(dbMeasurement.depth)}"` : undefined;
-  }
-
-  return formattedMeasurement;
-};
+}

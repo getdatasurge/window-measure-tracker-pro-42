@@ -1,7 +1,7 @@
 
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { Measurement } from '@/types/measurement';
+import { Measurement } from '@/features/measurements/types';
 import { useAuth } from '@/contexts/auth';
 import { useSyncQueue } from '@/hooks/useSyncQueue';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';

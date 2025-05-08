@@ -1,52 +1,27 @@
 
 /**
- * Set up realtime subscriptions for the app
- * This implementation is designed to work in a public read-only mode
- * without authentication requirements
+ * Utility for setting up Supabase realtime subscriptions
+ */
+import { supabase } from '@/integrations/supabase/client';
+
+/**
+ * Configure Supabase to enable realtime for specific tables
+ * In public mode, this is just a simulation
  */
 export async function setupRealtime(): Promise<boolean> {
   try {
-    // In public read-only mode, we don't set up actual realtime subscriptions
-    // but we simulate the behavior for UI consistency
+    console.info('Realtime initialized in public mode (read-only)');
+    console.info('Setting up periodic refresh for simulated realtime updates');
     
-    // Log that we're initializing realtime in public mode
-    console.log('Realtime initialized in public mode (read-only)');
+    // In a real implementation, this would call:
+    // await supabase.channel('any').subscribe()
+    // to initialize the realtime connection
     
-    // Create a trigger for periodic data refresh without actual subscriptions
-    const setupPeriodicRefresh = () => {
-      // In a real implementation, this would be replaced with actual 
-      // websocket connections or polling mechanisms
-      console.log('Setting up periodic refresh for simulated realtime updates');
-      
-      // We don't actually set any intervals here since this is just a placeholder
-      // In a production app with read-only mode, you might want to implement
-      // polling or local updates to maintain UI responsiveness
-    };
-    
-    // Call the setup function
-    setupPeriodicRefresh();
-    
+    // Simulate successful setup
+    console.info('Realtime enabled successfully');
     return true;
   } catch (error) {
-    console.error('Error setting up realtime:', error);
-    return false;
-  }
-}
-
-/**
- * Mock implementation of setupRealtime for fallback purposes
- * This is used when the standard setup fails
- */
-export async function mockSetupRealtime(): Promise<boolean> {
-  try {
-    console.log('Using mock realtime setup (fallback mechanism)');
-    
-    // In public read-only mode, the mock and standard implementations
-    // are essentially the same since we're not setting up actual subscriptions
-    
-    return true;
-  } catch (error) {
-    console.error('Error in mock realtime setup:', error);
+    console.error('Failed to enable realtime:', error);
     return false;
   }
 }
