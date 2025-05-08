@@ -1,4 +1,3 @@
-
 import React, { useState, useCallback, useEffect } from 'react';
 import { Measurement, MeasurementStatus } from '@/types/measurement'; 
 import { useMeasurements } from '@/hooks/useMeasurements';
@@ -12,6 +11,7 @@ import { Wifi, WifiOff, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { MeasurementFormData } from '@/hooks/measurements/types';
 import { Direction } from '@/constants/direction';
+import { Measurement as FeatureMeasurement } from '@/features/measurements/types';
 
 interface FilterState {
   projectId: string | null;
@@ -99,7 +99,7 @@ const MeasurementStatusBoard: React.FC = () => {
   // Handle saving a measurement
   const handleSaveMeasurement = useCallback(async (data: MeasurementFormData & { recorded_by?: string }) => {
     // Convert MeasurementFormData to Measurement for saveMeasurement function
-    const measurementToSave: Measurement = {
+    const measurementToSave: FeatureMeasurement = {
       id: data.id || '', // Ensure id is not undefined
       projectId: data.projectId || '', // Ensure projectId is not undefined
       projectName: data.projectName || '',

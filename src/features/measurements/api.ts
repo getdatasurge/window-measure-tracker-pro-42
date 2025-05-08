@@ -1,4 +1,3 @@
-
 /**
  * Measurement API functions
  * 
@@ -10,6 +9,7 @@ import { Measurement } from './types';
 import * as offlineStore from '../../services/cache/offlineStore';
 import * as syncQueue from '../../services/sync/syncQueue';
 import { getOnlineStatus } from '../../services/network/networkStatus';
+import { MeasurementStatus } from '@/types/measurement';
 
 /**
  * Fetch measurements for a project
@@ -63,7 +63,7 @@ export async function fetchMeasurements(projectId?: string): Promise<Measurement
         direction: 'S',
         notes: 'Special film required',
         film_required: true,
-        status: 'Ready',
+        status: 'Pending',
         updatedAt: new Date(Date.now() - 86400000).toISOString(),
         updatedBy: 'Demo User',
         measurementDate: new Date(Date.now() - 86400000).toISOString()

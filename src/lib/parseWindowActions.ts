@@ -16,16 +16,19 @@ export interface WindowAction {
  * @param markdownContent The raw markdown content to parse
  * @returns Array of parsed window actions
  */
-export function parseWindowActions(markdownContent: string): WindowAction[] {
-  if (!markdownContent) return [];
+export function parseWindowActions(markdownContent: string | null): WindowAction[] {
+  if (!markdownContent) {
+    console.warn('No markdown content provided to parseWindowActions');
+    return [];
+  }
   
   const actions: WindowAction[] = [];
   let currentType: string = "unknown";
   
   // Split content into lines and process each line
-  const lines = markdownContent.split('\n').map(line => line.trim());
+  const splitContent = typeof markdownContent === 'string' ? markdownContent.split('\n') : [];
   
-  lines.forEach((line, index) => {
+  splitContent.forEach((line, index) => {
     // Check if line is a heading (category/type marker)
     if (line.startsWith('# ') || line.startsWith('## ') || line.startsWith('### ')) {
       currentType = line.replace(/^[#\s]+/, '').trim();

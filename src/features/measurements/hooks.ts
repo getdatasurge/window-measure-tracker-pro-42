@@ -1,4 +1,3 @@
-
 /**
  * Measurement hooks for managing measurement data
  */
@@ -8,6 +7,7 @@ import { Measurement } from './types';
 import { useOfflineCache } from '../../hooks/useOfflineCache';
 import { useSyncQueue } from '../../hooks/useSyncQueue';
 import { useOnlineStatus } from '../../hooks/useOnlineStatus';
+import { MeasurementStatus } from '@/types/measurement';
 
 export interface MeasurementSubscriptionOptions {
   projectId?: string;
@@ -77,7 +77,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         direction: 'S',
         notes: 'Special film required',
         film_required: true,
-        status: 'Ready',
+        status: 'Pending',
         updatedAt: new Date(Date.now() - 86400000).toISOString(),
         updatedBy: 'Demo User',
         measurementDate: new Date(Date.now() - 86400000).toISOString()
