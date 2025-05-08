@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 import { useUser } from '@/contexts/UserContext';
 import { toast } from 'react-toastify';
 
@@ -30,17 +29,11 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // RLS will handle filtering to only show projects the user has access to
-      // (either as creator or through project_assignments)
-      const { data: projects, error: projectsError } = await supabase
-        .from('projects')
-        .select('*');
-
-      if (projectsError) {
-        throw projectsError;
-      }
-
-      return projects || [];
+      // Mock implementation - no Supabase
+      console.log('Mock getProjects called');
+      
+      // TODO: Replace with actual implementation
+      return [];
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to fetch projects');
       setError(error);
@@ -56,24 +49,18 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // Always ensure created_by is set to the current user's ID
-      const data = {
+      // Mock implementation - no Supabase
+      console.log('Mock createProject called with:', projectData);
+      
+      // TODO: Replace with actual implementation
+      const mockProject = {
         ...projectData,
+        id: 'mock-' + Date.now(),
         created_by: user?.id
       };
 
-      const { data: newProject, error: createError } = await supabase
-        .from('projects')
-        .insert(data)
-        .select()
-        .single();
-
-      if (createError) {
-        throw createError;
-      }
-
       toast.success('Project created successfully');
-      return newProject;
+      return mockProject;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to create project');
       setError(error);
@@ -89,19 +76,17 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      const { data: updatedProject, error: updateError } = await supabase
-        .from('projects')
-        .update(projectData)
-        .eq('id', id)
-        .select()
-        .single();
-
-      if (updateError) {
-        throw updateError;
-      }
+      // Mock implementation - no Supabase
+      console.log('Mock updateProject called with:', id, projectData);
+      
+      // TODO: Replace with actual implementation
+      const mockUpdatedProject = {
+        id,
+        ...projectData
+      };
 
       toast.success('Project updated successfully');
-      return updatedProject;
+      return mockUpdatedProject;
     } catch (err) {
       const error = err instanceof Error ? err : new Error('Failed to update project');
       setError(error);
@@ -117,16 +102,10 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      // Delete the project
-      const { error: deleteError } = await supabase
-        .from('projects')
-        .delete()
-        .eq('id', id);
-
-      if (deleteError) {
-        throw deleteError;
-      }
-
+      // Mock implementation - no Supabase
+      console.log('Mock deleteProject called with:', id);
+      
+      // TODO: Replace with actual implementation
       toast.success('Project deleted successfully');
       return true;
     } catch (err) {
@@ -144,14 +123,10 @@ export const useProjects = () => {
       setLoading(true);
       setError(null);
       
-      const { error: assignError } = await supabase
-        .from('project_assignments')
-        .insert(assignment);
-
-      if (assignError) {
-        throw assignError;
-      }
-
+      // Mock implementation - no Supabase
+      console.log('Mock assignUserToProject called with:', assignment);
+      
+      // TODO: Replace with actual implementation
       toast.success('User assigned to project successfully');
       return true;
     } catch (err) {

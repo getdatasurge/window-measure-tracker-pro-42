@@ -1,39 +1,31 @@
 
 /**
- * Utility for setting up Supabase realtime subscriptions
+ * Mock utility for setting up real-time subscriptions
+ * (Supabase has been removed from this project)
  */
-import { supabase } from '@/integrations/supabase/client';
 
 /**
- * Configure Supabase to enable realtime for specific tables
- * In public mode, this is just a simulation
+ * Configure mock real-time for specific tables
  */
 export async function setupRealtime(): Promise<boolean> {
   try {
-    console.info('Realtime initialized in public mode (read-only)');
-    console.info('Setting up periodic refresh for simulated realtime updates');
-    
-    // In a real implementation, this would call:
-    // await supabase.channel('any').subscribe()
-    // to initialize the realtime connection
+    console.info('Mock realtime initialized (no actual real-time functionality)');
     
     // Simulate successful setup
-    console.info('Realtime enabled successfully');
+    console.info('Mock realtime enabled successfully');
     return true;
   } catch (error) {
-    console.error('Failed to enable realtime:', error);
+    console.error('Failed to enable mock realtime:', error);
     return false;
   }
 }
 
 /**
  * Mock implementation of realtime setup for fallback scenarios
- * This is used when the standard setupRealtime fails
  */
 export async function mockSetupRealtime(): Promise<boolean> {
   try {
     console.info('Using mock implementation for realtime');
-    // This would typically set up a polling mechanism instead of realtime
     return true;
   } catch (error) {
     console.error('Failed to enable mock realtime:', error);

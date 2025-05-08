@@ -1,7 +1,6 @@
 
-import { supabase } from '@/integrations/supabase/client';
-import { Measurement, MeasurementStatus } from '@/types/measurement';
-import { formatMeasurement } from '../utils/formatMeasurement';
+import { Measurement } from '@/types/measurement';
+// Removed supabase import
 
 // Define options for measurement fetching
 export interface MeasurementFetchOptions {
@@ -12,45 +11,15 @@ export interface MeasurementFetchOptions {
 }
 
 /**
- * Fetch measurements data from Supabase
+ * Mock function to fetch measurements data
+ * (Supabase has been removed from this project)
  */
 export async function fetchMeasurementsData(options: MeasurementFetchOptions = {}): Promise<Measurement[]> {
   try {
-    let query = supabase.from('measurements').select(`
-      *,
-      projects (name)
-    `);
+    console.log('Mock fetch measurements called with options:', options);
     
-    // Apply filters if provided
-    if (options.projectId) {
-      query = query.eq('project_id', options.projectId);
-    }
-    
-    if (options.status) {
-      query = query.eq('status', options.status);
-    }
-    
-    if (options.startDate) {
-      query = query.gte('measurement_date', options.startDate.toISOString());
-    }
-    
-    if (options.endDate) {
-      query = query.lte('measurement_date', options.endDate.toISOString());
-    }
-    
-    // Fetch data
-    const { data, error } = await query.order('created_at', { ascending: false });
-    
-    if (error) {
-      console.error('Error fetching measurements:', error);
-      throw error;
-    }
-    
-    // Transform data to ensure types match Measurement interface
-    if (data) {
-      return data.map(item => formatMeasurement(item));
-    }
-    
+    // Return empty array as this is just a mock
+    // TODO: Implement actual data fetching from your new data source
     return [];
   } catch (error) {
     console.error('Error fetching measurements:', error);

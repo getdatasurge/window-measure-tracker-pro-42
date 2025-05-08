@@ -1,22 +1,24 @@
 
 /**
- * Setup polling as a fallback for real-time updates
- * 
- * @param refreshFn Function to call for refreshing data
- * @param intervalMs Polling interval in milliseconds
- * @returns Cleanup function
+ * Sets up polling for data updates
  */
-export function setupPolling(refreshFn: () => Promise<any>, intervalMs: number = 30000) {
-  console.info('Starting polling fallback mechanism');
+export function setupPolling(
+  refreshFunction: () => Promise<boolean>,
+  interval: number = 30000 // Default to 30 seconds
+): () => void {
+  console.log('Setting up polling with interval:', interval);
   
-  // Poll for updates on the specified interval
-  const intervalId = setInterval(() => {
-    console.info('Polling for measurement updates...');
-    refreshFn();
-  }, intervalMs);
+  // Start polling
+  const timerId = setInterval(() => {
+    console.log('Polling for updates...');
+    refreshFunction().catch(err => {
+      console.error('Error during polling update:', err);
+    });
+  }, interval);
   
   // Return cleanup function
   return () => {
-    clearInterval(intervalId);
+    console.log('Cleaning up polling');
+    clearInterval(timerId);
   };
 }

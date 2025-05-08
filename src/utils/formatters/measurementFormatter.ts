@@ -2,7 +2,7 @@
 /**
  * Utility functions for formatting measurement data
  */
-import { Measurement } from '@/features/measurements/types';
+import { Measurement } from '@/types/measurement';
 
 /**
  * Format raw database measurement data to the Measurement interface format
@@ -28,7 +28,6 @@ export function formatMeasurement(data: any): Measurement {
     installationDate: data.installation_date,
     input_source: data.input_source || 'manual',
     measurementDate: data.measurement_date || new Date().toISOString()
-    // Removed createdAt as it's not in the Measurement interface
   };
 }
 

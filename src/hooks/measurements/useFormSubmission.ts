@@ -2,7 +2,6 @@
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/auth';
-import { supabase } from '@/integrations/supabase/client';
 import { MeasurementFormData, FormSubmissionState, FormSubmissionHandlers } from './types';
 
 export function useFormSubmission(): FormSubmissionState & FormSubmissionHandlers {
@@ -34,26 +33,26 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
         area = (width * height) / 144; // Convert to square feet (from inches)
       }
       
-      // Ensure we use a valid direction value that matches the database constraint
+      // Ensure we use a valid direction value
       const direction = data.direction || 'N/A'; // Default to N/A if not provided
 
-      console.log("Direction being sent to database:", direction);
+      console.log("Direction being sent:", direction);
 
-      // Prepare data for database submission
+      // Prepare data for submission
       const measurementData: any = {
-        project_id: data.projectId || 'public-project',
+        project_id: data.projectId || 'mock-project',
         location: data.location.trim(),
         width,
         height,
         area,
         quantity: data.quantity || 1,
-        recorded_by: user?.id || 'public-user',
+        recorded_by: user?.id || 'mock-user',
         direction,
         notes: data.notes || '',
         status: data.status?.toLowerCase() || 'pending',
         measurement_date: new Date().toISOString(),
         updated_at: new Date().toISOString(),
-        updated_by: user?.id || 'public-user',
+        updated_by: user?.id || 'mock-user',
         film_required: data.filmRequired,
         photos: photoUrls,
         input_source: data.input_source || 'manual'
@@ -66,19 +65,17 @@ export function useFormSubmission(): FormSubmissionState & FormSubmissionHandler
       
       console.log("Measurement data being submitted:", measurementData);
       
-      // In public mode, measurements are temporary and not stored in the database
-      // We'll just simulate a successful submission
-      
+      // Mock implementation - data is temporary and not stored
       toast({
         title: "Measurement processed",
-        description: "Your measurement has been processed in read-only mode.",
+        description: "Your measurement has been processed in mock mode.",
         duration: 3000,
       });
       
       // Save last selected project to localStorage
       localStorage.setItem('lastSelectedProject', JSON.stringify({
-        id: data.projectId || 'public-project',
-        name: data.projectName || 'Public Project'
+        id: data.projectId || 'mock-project',
+        name: data.projectName || 'Mock Project'
       }));
       
       // Call success callback if provided

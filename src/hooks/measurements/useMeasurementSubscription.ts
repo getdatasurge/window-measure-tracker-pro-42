@@ -5,7 +5,6 @@ import { fetchMeasurementsData, MeasurementFetchOptions } from './api/fetchMeasu
 import { setupMeasurementsSubscription, SubscriptionCallbacks } from './api/setupSubscription';
 import { setupPolling } from './api/setupPolling';
 import { MeasurementSubscriptionOptions, SubscriptionState } from './types/subscriptionTypes';
-import { supabase } from '@/integrations/supabase/client';
 
 /**
  * Hook to handle measurement data with real-time subscription
@@ -23,7 +22,7 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
   });
   
   /**
-   * Refresh data from Supabase
+   * Refresh data from backend
    */
   const refreshData = useCallback(async () => {
     try {
@@ -90,13 +89,13 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
     // Fetch initial data
     refreshData();
     
-    // Setup real-time subscription
+    // Setup mock real-time subscription
     let cleanup: (() => void) | undefined;
     
     const setupSubscription = async () => {
       try {
-        // Try to set up realtime subscription
-        const channel = await setupMeasurementsSubscription(subscriptionCallbacks);
+        // Try to set up mock subscription
+        const cleanupFn = await setupMeasurementsSubscription(subscriptionCallbacks);
         
         // Update subscription state
         setSubscriptionState(prev => ({
@@ -106,13 +105,9 @@ export function useMeasurementSubscription(options: MeasurementSubscriptionOptio
         }));
         
         // Return cleanup function
-        return () => {
-          if (channel) {
-            supabase.removeChannel(channel);
-          }
-        };
+        return cleanupFn;
       } catch (error) {
-        console.warn('Error setting up realtime, falling back to polling:', error);
+        console.warn('Error setting up mock realtime, falling back to polling:', error);
         
         // Update subscription state
         setSubscriptionState(prev => ({

@@ -1,7 +1,5 @@
 
 import { useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { cleanupAuthState } from '@/features/auth/cleanupAuthState';
 import { useToast } from '@/hooks/use-toast';
 
 interface UseLogoutOptions {
@@ -16,16 +14,8 @@ export const useLogout = (options: UseLogoutOptions = {}) => {
   const logout = async () => {
     setIsLoggingOut(true);
     try {
-      // Clean up auth state
-      cleanupAuthState();
-      
-      // Try global sign out (catching any errors)
-      try {
-        await supabase.auth.signOut({ scope: 'global' });
-      } catch (err) {
-        console.error('Error during global sign out:', err);
-        // Continue even if this fails
-      }
+      // Mock implementation - no Supabase
+      console.log('Mock logout called');
       
       // Force page reload for a clean state
       if (redirectUrl) {

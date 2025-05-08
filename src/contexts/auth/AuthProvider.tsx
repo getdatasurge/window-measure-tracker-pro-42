@@ -1,5 +1,5 @@
 
-import { createContext, useContext, ReactNode } from 'react';
+import { createContext, useContext, ReactNode, useState } from 'react';
 
 // Define a basic Profile type to satisfy component requirements
 export interface Profile {
@@ -11,7 +11,7 @@ export interface Profile {
   [key: string]: any;
 }
 
-// Define the auth context value with public, non-authenticated defaults
+// Define the auth context value with mock data
 export interface AuthContextValue {
   user: { id: string; email: string } | null;
   session: null;
@@ -24,7 +24,7 @@ export interface AuthContextValue {
   signOut: () => Promise<void>;
 }
 
-// Create a context with default values for public access
+// Create a context with mock public access defaults
 const AuthContext = createContext<AuthContextValue>({
   user: { id: 'public-user', email: 'public@example.com' },
   session: null,
@@ -50,9 +50,12 @@ export const useAuth = () => {
 
 export const useUser = useAuth;
 
-// Provider component that wraps app with public auth context
+// Provider component that wraps app with mock auth context
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const defaultValue: AuthContextValue = {
+  // Mock auth state
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const authValue: AuthContextValue = {
     user: { id: 'public-user', email: 'public@example.com' },
     session: null,
     profile: {
@@ -61,16 +64,25 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       email: 'public@example.com',
       role: 'viewer'
     },
-    isLoading: false,
+    isLoading,
     isAuthenticated: true,
     profileNotFound: false,
     error: null,
-    refreshProfile: async () => {},
-    signOut: async () => {}
+    // Mock functions
+    refreshProfile: async () => {
+      setIsLoading(true);
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 500));
+      setIsLoading(false);
+    },
+    signOut: async () => {
+      console.log('Mock sign out called');
+      // In a real implementation, this would clear auth state
+    }
   };
 
   return (
-    <AuthContext.Provider value={defaultValue}>
+    <AuthContext.Provider value={authValue}>
       {children}
     </AuthContext.Provider>
   );
